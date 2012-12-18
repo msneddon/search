@@ -61,23 +61,6 @@ sub process_features {
     $gid = $gH->{$fid} if defined $gH->{$fid};
     $ncbi_tax_id = $tH{$gH->{$fid}} if defined $tH{$gH->{$fid}};
 
-    # setting the following values in the loop
-    $sequence_info_id = '';   # 
-    $locus_tag = '';          # not available in CDM
-    $feature_type = '';       # gene, CDS, etc... need from entity API
-    $annotation = '';         #
-    $gene = '';               # from Feature
-    $product = '';            # from Role
-    $ec_number = '';          # not available in EcNumber table (sometime in roles)
-    $ec_name = '';            # not available in EcNumber table (sometime in roles)
-    $pathway_id = '';         # not available in CDM (use name instead)
-    $pathway_name = '';       # from subsystem
-    $start_max = '';          # from location
-    $end_min = '';            # inferred from location
-    $strand = '';             # from location
-    $na_length = '';          # from location
-    $aa_length = '';          # inferred from protein_seq
-
     if( defined $psH->{$fid}) {
       $protein_seq = $psH->{$fid};
       $aa_length = length($protein_seq);
