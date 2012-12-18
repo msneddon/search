@@ -15,9 +15,12 @@ sub process_features {
   my $lH   = $csO->fids_to_locations($fids);
   my $rH   = $csO->fids_to_roles($fids);
   my $sH   = $csO->fids_to_subsystem_data($fids);
+  my $fdH  = $csO->fids_to_feature_data($fids);
   my $gdH  = $csO->genomes_to_genome_data([values %$gH]);
   my %tH   = map{@$_[1]->{'from_link'} => @$_[2]->{'id'}} @{$csEO->get_relationship_IsInTaxa([values %$gH],[],[],['id'])};
+  $fdH = $csEO->get_entity_Feature($fids, ['id','feature-type','alias']);
 
+  print Dumper($fdH);
   # dumping results as view
   foreach my $fid (@$fids) {
 
@@ -60,6 +63,7 @@ sub process_features {
     $na_feature_id = $fid;
     $gid = $gH->{$fid} if defined $gH->{$fid};
     $ncbi_tax_id = $tH{$gH->{$fid}} if defined $tH{$gH->{$fid}};
+    $feature_type = $fdH->{$fid}->{'feature_type'} if defined $fdH->{$fid}->{'feature_type'};
 
     if( defined $psH->{$fid}) {
       $protein_seq = $psH->{$fid};
