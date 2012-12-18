@@ -15,11 +15,10 @@ sub process_features {
   my $lH   = $csO->fids_to_locations($fids);
   my $rH   = $csO->fids_to_roles($fids);
   my $sH   = $csO->fids_to_subsystem_data($fids);
-  my $fdH  = $csO->fids_to_feature_data($fids);
+  my $fdH = $csEO->get_entity_Feature($fids, ['id','feature-type','alias']);
   my $gdH  = $csO->genomes_to_genome_data([values %$gH]);
   my %tH   = map{@$_[1]->{'from_link'} => @$_[2]->{'id'}} @{$csEO->get_relationship_IsInTaxa([values %$gH],[],[],['id'])};
-  $fdH = $csEO->get_entity_Feature($fids, ['id','feature-type','alias']);
-
+  
   print Dumper($fdH);
   # dumping results as view
   foreach my $fid (@$fids) {
