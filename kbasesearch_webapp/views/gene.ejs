@@ -1,0 +1,81 @@
+<% include header.html %>
+
+<style>
+  .sideElem {
+    font-size: 11px;
+  }
+</style>
+
+      <div class="jumbotron" style='margin:0px 0px 0px 0px;'>
+        <h1>KBase Search</h1>
+        <dir class='row'>
+          <div class="input-append">
+            <form class="form-wrapper" action='/process' id='searchForm' method='post' >
+              <input class="span2" id="appendedInputButtons" name='keyword' type="text" style='width:400px;'>
+              <button class="btn" type="button" id='search' >Search</button>
+              <button class="btn" type="button" id='advanced' >Advnaced</button>
+            </form>
+          </div>
+        </div>
+
+        <div class='row' style='margin-left:20px; border-bottom:1px solid #ccc;padding:20px;margin-top:5px;padding-top:0px;'>
+          Searched for <span class="label label-info"><%= keyword %></span> found <b><span id='totalcount'><%= size %></span></b> results.<br/>
+          Now showing <b>
+            <% 
+              if (size < 10 ) {
+              %>  <%= size %> <%
+              }else
+              {
+              %> 10
+              <%
+              }
+            %> 
+            </b> results.
+        
+        </div>
+
+        <div class='badges' style='padding: 5px 0px 10px 30px;'>
+          <span class="badge badge-important"><%= keyword %> <a href='*'><i class="icon-remove"></i></a></span>
+          <span class="badge badge-important"><%= type %> <a href='/processget/<%= keyword %>'><i class="icon-remove"></i></a></span>
+        </div>
+
+        <div class="row" style='padding-top:15px;padding-left:5px;'>
+          <div class="span10">
+          
+            <div>
+              <% for(var i=0; i < results.length; i++) { %>
+
+              <div style='border-bottom:1px solid #eee;padding-bottom:10px;'>
+                <blockquote>
+                  <div style='float:left;padding-top:0px;'> <%= i+1 %>. &nbsp; </div> 
+                  <h4><%= results[i].function %></h4>
+                  <span class="label label-info"><%= type %> </span>
+                  <span style='padding-left:30px;'> 
+                    Sequence Length: <strong><%= results[i].sequence_length %></strong>
+                  </span>
+                </blockquote>
+              </div>
+              <% } %>
+            </div>
+
+            <div class='row'>
+              <div class="pagination pagination-centered">
+                <ul>
+                  <li class="disabled"><a href="#">«</a></li>
+                  <li class="active"><a href="#">1</a></li>
+                  <li><a href="#">2</a></li>
+                  <li><a href="#">3</a></li>
+                  <li><a href="#">4</a></li>
+                  <li><a href="#">5</a></li>
+                  <li><a href="#">»</a></li>
+                </ul>
+              </div>
+            </div>
+          </div>
+
+
+      </div>
+
+<% include footer.html %>
+
+

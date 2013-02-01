@@ -1,0 +1,11 @@
+{
+    "KBaseSearch": {
+        "name": "KBase Search Service",
+        "protocol": "https",
+        "baseURL": "localhost",
+        "publicPath": "/search",
+        "headers" : {
+          "Accept": "application/json"
+        }
+    }
+}

@@ -1,0 +1,11 @@
+{
+    "KBaseSearch": {
+        "name": "KBase Search Service",
+        "protocol": "http",
+        "baseURL": "140.221.92.149:9999",
+        "publicPath": "/search",
+        "headers" : {},
+        "auth": "key",
+        "keyParam": "key"
+    }
+}

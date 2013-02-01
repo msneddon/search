@@ -1,0 +1,17 @@
+<html><head><title>Twitter 2.0</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+</head><body>
+<div id='tweet-list'></div>
+<script type="text/javascript">
+$(document).ready(function() {
+    //var url =  "https://api.twitter.com/1/statuses/user_timeline/codinghorror.json";
+    var url =  "https://192.168.56.101/search/literature/coli";
+    $.getJSON(url + "?callback=?", null, function(tweets) {
+        for(i in tweets.body) {
+            tweet = tweets.body[i];
+            $("#tweet-list").append(tweet.title + "<hr />");
+        }
+    });
+});
+</script>
+</body></html>

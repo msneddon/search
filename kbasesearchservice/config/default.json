@@ -1,0 +1,16 @@
+{
+  "conf": {
+    "system": {
+      "port":80
+     ,"securePort":443
+     ,"key":"certificates/server.key"
+     ,"certificate":"certificates/server.crt"
+    },
+    "searchServer": {
+      "host": "140.221.92.229",
+      "port": 8080,
+      "deployment": "/search/"
+    },
+    "version" : "v0.0.2"
+  }
+}

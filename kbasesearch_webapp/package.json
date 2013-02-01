@@ -1,0 +1,13 @@
+{
+    "name": "kbasesearch"
+  , "version": "0.0.2"
+  , "private": true
+  , "dependencies": {
+      "express": ">= 0.0.1"
+    , "ejs": ">= 0.0.1"
+    , "config": "*"
+    , "request": "*"
+    , "underscore": "*"
+    , "underscore.string": "*"
+  }
+}

@@ -1,0 +1,45 @@
+<% include header.html %>
+
+      <div class="jumbotron">
+        <h1>KBase Search</h1>
+        <dir class='row'>
+          <div class="input-append">
+            <form class="form-wrapper" action='/process' id='searchForm' method='post' style='margin-bottom:400px;'>
+              <input class="span2" id="appendedInputButtons" name='keyword' type="text" style='width:400px;'>
+              <button class="btn" type="button" id='search' >Search</button>
+              <button class="btn" type="button" id='advanced' >Advnaced</button>
+              <button class="btn" type="button" id='test' >testAjax</button>
+            </form>
+            <div id='tweet-list' ></div>
+          </div>
+        </div>
+      </div>
+
+
+<% include footer.html %>
+
+<script>
+/*
+$(document).ready(function(){
+  $("#test").click(function(){
+    $.get("https://192.168.56.101/search/literature/coli",function(data,status){
+      alert("Data: " + data + "\nStatus: " + status);
+    });
+  });
+});
+*/
+
+$(document).ready(function() {
+  $("#test").click(function(){
+    alert('heelo');
+    var url =  "http://api.twitter.com/1/statuses/user_timeline/codinghorror.json";
+    $.getJSON(url + "?callback=?",null,function(tweets) {
+      for(i in tweets) {
+        tweet = tweets[i];
+        $("#tweet-list").append(tweet.text + "<hr />");
+      }
+    });
+  });
+});
+  
+</script>
