@@ -36,25 +36,30 @@ sub process_tree {
   my %gid2info_str = map{$$_[2]->{id} => $$_[2]->{id}." ".$$_[2]->{scientific_name}." ".$$_[2]->{md5}} @$toGenome;
 
   foreach my $tid (@$treeids) {
+    next if $tid =~ m/^\s*$/;
     my %nd = ();
     $nd{'tree_id'} = $tid;
     $nd{'tree_status'} = $tid2info{$tid}->{'status'};
     $nd{'tree_data_type'} = $tid2info{$tid}->{'data_type'};
     $nd{'tree_source_id'} = $tid2info{$tid}->{'source_id'};
     $nd{'aln_id'} = $aid2info{$tid2aid{$tid}}->{'id'};
+    print STDERR "$tid is not defined in aln\n" if ! defined $nd{'aln_id'};
+    next if ! defined $nd{'aln_id'};
     $nd{'aln_n_rows'} = $aid2info{$nd{'aln_id'}}->{'n_rows'};
     $nd{'aln_n_cols'} = $aid2info{$nd{'aln_id'}}->{'n_cols'};
     $nd{'aln_status'} = $aid2info{$nd{'aln_id'}}->{'status'};
     $nd{'aln_sequence_type'} = $aid2info{$nd{'aln_id'}}->{'sequence_type'};
     $nd{'aln_source_id'} = $aid2info{$tid}->{'source_id'} if defined $aid2info{$tid}->{'source_id'};
-    $nd{'aln_rows_ids'} = [@{$aid2arid{$nd{'aln_id'}}}];
-    $nd{'aln_rows_row_ids'} = [@{$aid2arid_md5{$nd{'aln_id'}}}];
-    $nd{'aln_rows'} = [@{$aid2arid_str{$nd{'aln_id'}}}];
-    $nd{'protein_ids'} = [map{@{$arid2pid{$_}}} @{$nd{'aln_rows_ids'}}]; # pid is equal to aln_rows_row_ids
-    $nd{'fids'} = [ map{ (defined $pid2fid{$_}) ? @{$pid2fid{$_}} : ()} @{$nd{'protein_ids'}}];
-    my %gids = map{$fid2gid{$_} => $gid2info_str{$fid2gid{$_}}}@{$nd{'fids'}};
-    $nd{'genome_ids'} = [ keys %gids];
-    $nd{'genome'} = [ values %gids];
+    if(defined $aid2arid{$nd{'aln_id'}}  && scalar @{$aid2arid{$nd{'aln_id'}}} > 0) {
+      $nd{'aln_rows_ids'} = [@{$aid2arid{$nd{'aln_id'}}}];
+      $nd{'aln_rows_row_ids'} = [@{$aid2arid_md5{$nd{'aln_id'}}}];
+      $nd{'aln_rows'} = [@{$aid2arid_str{$nd{'aln_id'}}}];
+      $nd{'protein_ids'} = [map{@{$arid2pid{$_}}} @{$nd{'aln_rows_ids'}}]; # pid is equal to aln_rows_row_ids
+      $nd{'fids'} = [ map{ (defined $pid2fid{$_}) ? @{$pid2fid{$_}} : ()} @{$nd{'protein_ids'}}];
+      my %gids = map{$fid2gid{$_} => $gid2info_str{$fid2gid{$_}}}@{$nd{'fids'}};
+      $nd{'genome_ids'} = [ keys %gids];
+      $nd{'genome'} = [ values %gids];
+    }
     if($first) {
       $first = 0;
     } else {
@@ -63,7 +68,6 @@ sub process_tree {
     print to_json(\%nd);
   }
 }
-
 
 our $csO  = Bio::KBase::CDMI::CDMIClient->new_for_script();
 our $csEO = Bio::KBase::CDMI::CDMIClient->new_get_entity_for_script();
