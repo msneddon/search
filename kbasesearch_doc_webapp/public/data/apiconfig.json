@@ -2,8 +2,8 @@
     "KBaseSearch": {
         "name": "KBase Search Service",
         "protocol": "https",
-        "baseURL": "localhost",
-        "publicPath": "/search",
+        "baseURL": "kbase.us",
+        "publicPath": "/services/search-api/search",
         "headers" : {
           "Accept": "application/json"
         }

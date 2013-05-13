@@ -22,7 +22,7 @@ _.each(API, function( apiCall, callName ) {
   exports[callName] = function(req, res){
 
 
-    var start = 1;
+    var start = 0;
     var count = 10;
 
     if ( req.query.start != null && req.query.start != '' ) {
@@ -35,10 +35,14 @@ _.each(API, function( apiCall, callName ) {
    
 
     var keyword = req.params.keyword;
+
+
     var path = req.path;
     var callName = _.words(path,'/')[1];
     var apiCall = _.values(_.pick(API, 
         'get'+callName.toLowerCase()))[0]; 
+
+    //console.dir(apiCall);
 
     var result = { 
       status: 0
@@ -54,7 +58,13 @@ _.each(API, function( apiCall, callName ) {
 
     req.result = result;
 
+    //By default its a fuzzy search
+    //
+    //keyword = '*' + keyword + '*';
+
     var url = apiCall.url + keyword + '&start=' + start + '&rows=' + count; 
+    console.log(url);
+    //res.jsonp({a:1});
     request(url, function (error, response, body) {
       if (!error && response.statusCode == 200) {
         var allResp = JSON.parse(body);

@@ -55,12 +55,16 @@ _.each(API, function( apiCall, callName ) {
 
 app.get('*', routes.index );
 
-/*
-http.createServer(app).listen(CONFIG.system.port, function() {
-  console.log("**   KBase Search API running on localhost:" + CONFIG.system.port);
+http.createServer(app).listen(CONFIG.system.securePort, function() {
+  console.log("**   KBase Search API running on localhost:" + CONFIG.system.securePort);
 });
-*/
 
+/*
 https.createServer(options, app).listen(CONFIG.system.securePort, function() {
   console.log("**   KBase Search API running on localhost:" + CONFIG.system.securePort);
 });
+
+https.createServer(app).listen(CONFIG.system.securePort, function() {
+  console.log("**   KBase Search API running on localhost:" + CONFIG.system.securePort);
+});
+*/

@@ -1,9 +1,9 @@
 {
 "endpoints":[
     {
-  "name": "Data Retrival", "methods":[
+  "name": "General", "methods":[
       {
-    "MethodName": "Literature", "Synopsis": "Retrive kbase literature for a given keyword. Eg: curl kbase.us/search/literature/coli", "HTTPMethod": "GET", "URI": "/literature/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Literature", "Synopsis": "Retrive kbase literature for a given keyword. Eg: curl https://kbase.us/services/search-api/search/literature/coli", "HTTPMethod": "GET", "URI": "/literature/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
     "Name": "keyword", "Required": "Y", "Default": "16s", "Type": "string", "Description":"Keyword for search."}
 	,
@@ -16,9 +16,11 @@
 	{
     "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
       ]}
-      ,
+      ]},
+    {
+  "name": "Genomes", "methods":[
       {
-    "MethodName": "Genomes", "Synopsis": "Retrive kbase genomes for a given keyword. Eg: curl kbase.us/search/genome/coli", "HTTPMethod": "GET", "URI": "/genome/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Genomes", "Synopsis": "Retrive kbase genomes for a given keyword. Eg: curl https://kbase.us/services/search-api/search/genome/coli", "HTTPMethod": "GET", "URI": "/genome/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
     "Name": "keyword", "Required": "Y", "Default": "coli", "Type": "string", "Description":"Keyword for search."}
 	,
@@ -31,11 +33,10 @@
 	{
     "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
       ]}
-      ,
-      {
-    "MethodName": "Operators", "Synopsis": "Retrive operators for a given keyword. Eg: curl kbase.us/search/operator/coli", "HTTPMethod": "GET", "URI": "/operator/:keyword", "RequiresOAuth": "N", "parameters":[
+      ,{
+    "MethodName": "Viruses", "Synopsis": "Retrive viruses for a given keyword. Eg:  curl https://kbase.us/services/search-api/search/viruses/coli", "HTTPMethod": "GET", "URI": "/viruses/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "Tor*", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -48,9 +49,9 @@
       ]}
       ,
       {
-    "MethodName": "Binding Sites", "Synopsis": "Retrive binding sites for a given keyword. Eg: curl kbase.us/search/proteinbindingsite/coli", "HTTPMethod": "GET", "URI": "/proteinbindingsite/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Bacteria", "Synopsis": "Retrive bacteria for a given keyword. Eg:  curl https://kbase.us/services/search-api/search/bacteria/coli", "HTTPMethod": "GET", "URI": "/bacteria/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "*Proteobacteria*", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -63,7 +64,100 @@
       ]}
       ,
       {
-    "MethodName": "Gene", "Synopsis": "Retrive genes for a given keyword. Eg: curl kbase.us/search/gene/coli", "HTTPMethod": "GET", "URI": "/gene/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Archaea", "Synopsis": "Retrive archaea for a given keyword. Eg:  curl https://kbase.us/services/search-api/search/archaea/coli", "HTTPMethod": "GET", "URI": "/archaea/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ,
+      {
+    "MethodName": "Eukaryota", "Synopsis": "Retrive eukaryota for a given keyword. Eg:  curl https://kbase.us/services/search-api/search/eukaryota/coli", "HTTPMethod": "GET", "URI": "/eukaryota/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ,
+      {
+    "MethodName": "Viruses Count", "Synopsis": "Retrive viruses count for a given keyword. Eg:  curl https://kbase.us/services/search-api/search/virusescount/coli", "HTTPMethod": "GET", "URI": "/virusescount/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ,
+      {
+    "MethodName": "Bacteria Count", "Synopsis": "Retrive bacteria count for a given keyword. Eg:  curl https://kbase.us/services/search-api/search/bacteriacount/coli", "HTTPMethod": "GET", "URI": "/bacteriacount/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ,
+      {
+    "MethodName": "Archaea Count", "Synopsis": "Retrive archaea count for a given keyword. Eg:  curl https://kbase.us/services/search-api/search/archaeacount/coli", "HTTPMethod": "GET", "URI": "/archaeacount/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ,
+      {
+    "MethodName": "Eukaryota Count", "Synopsis": "Retrive eukaryota count for a given keyword. Eg:  curl https://kbase.us/services/search-api/search/eukaryotacount/coli", "HTTPMethod": "GET", "URI": "/eukaryotacount/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      
+      ]},
+    {
+  "name": "Function", "methods":[
+      {
+    "MethodName": "Gene", "Synopsis": "Retrive genes for a given keyword. Eg: curl https://kbase.us/services/search-api/search/gene/coli", "HTTPMethod": "GET", "URI": "/gene/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
     "Name": "keyword", "Required": "Y", "Default": "16s", "Type": "string", "Description":"Keyword for search."}
 	,
@@ -78,82 +172,7 @@
       ]}
       ,
       {
-    "MethodName": "Promoter", "Synopsis": "Retrive promoters for a given keyword. Eg: curl kbase.us/search/promoter/coli", "HTTPMethod": "GET", "URI": "/promoter/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "putative", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
-      ]}
-      ,
-      {
-    "MethodName": "RNA", "Synopsis": "Retrive RNAs for a given keyword. Eg: curl kbase.us/search/rna/coli", "HTTPMethod": "GET", "URI": "/rna/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "16s", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
-      ]}
-      ,
-      {
-    "MethodName": "Tandemly Repeated Short Sequence Motifs", "Synopsis": "Retrive short sequence motifs for a given keyword. Eg: curl kbase.us/search/ssmotifs/coli", "HTTPMethod": "GET", "URI": "/ssmotifs/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "putative", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
-      ]}
-      ,
-      {
-    "MethodName": "Short Palindromic Repeats", "Synopsis": "Retrive short palindromic repeats for a given keyword. Eg: curl kbase.us/search/crispr/coli", "HTTPMethod": "GET", "URI": "/crispr/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "16s", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
-      ]}
-      ,
-      {
-    "MethodName": "Consensus Repeat Sequence", "Synopsis": "Retrive consensus repeat sequences for a given keyword. Eg: curl kbase.us/search/crs/coli", "HTTPMethod": "GET", "URI": "/crs/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "16s", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
-      ]}
-      ,
-      {
-    "MethodName": "Prophage", "Synopsis": "Retrive prophages for a given keyword. Eg: curl kbase.us/search/propage/coli", "HTTPMethod": "GET", "URI": "/propage/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Prophage", "Synopsis": "Retrive prophages for a given keyword. Eg: curl https://kbase.us/services/search-api/search/propage/coli", "HTTPMethod": "GET", "URI": "/propage/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
     "Name": "keyword", "Required": "Y", "Default": "Prophage", "Type": "string", "Description":"Keyword for search."}
 	,
@@ -168,7 +187,7 @@
       ]}
       ,
       {
-    "MethodName": "Pseudogene", "Synopsis": "Retrive pseudo genes for a given keyword. Eg: curl kbase.us/search/pseudo/coli", "HTTPMethod": "GET", "URI": "/pseudo/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Pseudogene", "Synopsis": "Retrive pseudo genes for a given keyword. Eg: curl https://kbase.us/services/search-api/search/pseudo/coli", "HTTPMethod": "GET", "URI": "/pseudo/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
     "Name": "keyword", "Required": "Y", "Default": "Bacillus", "Type": "string", "Description":"Keyword for search."}
 	,
@@ -181,11 +200,27 @@
 	{
     "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
       ]}
-      ,
-      {
-    "MethodName": "Transposon", "Synopsis": "Retrive transposons for a given keyword. Eg: curl kbase.us/search/trnspn/coli", "HTTPMethod": "GET", "URI": "/trnspn/:keyword", "RequiresOAuth": "N", "parameters":[
+      ,{
+    "MethodName": "Locus", "Synopsis": "Retrive locus tags for a given keyword. Eg: curl https://kbase.us/services/search-api/search/locus/coli", "HTTPMethod": "GET", "URI": "/locus/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "metallothionein1", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ]},
+    {
+  "name": "Regulation", "methods":[
+      {
+    "MethodName": "Operators", "Synopsis": "Retrive operators for a given keyword. Eg: curl https://kbase.us/services/search-api/search/operator/coli", "HTTPMethod": "GET", "URI": "/operator/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "Tor*", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -198,7 +233,55 @@
       ]}
       ,
       {
-    "MethodName": "Small RNAs", "Synopsis": "Retrive small RNAs for a given keyword. Eg: curl kbase.us/search/srna/coli", "HTTPMethod": "GET", "URI": "/srna/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Promoter", "Synopsis": "Retrive promoters for a given keyword. Eg: curl https://kbase.us/services/search-api/search/promoter/coli", "HTTPMethod": "GET", "URI": "/promoter/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "putative", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ,
+      {
+    "MethodName": "Riboswitch", "Synopsis": "Retrive riboswitch segments for a given keyword. Eg: curl https://kbase.us/services/search-api/search/rsw/coli", "HTTPMethod": "GET", "URI": "/rsw/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ,
+      {
+    "MethodName": "Binding Sites", "Synopsis": "Retrive binding sites for a given keyword. Eg:  curl https://kbase.us/services/search-api/search/bindingsite/coli", "HTTPMethod": "GET", "URI": "/bindingsite/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ]}
+      ,
+  {
+  "name": "RNA", "methods":[
+      {
+    "MethodName": "RNA", "Synopsis": "Retrive RNAs for a given keyword. Eg: curl https://kbase.us/services/search-api/search/rna/coli", "HTTPMethod": "GET", "URI": "/rna/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
     "Name": "keyword", "Required": "Y", "Default": "16s", "Type": "string", "Description":"Keyword for search."}
 	,
@@ -213,7 +296,37 @@
       ]}
       ,
       {
-    "MethodName": "Small RNA", "Synopsis": "Retrive small RNAs for a given keyword. Eg: curl kbase.us/search/srna/coli", "HTTPMethod": "GET", "URI": "/srna/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Transposon", "Synopsis": "Retrive transposons for a given keyword. Eg: curl https://kbase.us/services/search-api/search/trnspn/coli", "HTTPMethod": "GET", "URI": "/trnspn/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "metallothionein1", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ,
+      {
+    "MethodName": "Small RNAs", "Synopsis": "Retrive small RNAs for a given keyword. Eg: curl https://kbase.us/services/search-api/search/srna/coli", "HTTPMethod": "GET", "URI": "/srna/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "16s", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ,
+      {
+    "MethodName": "Messenger RNAs", "Synopsis": "Retrive messenger RNAs for a given keyword. Eg: curl https://kbase.us/services/search-api/search/mrna/coli", "HTTPMethod": "GET", "URI": "/mrna/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
     "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
 	,
@@ -228,9 +341,27 @@
       ]}
       ,
       {
-    "MethodName": "Riboswitch", "Synopsis": "Retrive riboswitch segments for a given keyword. Eg: curl kbase.us/search/rsw/coli", "HTTPMethod": "GET", "URI": "/rsw/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Pathogenicity Islands", "Synopsis": "Retrive pathogenicity island binding sites for a given keyword. Eg: curl https://kbase.us/services/search-api/search/pathogenicityisland/coli", "HTTPMethod": "GET", "URI": "/pathogenicityisland/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
     "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ]}
+      ,
+  {
+  "name": "Ontologies", "methods":[
+      {
+    "MethodName": "Go", "Synopsis": "Retrive GO ontologies for a given keyword. Eg: curl https://kbase.us/services/search-api/search/ontologies/oxygen", "HTTPMethod": "GET", "URI": "/ontologies/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "oxygen", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -243,9 +374,27 @@
       ]}
       ,
       {
-    "MethodName": "Locus", "Synopsis": "Retrive locus tags for a given keyword. Eg: curl kbase.us/search/locus/coli", "HTTPMethod": "GET", "URI": "/locus/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Go Count", "Synopsis": "Retrive GO ontologies for a given keyword. Eg: curl https://kbase.us/services/search-api/search/ontologiescount/oxygen", "HTTPMethod": "GET", "URI": "/ontologiescount/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "oxygen", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ]}
+      ,
+  {
+  "name": "Systems", "methods":[
+      {
+    "MethodName": "Metabolic Pathways", "Synopsis": "Retrive metabolic pathways for a given keyword. Eg: curl https://kbase.us/services/search-api/search/pathways/degradation", "HTTPMethod": "GET", "URI": "/pathways/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "degradation", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -258,9 +407,9 @@
       ]}
       ,
       {
-    "MethodName": "Messenger RNAs", "Synopsis": "Retrive messenger RNAs for a given keyword. Eg: curl kbase.us/search/mrna/coli", "HTTPMethod": "GET", "URI": "/mrna/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Metabolic Pathways Count", "Synopsis": "Retrive metabolic pathways for a given keyword. Eg: curl https://kbase.us/services/search-api/search/pathwayscount/degradation", "HTTPMethod": "GET", "URI": "/pathwayscount/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "degradation", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -273,9 +422,9 @@
       ]}
       ,
       {
-    "MethodName": "Binding Sites", "Synopsis": "Retrive binding sites for a given keyword. Eg: curl kbase.us/bindingsite/coli", "HTTPMethod": "GET", "URI": "/bindingsite/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Regulatory Networks", "Synopsis": "Retrive regulatory networks for a given keyword. Eg: curl https://kbase.us/services/search-api/search/networks/Streptococcus", "HTTPMethod": "GET", "URI": "/networks/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "Streptococcus", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -288,9 +437,27 @@
       ]}
       ,
       {
-    "MethodName": "Viruses", "Synopsis": "Retrive viruses for a given keyword. Eg: curl kbase.us/viruses/coli", "HTTPMethod": "GET", "URI": "/viruses/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Regulatory Networks Count", "Synopsis": "Retrive regulatory networks for a given keyword. Eg: curl https://kbase.us/services/search-api/search/networkscounts/Streptococcus", "HTTPMethod": "GET", "URI": "/networkscount/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "Streptococcus", "Type": "string", "Description":"Keyword for search."}
+	,
+	{
+    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
+	,
+	{
+    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
+	,
+	{
+    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
+      ]}
+      ]}
+      ,
+  {
+  "name": "KBase", "methods":[
+      {
+    "MethodName": "Workspace", "Synopsis": "Retrive KBase workspace metadata for a given keyword. Eg: curl https://kbase.us/services/search-api/search/workspace/coli", "HTTPMethod": "GET", "URI": "/workspace/:keyword", "RequiresOAuth": "N", "parameters":[
+	{
+    "Name": "keyword", "Required": "Y", "Default": "coli", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -303,9 +470,9 @@
       ]}
       ,
       {
-    "MethodName": "Bacteria", "Synopsis": "Retrive bacteria for a given keyword. Eg: curl kbase.us/bacteria/coli", "HTTPMethod": "GET", "URI": "/bacteria/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "Workspace Count", "Synopsis": "Retrive KBase workspace metadata for a given keyword. Eg: curl https://kbase.us/services/search-api/search/workspacecount/coli", "HTTPMethod": "GET", "URI": "/workspacecount/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "coli", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -318,9 +485,9 @@
       ]}
       ,
       {
-    "MethodName": "Archaea", "Synopsis": "Retrive archaea for a given keyword. Eg: curl kbase.us/archaea/coli", "HTTPMethod": "GET", "URI": "/archaea/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "ADM Metadata", "Synopsis": "Retrive KBase auxillary store metadata for a given keyword. Eg: curl https://kbase.us/services/search-api/search/adm/coli", "HTTPMethod": "GET", "URI": "/adm/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "coli", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -333,9 +500,9 @@
       ]}
       ,
       {
-    "MethodName": "Eukaryota", "Synopsis": "Retrive eukaryota for a given keyword. Eg: curl kbase.us/eukaryota/coli", "HTTPMethod": "GET", "URI": "/eukaryota/:keyword", "RequiresOAuth": "N", "parameters":[
+    "MethodName": "ADM Metadata Count", "Synopsis": "Retrive KBase auxillary store metadata for a given keyword. Eg: curl https://kbase.us/services/search-api/search/admcount/coli", "HTTPMethod": "GET", "URI": "/admcount/:keyword", "RequiresOAuth": "N", "parameters":[
 	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
+    "Name": "keyword", "Required": "Y", "Default": "coli", "Type": "string", "Description":"Keyword for search."}
 	,
 	{
     "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
@@ -346,80 +513,5 @@
 	{
     "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
       ]}
-      ,
-      {
-    "MethodName": "Viruses Count", "Synopsis": "Retrive viruses count for a given keyword. Eg: curl kbase.us/virusescount/coli", "HTTPMethod": "GET", "URI": "/virusescount/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
       ]}
-      ,
-      {
-    "MethodName": "Bacteria Count", "Synopsis": "Retrive bacteria count for a given keyword. Eg: curl kbase.us/bacteriacount/coli", "HTTPMethod": "GET", "URI": "/bacteriacount/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
-      ]}
-      ,
-      {
-    "MethodName": "Archaea Count", "Synopsis": "Retrive archaea count for a given keyword. Eg: curl kbase.us/archaeacount/coli", "HTTPMethod": "GET", "URI": "/archaeacount/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
-      ]}
-      ,
-      {
-    "MethodName": "Eukaryota Count", "Synopsis": "Retrive eukaryota count for a given keyword. Eg: curl kbase.us/eukaryotacount/coli", "HTTPMethod": "GET", "URI": "/eukaryotacount/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
-      ]}
-      ,
-      {
-    "MethodName": "Pathogenicity Islands", "Synopsis": "Retrive pathogenicity island binding sites for a given keyword. Eg: curl kbase.us/search/pathogenicityisland/coli", "HTTPMethod": "GET", "URI": "/pathogenicityisland/:keyword", "RequiresOAuth": "N", "parameters":[
-	{
-    "Name": "keyword", "Required": "Y", "Default": "", "Type": "string", "Description":"Keyword for search."}
-	,
-	{
-    "Name": "start", "Required": "N", "Default": "1", "Type": "string", "Description":"Starting record number."}
-	,
-	{
-    "Name": "count", "Required": "N", "Default": "10", "Type": "string", "Description":"Number of records to retrive."}
-	,
-	{
-    "Name": "format", "Required": "N", "Default": "json", "Type": "enumerated", "Description": "Output format as JSON or XML (Coming soon)", "EnumeratedList":["json"]}
-      ]}
-    ]}
 ]}

@@ -4,18 +4,16 @@
 
 KBase search web application. 
 
-### Ugh?
+### Requirements
 
 * Express (latest, tested with 3.0.0rc3)
 * jQuery 1.8.0
 * Bootstrap (2.0.4)
 
-### Okay, how do I use it?
 
-* Clone this repo
+### Requirements
 
-
-* Install dependencies locally
+* Install dependencies
 
     npm install -d
 

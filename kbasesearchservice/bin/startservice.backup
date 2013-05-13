@@ -1,0 +1,6 @@
+#!/bin/bash
+
+cd /home/knoxville/koragh/packages/kbasegit/search/kbasesearchservice
+export NODE_CONFIG_DIR=/home/knoxville/koragh/packages/kbasegit/search/kbasesearchservice
+
+forever start -a -l `pwd`/runtime/log.log -o `pwd`/runtime/output.log -e `pwd`/runtime/error.log `pwd`/app.js

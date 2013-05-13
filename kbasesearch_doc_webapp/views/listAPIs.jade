@@ -22,4 +22,5 @@ br
 
 ul
    - for (var api in apiInfo)
-       li: a(href = '/' + api) #{apiInfo[api].name}
+       b
+         li: a(href = '/services/search-doc/' + api) #{apiInfo[api].name}

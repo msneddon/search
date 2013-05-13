@@ -1,5 +1,6 @@
 {
     "name": "kbasesearch"
+  , "description": "KBase search web application."
   , "version": "0.0.2"
   , "private": true
   , "dependencies": {

@@ -1,4 +1,6 @@
 #!/bin/bash
 
-forever start ./app.js
+cd /home/knoxville/koragh/packages/kbasegit/search/kbasesearchservice
+#export NODE_CONFIG_DIR=/home/knoxville/koragh/packages/kbasegit/search/kbasesearchservice
 
+forever start ./app.js
