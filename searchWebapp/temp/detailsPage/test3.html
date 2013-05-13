@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<head>
+    <script src="http://code.jquery.com/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="./CDMI.js" type="text/javascript" charset="utf-8"></script>
+    <script>
+    $(function () {
+        var api = new CDMI_API('http://kbase.us/services/cdmi_api');
+  
+        api.fids_to_literature_async(['kb|g.0.peg.1089'], 
+			function (literature) {
+				for (var id in literature) {
+					var pubs = literature[id];
+					for (var i = 0; i < pubs.length; i++ ) {
+						var txt = pubs[i];
+						for ( var field in txt ) {
+							$('#literature').append($('<div>').append('<span>').text(txt[field]));
+							//$("#literature").append(txt[field] + '<br/>');
+							//$("#literature").append(txt[2] + '<br/>');
+						}
+						//$("#table-body").append($("<tr>").append($("<td>").text(txt)));
+						//$("#literature").append(txt + '<br/>');
+					}
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+    })
+    </script>
+</head>
+<body>
+	<div id='literature'></div>
+</body>

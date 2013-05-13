@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<!-- saved from url=(0068)http://140.221.92.12/feature_info/feature.html?id=kb|g.1863.peg.4774 -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>KBase Feature Information Browser</title>
+    <link href="http://140.221.92.12/assets/css/kbase-bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 50px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="http://140.221.92.12/assets/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="http://140.221.92.12/assets/css/jquery.dataTables.css" rel="stylesheet">
+    <link href="http://140.221.92.12/assets/css/kbase-contig-widget.css" rel="stylesheet">
+  </head>
+
+<body onload="var thefid = extractIdFromUrl(); 
+              if (!thefid) {
+                  window.alert('No feature ID found!\nLoading an example.');
+                  window.open('feature.html?id=kb|g.0.peg.3691', '_self');
+              } else {
+                $('#about').attr('href', makeMemoryLink('aboutFeature.html', thefid));
+                $('#contact').attr('href', makeMemoryLink('contactFeature.html', thefid));
+                var widget = makeContigWidget('browser', 565, 100, { 'feature' : thefid,
+                                                                     'onClickUrl' : 'feature.html?id=',
+                                                                     'allowResize' : true}); 
+                loadFeature();
+              }
+              ">
+
+
+
+    <div class="container">
+      <div class="row">
+        <div class="span6">
+          <div align="center">
+            <button onclick="widget.moveLeftEnd();">&lt;&lt;</button>
+            <button onclick="widget.moveLeftStep();">&lt;-</button>
+            <button onclick="widget.zoomIn();">+</button>
+            <button onclick="widget.zoomOut();">-</button>
+            <button onclick="widget.moveRightStep();">-&gt;</button>
+            <button onclick="widget.moveRightEnd();">&gt;&gt;</button>
+          </div>
+          <br>
+          <div id="browser">
+        </div>
+      </div>
+
+
+    <!-- Javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./js/jquery.js"></script>
+    <script src="./js/jquery-ui-1.8.21.custom.min.js"></script>
+    <script src="./js/bootstrap-transition.js"></script>
+    <script src="./js/bootstrap-alert.js"></script>
+    <script src="./js/bootstrap-modal.js"></script>
+    <script src="./js/bootstrap-dropdown.js"></script>
+    <script src="./js/bootstrap-scrollspy.js"></script>
+    <script src="./js/bootstrap-tab.js"></script>
+    <script src="./js/bootstrap-tooltip.js"></script>
+    <script src="./js/bootstrap-popover.js"></script>
+    <script src="./js/bootstrap-button.js"></script>
+    <script src="./js/bootstrap-collapse.js"></script>
+    <script src="./js/bootstrap-carousel.js"></script>
+    <script src="./js/bootstrap-typeahead.js"></script>
+    <script src="./js/d3.v2.min.js"></script>
+    <script src="./js/kbase-protein-info.js"></script>
+    <script src="./js/kbase-cdmi.js"></script>
+    <script src="./js/kbase-feature.js"></script>
+	<script src="./js/kbase-contig-widget.js"></script>
+	
+	<div style="position: absolute; z-index: 10; visibility: hidden; opacity: 0.8; background-color: rgb(34, 34, 34); color: rgb(255, 255, 255); padding: 0.5em; top: 323px; left: 1316px;">kb|g.1863.peg.4749: hypothetical protein</div>
+    <script>
+      var makeMemoryLink = function(url, id) {
+        if (id) 
+          url += "?id=" + id;
+        return url;
+      }
+    </script>
+  
+
+</body></html>

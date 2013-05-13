@@ -1,0 +1,15 @@
+{
+  "conf": {
+    "system": {
+     "securePort":7078
+     ,"key":"certificates/server.key"
+     ,"certificate":"certificates/server.crt"
+    },
+    "searchServer": {
+      "host": "localhost",
+      "port": 7077,
+      "deployment": "/search/"
+    },
+    "version" : "v0.0.8"
+  }
+}

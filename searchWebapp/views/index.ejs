@@ -1,0 +1,37 @@
+<% include header.html %>
+
+      <div class="jumbotron">
+        <h1>KBase Search<small><img src='/services/search/libs/imgs/beta.gif'/></small></h1>
+        <dir class='row'>
+          <div class="input-append">
+            <form class="form-wrapper" action='/services/search/process' id='searchForm' method='post' style='margin-bottom:400px;'>
+              <input class="span2" id="appendedInputButtons" name='keyword' type="text" style='width:400px;'>
+              <button class="btn" type="button" id='search' >Search</button>
+              <button class="btn" type="button" id='advanced' >Advanced</button>
+              <br/> <br/>
+              <div class="alert alert-error" id='alert' style='display:none;width:50%;text-align:center;margin-left:210px;'>
+                <button type="button" class="close" data-dismiss="alert">&times;</button>
+                <h4>Keyword Missing. Please provide a search keyword</h4>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
+
+
+<% include footer.html %>
+<script>
+  $("#searchForm").submit(function(){
+    var isFormValid = true;
+
+
+    if ($.trim($('#appendedInputButtons').val()).length == 0){
+      isFormValid = false;
+    }
+
+    //if (!isFormValid) alert("Please provide a search keyword");
+    if (!isFormValid) $('#alert').show();
+
+    return isFormValid;
+  });
+</script>

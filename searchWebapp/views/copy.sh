@@ -1,0 +1,12 @@
+cp gene.ejs locus.ejs
+cp gene.ejs prophage.ejs
+cp gene.ejs pseudogene.ejs
+cp gene.ejs promoter.ejs
+cp gene.ejs operator.ejs
+cp gene.ejs proteinbindingsite.ejs
+cp gene.ejs bindingsite.ejs
+cp gene.ejs riboswitch.ejs
+cp gene.ejs rna.ejs
+cp gene.ejs transposon.ejs
+cp gene.ejs mrna.ejs
+cp gene.ejs smallrna.ejs

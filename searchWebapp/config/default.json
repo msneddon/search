@@ -1,0 +1,12 @@
+{
+  "conf": {
+    "system": {
+      "port":7079
+    },
+    "searchAPIServer": {
+      "host": "localhost",
+      "port": 7078,
+      "deployment": "/solr/"
+    }
+  }
+}

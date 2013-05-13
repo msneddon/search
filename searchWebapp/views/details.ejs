@@ -1,0 +1,388 @@
+<% include header.html %>
+
+<script src="/services/search/libs/js/CDMI.js"></script>
+<link href="/services/search/libs/css/common.css" rel="stylesheet">
+
+<style>
+  .sideElem {
+    font-size: 11px;
+  }
+</style>
+
+      <div class="jumbotron" style='margin:0px 0px 0px 0px;'>
+        <h1>KBase Search<small><img src='/services/search/libs/imgs/beta.gif'/></small></h1>
+        <dir class='row'>
+          <div class="input-append">
+            <form class="form-wrapper" action='/services/search/process' id='searchForm' method='post' >
+              <input class="span2" id="appendedInputButtons" name='keyword' type="text" style='width:400px;'>
+              <button class="btn" type="button" id='search' >Search</button>
+              <button class="btn" type="button" id='advanced' >Advanced</button>
+            </form>
+          </div>
+        </div>
+
+        <div class='row' style='margin-left:20px; border-bottom:1px solid #ccc;padding:20px;margin-top:5px;padding-top:0px;'>
+
+        </div>
+
+
+        <div class="row" style='padding-top:15px;padding-left:5px;'>
+          <div class="span8">
+          
+            <div class='well'>
+              <span class="label label-info" style='float:right;'><%= type %></span>
+              <h3 id='feature_function'></h3>
+              <table style='width:100%;'><tr>	
+                  <td>Genome <span class='klinks2' id='genome_name'></span><td/>
+                  <td>KBase Id <span class='klinks2' id='feature_id'></span> <td/>
+                  <td>DNA Size <span class='klinks2' id='feature_length'></span> <td/>
+                  <!--td>Location <span class='klinks2' id='feature_location'></span> <td/-->
+              </tr></table>
+
+              <br/>
+              <div class='btngrp'>
+                <div class="btn-group">
+
+                   <a href='#co-expressed' class="btn btn-mini btn-success" id='coebtn' type="button">Co-expressed</a>
+                   <a href='#co-occur' class="btn btn-mini btn-success" id='coobtn' type="button">Co-occurences</a>
+                   <a href='#subsystem' class="btn btn-mini btn-success" id='subbtn' type="button">Subsystem</a>
+                   <a href='#annotation2' class="btn btn-mini btn-success" id='annbtn' type="button">Annotation</a>
+                   <a href='#literature2' class="btn btn-mini btn-success" id='litbtn' type="button">Literature</a>
+                   <a href='#dna-seq' class="btn btn-mini btn-success" id='dnabtn' type="button">DNA Sequence</a>
+                   <a href='#protein-seq' class="btn btn-mini btn-success" id='probtn' type="button">Protein Sequence</a>
+                </div>
+              </div>
+            </div>
+
+              <a name='co-expressed' ></a>
+              <div class='co-expressed-enclosure' id='co-expressed-enclosure'>
+                <table class="table">
+                  <caption><span style='font-weight:bold;' id='ceFeature'></span> is co-expressed with</caption>
+                  <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Protein Encoding Gene</th>
+                    <th>Pearson Coefficient</th>
+                  </tr>
+                  </thead>
+                  <tbody id='co-expressed'>
+                  </tbody>
+                </table>
+              </div>
+
+
+              <a name='ContigBrowser' ></a>
+              <div class='contig-enclosure' id='contig-enclosure'>
+                <iframe frameborder="0" scrolling="no" width="700" height="250"                                                                                             
+                  src="http://kbase.us/services/search/f1/<%= keyword  %>" name="imgbox" id="imgbox">
+                  <p>iframes are not supported by your browser.</p>                                                                                                         
+                </iframe><br />
+              </div>
+
+              <a name='co-occur' ></a>
+              <div class='co-occur-enclosure' id='co-occur-enclosure'>
+
+                <table class="table">
+                  <caption><span style='font-weight:bold;' id='coFeature'></span> co-occurs with</caption>
+                  <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Protein Encoding Gene</th>
+                    <th>Occurences</th>
+                  </tr>
+                  </thead>
+                  <tbody id='co-occur'>
+                  </tbody>
+                </table>
+              </div>
+
+              <a name='subsystem' ></a>
+              <div class='subsystem-enclosure' id='subsystem-enclosure'>
+                <div>
+                    <dl id='subsystem'></dl>
+                </div>
+              </div>
+
+              <a name='annotation2' ></a>
+              <div class='annotation-enclosure' id='annotation-enclosure'>
+                <div id='annotation'></div>
+              </div>
+
+              <a name='literature2' ></a>
+              <div class='literature-enclosure' id='literature-enclosure'>
+                <div id='literature'></div>
+              </div>
+
+              <a name='dna-seq' ></a>
+              <div class='dna-enclosure' id='dna-enclosure'>
+                <div id='dna-seq' class='sequence' >
+                </div>
+              </div>
+
+              <a name='protein-seq' ></a>
+              <div class='protein-enclosure' id='protein-enclosure'>
+                <div id='protein-seq' class='sequence' >
+                </div>
+              </div>
+
+
+            </div>
+
+          </div>
+
+
+      </div>
+
+<% include footer.html %>
+
+  <script>
+    $(function () {
+
+		/*
+		var fid = 'kb|g.0.peg.1089';
+		var fid = 'kb|g.0.ar.44';
+		var fid = 'kb|g.0.peg.1457';
+		var fid = 'kb|g.8776';
+		var fid = 'kb|g.0.rna.2';
+		var fid = 'kb|g.0.peg.133';
+		*/
+
+		var fid = '<%= keyword %>';
+    var gfid = fid.split('.')[0]+'.' + fid.split('.')[1];
+
+		var fids = [fid];
+    var api  = new CDMI_API('http://kbase.us/services/cdmi_api');
+
+  
+        api.fids_to_literature_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					//$('#litbtn').addClass($('#litbtn').class() + ' disabled');
+					$('#litbtn').addClass('disabled');
+					$('#literature-enclosure').hide();
+
+				} else {
+					for (var id in results) {
+						var pubs = results[id];
+						for (var i = 0; i < pubs.length; i++ ) {
+							var txt = pubs[i];
+							var text2 = i + 1 + '. ' + txt[2] + '<br/>' +
+									'<span class="klinks">' + txt[1] + '</span>' +
+									'<a href="' + txt[1] + '">' + 'PUBMED:' + txt[0] + '</a><br/><br/>';
+							//$('#literature').append($('<blockquote>').html(txt[2]).append('<br/>').append(text2).text('PUBMED:' + txt[0] ));
+							$('#literature').append($('<div>').html(text2));
+						}
+					}
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+
+        api.fids_to_feature_data_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+				} else {
+					var result = results[fid];
+					for (var id in results[fid]) {
+						var value = result[id];
+						$('#' + id).text(value);
+            if (id === 'feature_function' ) {
+              $('#ceFeature').text(value);
+              $('#coFeature').text(value);
+            } else if (id === 'genome_name' ) {
+                var strgn = '<a href="/services/search/genomedetails/'+ gfid  +'">'+ value +'</a>';
+						    $('#' + id).html(strgn);
+              
+            }
+				  }
+        }
+      }, function( error ) {
+        alert(error);
+      });
+
+        api.fids_to_annotations_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#annbtn').addClass('disabled');
+					$('#annotation-enclosure').hide();
+
+				} else {
+					for (var id in results) {
+						var pubs = results[id];
+						for (var i = 0; i < pubs.length; i++ ) {
+							var txt = pubs[i];
+							var time = timeConverter(txt[2]);
+
+							var markup = '<img src="/services/search/libs/imgs/User.png" style="float:left;padding:5px;" />' +
+										'<h4 style="padding-top:5px;">' + txt[1] + '</h4> ' +
+										'<span class="klinks">' + time + '</span> <br/>' +
+										'<div style="padding-left:60px;">' + txt[0] + '</div> <br/>' ;
+							$('#annotation').append($('<div class="item">').html(markup));
+						}
+					}
+				}
+            }, function( error ) {
+              alert(error);
+        });
+
+        /*
+        api.fids_to_coexpressed_fids_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#coebtn').addClass('disabled');
+					$('#co-expressed-enclosure').hide();
+				} else {
+					var result = results[fid];
+					for (var i = 0; i < result.length; i++ ) {
+						var txt = result[i];
+						//var markup = '<a href="#"><i class="icon-ok-sign"></i>' + txt[0] + '</a>';
+                		var markup = '<tr><td>'+ (i+1) + '</td><td>'+ fid + '</td><td><a href="/services/search/details/'+ txt[0] +'">'+ txt[0] +'</a></td><td>'+txt[1]+'</td></tr>';
+						$('#co-expressed').html( $('#co-expressed').html() + markup);
+					}
+				}
+            }, function( error ) {
+              alert(error);
+        });
+
+        api.fids_to_co_occurring_fids_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#coobtn').addClass('disabled');
+					$('#co-occur-enclosure').hide();
+				} else {
+					var result = results[fid];
+					for (var i = 0; i < result.length; i++ ) {
+						var txt = result[i];
+                		var markup = '<tr><td>'+ (i+1) + '</td><td>'+ fid + '</td><td><a href="/services/search/details/'+ txt[0] +'">'+ txt[0] +'</a></td><td>'+txt[1]+'</td></tr>';
+						$('#co-occur').html( $('#co-occur').html() + markup);
+					}
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+        });
+        */
+
+        api.fids_to_dna_sequences_async(fids, 
+          function (results) {
+            var result = results[fid];
+            if ($.isEmptyObject(result)) {
+              $('#dnabtn').addClass('disabled');
+              $('#dna-enclosure').hide();
+            } else {
+              $('#dna-seq').html(result);
+            }
+                }, function( error ) {
+                  alert(error);
+        });
+
+        api.fids_to_protein_sequences_async(fids, 
+          function (results) {
+            if ($.isEmptyObject(results)) {
+              $('#probtn').addClass('disabled');
+              $('#protein-enclosure').hide();
+            
+            } else {
+              var result = results[fid];
+              $('#protein-seq').html(result);
+            }
+                }, function( error ) {
+                  alert(error);
+        });
+
+        api.fids_to_subsystem_data_async(fids, 
+          function (results) {
+            var result = results[fid];
+            if ($.isEmptyObject(results)) {
+              $('#subbtn').addClass('disabled');
+              $('#subsystem-enclosure').hide();
+            } else {
+              for (var i = 0; i < result.length; i++ ) {
+                var markup = '<dt>'+ (i+1) + '. ' + result[i][0] + '</dt><dd>'+ result[i][2] + '</dd><br/>';
+                $('#subsystem').html( $('#subsystem').html() + markup );
+              }
+            }
+                }, function( error ) {
+                  alert(error);
+        });
+
+        function coexpressed( fid ) {
+          $.post('/services/search/ajax/coexpressed/'+fid,
+          function(data, status ) {
+            var str = "";
+            if ( status === 'success' ) {
+              if ($.isEmptyObject(data.data)) {
+                $('#coebtn').addClass('disabled');
+                $('#co-expressed-enclosure').hide();
+              } else {
+                var alldata = data;
+                var count = alldata.count;
+                var returned = alldata.returned;
+                var result = alldata.data;
+                for (var i = 0; i < result.length; i++ ) {
+                  var txt = result[i];
+                  var markup = '<tr><td>'+ (i+1) + '</td><td><a href="/services/search/details/'+ txt.id +'?type=Gene">'+ txt.function +'</a></td><td>'+txt.pc +'</td></tr>';
+                  str = str + markup;
+                  //$('#co-expressed').html( $('#co-expressed').html() + markup);
+                }
+                if ( alldata.remaining > 0 ) {
+                  var markup2 = '<tr><td colspan="3" style="text-align:right;"><b>'+ count + '</b>' + ' More ... '+ '</td></tr>';
+                  str = str + markup2;
+                }
+                $('#co-expressed').html( $('#co-expressed').html() + str);
+              }
+            } else {
+              $('#coebtn').addClass('disabled');
+              $('#co-expressed-enclosure').hide();
+            }
+          });
+      };
+
+      function cooccurences( fid ) {
+
+        $.post('/services/search/ajax/cooccurences/'+fid,
+        function(data, status ) {
+          var str = "";
+          if ( status === 'success' ) {
+            if ($.isEmptyObject(data.data)) {
+              $('#coobtn').addClass('disabled');
+              $('#co-occur-enclosure').hide();
+            } else {
+              var alldata = data;
+              var count = alldata.count;
+              var returned = alldata.returned;
+              var result = alldata.data;
+              for (var i = 0; i < result.length; i++ ) {
+                var txt = result[i];
+                var markup = '<tr><td>'+ (i+1) + '</td><td><a href="/services/search/details/'+ txt.id +'?type=Gene">'+ txt.function +'</a></td><td>'+txt.cooccur +' Hits</td></tr>';
+                str = str + markup;
+                //$('#co-expressed').html( $('#co-expressed').html() + markup);
+              }
+
+              if ( alldata.remaining > 0 ) {
+                var markup2 = '<tr><td colspan="3" style="text-align:right;"><b>'+ count + '</b>' + ' More ... '+ '</td></tr>';
+                str = str + markup2;
+              }
+              $('#co-occur').html( $('#co-occur').html() + str);
+            }
+          } else {
+            $('#coobtn').addClass('disabled');
+            $('#co-occur-enclosure').hide();
+          }
+        });
+
+      };
+
+
+      setTimeout( cooccurences, 100, fid );
+      setTimeout( coexpressed, 800, fid );
+
+
+
+
+    })
+    </script>
+
