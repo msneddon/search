@@ -1,0 +1,357 @@
+<!DOCTYPE html>
+<head>
+    <script src="http://code.jquery.com/jquery.min.js" type="text/javascript" charset="utf-8"></script>
+    <script src="./CDMI.js" type="text/javascript" charset="utf-8"></script>
+	<link href="css/bootstrap.min.css" rel="stylesheet" media="screen">
+	<script src="js/bootstrap.min.js"></script>
+
+
+    <script>
+    $(function () {
+
+		var fid = 'kb|g.0.peg.1089';
+		var fid = 'kb|g.0.peg.133';
+		var fids = [fid];
+        var api = new CDMI_API('http://kbase.us/services/cdmi_api');
+  
+        api.fids_to_literature_async(fids, 
+			function (results) {
+				for (var id in results) {
+					var pubs = results[id];
+					for (var i = 0; i < pubs.length; i++ ) {
+						var txt = pubs[i];
+						for ( var field in txt ) {
+							$('#literature').append($('<div class="test">').append($('<span>').text(txt[field])));
+						}
+					}
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+
+        api.fids_to_annotations_async(fids, 
+			function (results) {
+				for (var id in results) {
+					var pubs = results[id];
+					for (var i = 0; i < pubs.length; i++ ) {
+						var txt = pubs[i];
+						for ( var field in txt ) {
+							$('#annotation').append($('<div class="test">').append($('<span>').text(txt[field])));
+						}
+					}
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+
+        api.fids_to_functions_async(fids, 
+			function (results) {
+				for (var id in results) {
+					var pubs = results[id];
+					$('#functions').append($('<div class="test">').append($('<span>').text(pubs)));
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+
+        api.fids_to_protein_families_async(fids, 
+			function (results) {
+				for (var id in results) {
+					var pubs = results[id];
+					$('#protein-fam').append($('<div class="test">').append($('<span>').text(pubs)));
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+
+        api.fids_to_roles_async(fids, 
+			function (results) {
+				for (var id in results) {
+					var pubs = results[id];
+					$('#roles').append($('<div class="test">').append($('<span>').text(pubs)));
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+
+        api.fids_to_subsystems_async(fids, 
+			function (results) {
+				for (var id in results) {
+					var pubs = results[id];
+					for (var i = 0; i < pubs.length; i++ ) {
+						var txt = pubs[i];
+						$('#subsystems').append($('<div class="test">').append($('<span>').text(txt)));
+					}
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+
+        api.fids_to_co_occurring_fids_async(fids, 
+			function (results) {
+				for (var id in results) {
+					var pubs = results[id];
+					for (var i = 0; i < pubs.length; i++ ) {
+						var txt = pubs[i];
+						$('#co-occur').append($('<div class="test">').append($('<span>').text(txt)));
+					}
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+
+        api.fids_to_locations_async(fids, 
+			function (results) {
+				for (var id in results) {
+					var pubs = results[id];
+					for (var i = 0; i < pubs.length; i++ ) {
+						var txt = pubs[i];
+						$('#location').append($('<div class="test">').append($('<span>').text(txt)));
+					}
+				}
+            }, function( error ) {
+
+              alert(error);
+            
+          });
+
+        api.fids_to_regulon_data_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#regulon-data').hide();
+				
+				} else {
+					var txt = JSON.stringify(results);
+					$('#regulon-data').append($('<div class="test">').append($('<span>').text(txt)));
+				}
+            }, function( error ) {
+              alert(error);
+          });
+
+        api.fids_to_coexpressed_fids_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#co-expressed').hide();
+				
+				} else {
+					for (var id in results) {
+						var result = results[id];
+						for (var i = 0; i < result.length; i++ ) {
+							var txt = result[i];
+							$('#co-expressed').append($('<div class="test">').append($('<span>').text(txt)));
+						}
+					}
+				}
+            }, function( error ) {
+              alert(error);
+          });
+
+        api.fids_to_feature_data_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#feature-data').hide();
+				
+				} else {
+					//alert(JSON.stringify(results[fid]));
+					var result = results[fid];
+					for (var id in results[fid]) {
+						var value = result[id];
+						//$('#feature-data').append($('<div class="test">').append($('<span>').text(id + '-------:' + value)));
+						$('#feature-data').append($('<div class="test">').append($('<span>').text(id )));
+					}
+				}
+            }, function( error ) {
+              alert(error);
+          });
+
+
+        api.fids_to_atomic_regulons_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#atomic_regulons').hide();
+				
+				} else {
+					var txt = JSON.stringify(results);
+					$('#atomic_regulons').append($('<div class="test">').append($('<span>').text(txt)));
+				}
+            }, function( error ) {
+              alert(error);
+          });
+
+
+        api.fids_to_protein_sequences_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#protein_seq').hide();
+				
+				} else {
+					var txt = JSON.stringify(results);
+					$('#protein_seq').append($('<div class="test" style="width:400px;">').append($('<span style="width:400px;">').text(txt)));
+				}
+            }, function( error ) {
+              alert(error);
+          });
+
+        api.fids_to_proteins_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#proteins').hide();
+				
+				} else {
+					var txt = JSON.stringify(results);
+					$('#proteins').append($('<div class="test" style="width:400px;">').append($('<span style="width:400px;">').text(txt)));
+				}
+            }, function( error ) {
+              alert(error);
+          });
+
+        api.fids_to_dna_sequences_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#dna_seq').hide();
+				
+				} else {
+					var txt = JSON.stringify(results);
+					$('#dna_seq').append($('<div class="test" style="width:400px;">').append($('<span style="width:400px;">').text(txt)));
+				}
+            }, function( error ) {
+              alert(error);
+          });
+
+        api.fids_to_subsystem_data_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#subsystem_data').hide();
+				
+				} else {
+					var txt = JSON.stringify(results);
+					$('#subsystem_data').append($('<div class="test" style="width:400px;">').append($('<span style="width:400px;">').text(txt)));
+				}
+            }, function( error ) {
+              alert(error);
+          });
+
+        api.fids_to_genomes_async(fids, 
+			function (results) {
+				if ($.isEmptyObject(results)) {
+					$('#genomes').hide();
+				
+				} else {
+					var txt = JSON.stringify(results);
+					$('#genomes').append($('<div class="test" style="width:400px;">').append($('<span style="width:400px;">').text(txt)));
+				}
+            }, function( error ) {
+              alert(error);
+          });
+
+
+
+    })
+    </script>
+</head>
+<body>
+
+	<div id='genomes'>
+		<h2>genomes</h2>
+		<div id='genomes'></div>
+	</div>
+
+	<div id='subsystem_data'>
+		<h2>subsystem_data</h2>
+		<div id='subsystem_data'></div>
+	</div>
+
+	<div id='dna_seq'>
+		<h2>dna_seq</h2>
+		<div id='dna_seq'></div>
+	</div>
+
+
+	<div id='proteins'>
+		<h2>proteins</h2>
+		<div id='proteins'></div>
+	</div>
+
+	<div id='protein_seq'>
+		<h2>protein_seq</h2>
+		<div id='protein_seq'></div>
+	</div>
+
+	<div id='atomic_regulons'>
+		<h2>atomic_regulons</h2>
+		<div id='atomic_regulons'></div>
+	</div>
+
+
+	<div id='feature-data'>
+		<h2>Feature-data</h2>
+		<div id='feature-data'></div>
+	</div>
+
+	<div id='co-expressed'>
+		<h2>co-expressed</h2>
+		<div id='co-expressed'></div>
+	</div>
+
+	<div id='regulon-data'>
+		<h2>regulon-data</h2>
+		<div id='regulon-data'></div>
+	</div>
+
+	<div id='location'>
+		<h2>Location</h2>
+		<div id='location'></div>
+	</div>
+
+	<div id='co-occur'>
+		<h2>co-occur</h2>
+		<div id='co-occur'></div>
+	</div>
+
+	<div id='annotation'>
+		<h2>Annotation</h2>
+		<div id='annotation'></div>
+	</div>
+
+	<div id='functions'>
+		<h2>Functions</h2>
+		<div id='functions'></div>
+	</div>
+
+	<div id='protein-fam'>
+		<h2>Protein-families</h2>
+		<div id='protein-fam'></div>
+	</div>
+
+	<div id='roles'>
+		<h2>Roles</h2>
+		<div id='roles'></div>
+	</div>
+
+	<div id='subsystems'>
+		<h2>Subsystems</h2>
+		<div id='subsystems'></div>
+	</div>
+
+	<div id='literatureContainer'>
+		<h2>Literature</h2>
+		<div id='literature'></div>
+	</div>
+
+
+
+</body>

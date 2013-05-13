@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<!-- saved from url=(0068)http://140.221.92.12/feature_info/feature.html?id=kb|g.1863.peg.4774 -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>KBase Feature Information Browser</title>
+    <link href="/services/search/libs/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 50px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="/services/search/libs/css/kbase-contig-widget.css" rel="stylesheet">
+  </head>
+
+  <body onLoad="getGenome('<%= id %>')">
+
+
+    <div class="container">
+
+      <div class="row">
+        <div>
+          <div id="gBrowser">
+            <div id="contigContainer" align="center">
+              <div id="contigMenuContainer">
+              </div>
+			  <br/>
+
+              <div id="contigButtonContainer" align="center">
+              </div>
+              <br/>
+
+              <div id="contigTrackContainer">
+              </div>
+
+
+              <div id="featureInfoContainer" style='width:80%;text-align:left;'>
+              </div>
+            </div>
+            <div id="gcContainer" style="display:none;">
+              <div id="gcMenuContainer">
+              </div>
+
+              <svg id="gcSVG" width="450" height="500">
+                <g id="gcViewport"></g>
+              </svg>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script src="/services/search/libs/js/jquery.js"></script>
+    <script src="/services/search/libs/js/bootstrap.min.js"></script>
+    <script src="/services/search/libs/js/d3.v2.min.js"></script>
+    <script src="/services/search/libs/js/kbase-cdmi.js"></script>
+    <script src="/services/search/libs/js/kbase-protein-info.js"></script>
+    <script src="/services/search/libs/js/genome-overview.js"></script>
+	  <script src="/services/search/libs/js/kbase-contig-widget.js"></script>
+  </body>
+
+</html>

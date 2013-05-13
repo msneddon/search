@@ -1,0 +1,74 @@
+<% include header.html %>
+
+<link href="/services/search/libs/css/common.css" rel="stylesheet">
+
+<style>
+  .sideElem {
+    font-size: 11px;
+  }
+</style>
+
+      <div class="jumbotron" style='margin:0px 0px 0px 0px;'>
+        <h1>KBase Search<small><img src='/services/search/libs/imgs/beta.gif'/></small></h1>
+        <dir class='row'>
+          <div class="input-append">
+            <form class="form-wrapper" action='/services/search/process' id='searchForm' method='post' >
+              <input class="span2" id="appendedInputButtons" name='keyword' type="text" style='width:400px;'>
+              <button class="btn" type="button" id='search' >Search</button>
+              <button class="btn" type="button" id='advanced' >Advanced</button>
+            </form>
+          </div>
+        </div>
+
+        <div class='row' style='margin-left:20px; border-bottom:1px solid #ccc;padding:20px;margin-top:5px;padding-top:0px;'>
+
+        </div>
+
+
+        <div class="row" style='padding-top:15px;padding-left:5px;'>
+          <div class="span8">
+          
+            <div class='well'>
+              <span class="label label-info" style='float:right;'><%= type %></span>
+              <h3 id='feature_function'></h3>
+              <table style='width:100%;'><tr>	
+                  <td>Genome <span class='klinks2' id='genome_name'></span><td/>
+                  <td>KBase Id <span class='klinks2' id='feature_id'></span> <td/>
+                  <td>DNA Size <span class='klinks2' id='feature_length'></span> <td/>
+              </tr></table>
+
+              <br/>
+            </div>
+
+              <a name='co-expressed' ></a>
+              <div class='co-expressed-enclosure' id='co-expressed-enclosure'>
+
+
+
+                <table class="table">
+                  <caption><span style='font-weight:bold;' id='ceFeature'></span> is co-expressed with</caption>
+                  <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Protein Encoding Gene</th>
+                    <th>Pearson Coefficient</th>
+                  </tr>
+                  </thead>
+                  <tbody id='co-expressed'>
+                  </tbody>
+                </table>
+              </div>
+
+
+
+
+            </div>
+
+          </div>
+
+
+      </div>
+
+<% include footer.html %>
+
+

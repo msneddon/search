@@ -1,0 +1,7 @@
+<dataConfig>
+  <dataSource type="JdbcDataSource" driver="com.mysql.jdbc.Driver" url="jdbc:mysql://localhost:33063/kbase_sapling_v1"  user="kbase_sapselect"  password='oiwn22&amp;dmwWEe'/>
+  <document>
+    <entity name="compound" query="select * from Compound">
+    </entity>
+  </document>
+</dataConfig>

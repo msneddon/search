@@ -1,0 +1,85 @@
+<html><head><title>Twitter 2.0</title>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+</head><body>
+
+Literature
+<span id='literaturecount'></span>
+<br/>
+
+Gene
+<span id='genecount'></span>
+<br/>
+
+Genome
+<span id='genomecount'></span>
+<br/>
+
+Archaea
+<span id='archaeacount'></span>
+<br/>
+
+Bacteria
+<span id='bacteriacount'></span>
+<br/>
+
+Eukaryota
+<span id='eukaryotacount'></span>
+<br/>
+
+Virus
+<span id='virusescount'></span>
+<br/>
+
+
+<script type="text/javascript">
+$(document).ready(function() {
+    var protocol = 'https://';
+    var hostname = '192.168.56.101';
+    var subdeployment = '/search/';
+
+    var genurl =  protocol + hostname + subdeployment;
+
+    var keyword = '*';
+
+    var url = '',i = 0;
+
+    //url =  "https://192.168.56.101/search/literaturecount/coli";
+
+    var suburls = [ 
+                    'literaturecount'
+                   ,'genecount'
+                   ,'bacteriacount'
+                   ,'virusescount'
+                   ,'archaeacount'
+                   ,'eukaryotacount' 
+               ];
+
+        
+
+    for (var i = 0; i < suburls.length; i++) {
+      url = genurl + suburls[i] + '/' + keyword;
+
+      $.getJSON(url + "?callback=?", null, function(data) {
+          var ele = '#' + data.search;
+          $(ele).append('('+data.found + ')');
+      });
+
+    }
+
+    /*
+
+    var url =  "https://192.168.56.101/search/genecount/coli";
+    $.getJSON(url + "?callback=?", null, function(data) {
+        $("#genecount").append('('+data.found + ')');
+    });
+
+    var url =  "https://192.168.56.101/search/genomecount/coli";
+    $.getJSON(url + "?callback=?", null, function(data) {
+        $("#genomecount").append('('+data.found + ')');
+    });
+    */
+
+
+});
+</script>
+</body></html>

@@ -1,0 +1,5 @@
+#!/bin/bash
+
+./node_modules/forever/bin/forever ./service.js & > /dev/null
+#./node_modules/forever/bin/forever ./service.js -l ./logs/service.logs -o ./logs/service.out -e ./logs/errors.log &
+#./node_modules/forever/bin/forever start -a -l /home/user1/distribution/searchService/logs/service.logs /home/user1/distribution/searchService/service.js

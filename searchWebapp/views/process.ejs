@@ -1,0 +1,349 @@
+<% include header.html %>
+<link href="/services/search/libs/css/common.css" rel="stylesheet">
+
+
+      <div class="jumbotron" style='margin:0px 0px 0px 0px;'>
+        <h1>KBase Search<small><img src='/services/search/libs/imgs/beta.gif'/></small></h1>
+        <dir class='row'>
+          <div class="input-append">
+            <form class="form-wrapper" action='/services/search/process' id='searchForm' method='post' >
+              <input class="span2" id="appendedInputButtons" name='keyword' type="text" style='width:400px;'>
+              <button class="btn" type="button" id='search' >Search</button>
+              <button class="btn" type="button" id='advanced' >Advanced</button>
+            </form>
+          </div>
+        </div>
+
+        <div class='row' style='margin-left:20px; border-bottom:1px solid #ccc;padding:20px;margin-top:5px;padding-top:0px;'>
+          Searched for <span class="label label-info"><%= keyword %></span> found <b><span id='totalcount'>0</span></b> results.<br/>
+          Now showing <b> 
+            <% 
+              if (size < 10 ) {
+              %>  <%= size %> <%
+              }else
+              {
+              %> <%= rowcount %>
+              <%
+              }
+            %> 
+            </b> results.
+        
+        </div>
+
+        <div class='badges' style='padding: 5px 0px 10px 30px;'>
+          <span class="badge badge-important"><%= keyword %> <a href='*'><i class="icon-remove"></i></a></span>
+        </div>
+
+        <div class="row" style='padding-top:15px;padding-left:5px;'>
+          <div class="span2">
+            <div>
+              <blockquote>
+              <p><i class="icon-search"></i> Results</p>
+              </blockquote>
+
+              <h6>Literature</h6>
+              <blockquote>
+              <p><a href='/services/search/literature/<%= keyword %>'><span class='sideElem'>Pubmed <span id='literaturecount'></span></span></a></p>
+              </blockquote>
+
+              <h6>Genomes</h6>
+              <blockquote>
+              <p><a href='/services/search/bacteria/<%= keyword %>'><span class='sideElem'>Bacteria <span id='bacteriacount'></span></span></a></p>
+              <p><a href='/services/search/viruses/<%= keyword %>'><span class='sideElem'>Viruses <span id='virusescount'></span></span></a></p>
+              <p><a href='/services/search/eukaryota/<%= keyword %>'><span class='sideElem'>Eukaryota <span id='eukaryotacount'></span></span></a></p>
+              <p><a href='/services/search/archaea/<%= keyword %>'><span class='sideElem'>Archaea <span id='archaeacount'></span></span></a></p>
+              </blockquote>
+
+              <h6>Function</h6>
+              <blockquote>
+              <p><a href='/services/search/gene/<%= keyword %>'><span class='sideElem'>Genes <span id='genecount'></span></span></a></p>
+              <p><a href='/services/search/locus/<%= keyword %>'><span class='sideElem'>Locus <span id='locuscount'></span></span></a></p>
+              <p><a href='/services/search/prophage/<%= keyword %>'><span class='sideElem'>Prophage <span id='prophagecount'></span></span></a></p>
+              <p><a href='/services/search/pseudogene/<%= keyword %>'><span class='sideElem'>Pseudo Gene <span id='pseudogenecount'></span></span></a></p>
+              </blockquote>
+
+              <h6>Regulation</h6>
+              <blockquote>
+              <p><a href='/services/search/promoter/<%= keyword %>'><span class='sideElem'>Promoter <span id='promotercount'></span></span></a></p>
+              <p><a href='/services/search/operator/<%= keyword %>'><span class='sideElem'>Operator <span id='operatorcount'></span></span></a></p>
+              <p><a href='/services/search/proteinbindingsite/<%= keyword %>'><span class='sideElem'>Protein Binding Sites <span id='proteinbindingsitecount'></span></span></a></p>
+              <p><a href='/services/search/bindingsite/<%= keyword %>'><span class='sideElem'>Binding Sites <span id='bindingsitecount'></span></span></a></p>
+              <p><a href='/services/search/riboswitch/<%= keyword %>'><span class='sideElem'>Riboswitch <span id='riboswitch'></span></span></a></p>
+              </blockquote>
+
+              <h6>RNA</h6>
+              <blockquote>
+              <p><a href='/services/search/rna/<%= keyword %>'><span class='sideElem'>RNAs <span id='rnacount'></span></span></a></p>
+              <p><a href='/services/search/transposon/<%= keyword %>'><span class='sideElem'>Transposons <span id='transposoncount'></span></span></a></p>
+              <p><a href='/services/search/mrna/<%= keyword %>'><span class='sideElem'>mRNAs <span id='mrnacount'></span></span></a></p>
+              <p><a href='/services/search/smallrna/<%= keyword %>'><span class='sideElem'>Small RNAs <span id='srnacount'></span></span></a></p>
+              </blockquote>
+
+
+            </div>
+
+          </div>
+          <div class="span5">
+          
+      <div class='results'>
+      <% var months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec']; %>
+      <% 
+      
+        for(var i=0; i < results.length; i++) { 
+        
+        var item = i + parseInt(start);
+        
+        var obj = results[i];
+
+        if ( obj['feature_type'] != null )  {
+
+        var ft = obj['feature_type'];
+        var ftlabel = 'Feature';
+
+        if ( ft === 'CDS' ) 
+          ftlabel = 'Gene';
+        else if ( ft === 'locus' )
+          ftlabel = 'Locus';
+        else if ( ft === 'opr' )
+          ftlabel = 'Operator';
+        else if ( ft === 'pbs' )
+          ftlabel = 'Binding Site';
+        else if ( ft === 'prm' )
+          ftlabel = 'Promoter';
+        else if ( ft === 'rna' )
+          ftlabel = 'RNA';
+        else if ( ft === 'pp' )
+          ftlabel = 'Prophage';
+        else if ( ft === 'pseudo' )
+          ftlabel = 'Pseudogene';
+        else if ( ft === 'sRNA' )
+          ftlabel = 'Small RNA';
+        else if ( ft === 'rsw' )
+          ftlabel = 'Riboswitch';
+        else if ( ft === 'mRNA' )
+          ftlabel = 'Messenger RNA';
+        else if ( ft === 'bs' )
+          ftlabel = 'Binding Site';
+
+
+        %>
+
+        <!-- Gene and stuff -->
+        <div style='border-bottom:1px solid #eee;padding-bottom:10px;'>
+          <blockquote>
+            <div style='float:left;padding-top:0px;'> <%= item %>. &nbsp; </div> 
+            <h4>
+              <% 
+                if (typeof( results[i].function ) === "undefined" ) { %>
+               <%= ftlabel %> from <%= results[i].scientific_name %> - [Unidentified]
+              <% } else { %>
+                <%= results[i].function %>
+              <% } %>
+              
+            
+            </h4>
+            <small>
+              Genome: <%= results[i].scientific_name %> 
+            </small>
+            <span class="label label-info"><%= ftlabel %> </span>
+            <span style='padding-left:30px;'> 
+              Sequence Length: <strong><%= results[i].sequence_length %></strong> &nbsp; &nbsp; &nbsp; 
+
+              <% 
+                var obj2 = results[i];
+                if ( obj2['alias'] != null ) {%> Alias: <%= results[i].alias %>  &nbsp; &nbsp; &nbsp; <% }
+                if ( results[i].f_source_id.substr(0,4) === 'fig|' ) {
+
+                %> 
+                 <a href='http://theseed.uchicago.edu/FIG/seedviewer.cgi?page=Annotation&feature=<%= results[i].f_source_id %>' target="_blank">SEED: <%= results[i].f_source_id %> </a> &nbsp; &nbsp; &nbsp;
+                <%
+                }
+              %>
+
+              <a href='/services/search/details/<%= results[i].fid %>?type=<%= type %>'>Details</a>
+            </span>
+          </blockquote>
+        </div>
+        <!-- End of Gene and stuff -->
+
+        <% 
+        continue; 
+        } 
+        
+        if ( obj['scientific_name'] != null )  {
+        %>
+
+        <!-- Bacteria -->
+        <div style='border-bottom:1px solid #eee;padding-bottom:10px;'>
+            <blockquote>
+          <div style='float:left;padding-top:0px;'> <%= item %>. &nbsp; </div> 
+          <h4><%= results[i].scientific_name %></h4>
+          <span class="label label-info"><%= results[i].domain %> </span>
+          <span style='padding-left:30px;'> 
+            Contigs: <strong><%= results[i].contigs %></strong> &nbsp; &nbsp; 
+            RNA Features: <strong><%= results[i].rnas %> </strong> &nbsp; &nbsp; 
+            Protein Encoding Genes: <strong><%= results[i].pegs %></strong>  &nbsp; &nbsp; 
+            <small>
+            Genome Size: <strong><%= results[i].dna_size %> bp </strong> &nbsp; &nbsp; 
+            GC Content: <strong><% var gc =  results[i].gc_content %> <%= Number(gc).toFixed(2) %> %</strong> 
+            </small>
+            <a href='/services/search/genomedetails/<%= results[i].gid %>?type=<%= type %>'>Details</a>
+            </blockquote>
+          </span>
+        </div>
+        <!-- End Bacteria -->
+     
+        <% 
+        continue; 
+        } 
+        
+        if ( obj['title'] != null )  {
+        %>
+
+        <!-- Literature -->
+        <div style='border-bottom:1px solid #eee;padding-bottom:10px;'>
+          <span style='padding-left:30px;'> 
+            <blockquote>
+              <div style='float:left;padding-top:0px;'> <%= item %>. &nbsp; </div> 
+              <h4><%= results[i].title %></h4> 
+			      <span class="label label-info">Literature</span>
+            Published Date: <strong><% var date = new Date( results[i].pubdate * 1000); var formateDate = months[date.getMonth()] + ' ' + date.getDate() + ', ' + date.getFullYear(); %> <%= formateDate %> </strong> &nbsp; &nbsp; 
+            Pubmed Link: <a href="<%= results[i].link %>" target='_blank' >PUBMED<img src='/services/search/libs/imgs/offsite.gif' /></a> &nbsp; &nbsp; </br>
+            Abstract <img src='/services/search/libs/imgs/right.png' onclick='showAbstract(<%= results[i].pid %>);' />
+            </blockquote>
+          </span>
+        </div>
+        <!-- End of Literature -->
+
+        <% } %>
+
+
+      <% } %>
+      </div>
+
+      <div class='row'>
+        <div class="pagination pagination-centered">
+          <ul>
+            <li class="disabled"><a href="#">«</a></li>
+            <!--
+            <li class="active"><a href="#">1</a></li>
+            <li><a href="/services/search/processget/<%= keyword %>?start=11&count=10">2</a></li>
+            <li><a href="/services/search/processget/<%= keyword %>?start=21&count=10">3</a></li>
+            <li><a href="#">4</a></li>
+            <li><a href="#">5</a></li>
+            <li><a href="#">»</a></li>
+            -->
+            <% 
+
+              var rowsize = 10;
+              var pageCount = 1;
+              var initialPageCount = pageCount;
+              var item = parseInt(start);
+              for ( var i = 0; i < size; i = i + rowsize  ) {
+                var highlightrow = '';
+
+                if ( item == i + 1) highlightrow = 'active';
+
+                if ( pageCount == initialPageCount + 5 ) {
+
+                  %> <li class='<%= highlightrow %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= i+1 %>&count=<%= rowsize %>">»</a></li> <%
+
+                  break;
+
+                }
+
+                if ( (size - i ) < rowsize ) {
+                  // Last
+                  
+                  %> <li class='<%= highlightrow %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= i+1 %>&count=<%= rowsize %>">Last</a></li> <%
+                } else {
+                  %> <li class='<%= highlightrow %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= i+1 %>&count=<%= rowsize %>"><%= pageCount %></a></li> <%
+                }
+                pageCount = pageCount + 1;
+
+              }
+            %> 
+
+          </ul>
+        </div>
+      </div>
+
+          
+          
+          <div>
+        </div>
+
+      </div>
+
+<% include footer.html %>
+
+
+<script type="text/javascript">
+
+var counts = [];
+
+$(".results").highlight("<%= keyword %>");
+
+$(document).ready(function() {
+    var protocol = 'https://';
+    var hostname = 'kbase.us/services/search-api';
+    var subdeployment = '/search/';
+
+    var genurl =  protocol + hostname + subdeployment;
+
+    var keyword = '<%= keyword %>';
+
+    var url = '',i = 0;
+
+    var suburls = [ 
+                    'literaturecount'
+                   ,'genecount'
+                   ,'bacteriacount'
+                   ,'virusescount'
+                   ,'archaeacount'
+                   ,'eukaryotacount' 
+                   ,'prophagecount' 
+                   ,'operatorcount' 
+                   ,'locuscount' 
+                   ,'pseudogenecount' 
+                   ,'promotercount' 
+                   ,'proteinbindingsitecount' 
+                   ,'bindingsitecount' 
+                   ,'riboswitch' 
+                   ,'rnacount' 
+                   ,'transposoncount' 
+                   ,'mrnacount' 
+                   ,'srnacount' 
+               ];
+
+        
+
+    for (var i = 0; i < suburls.length; i++) {
+      url = genurl + suburls[i] + '/' + keyword;
+
+      //$.getJSON(url + "?callback=?", null, function(data) {
+      $.getJSON(url, function(data) {
+
+
+          var ele = '#' + data.search;
+
+          $(ele).append('('+data.found + ')');
+
+          counts.push(data.found);
+
+          var cnt = 0;
+          for (var j = 0; j < counts.length; j++ ) {
+            cnt = cnt + counts[j];
+          }
+
+          $('#totalcount').html(cnt);
+
+      });
+
+    }
+
+
+});
+</script>
+
+

@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<!-- saved from url=(0061)http://140.221.92.12/genome_info/showGenome.html?id=kb|g.1863 -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
+    <title>KBase Genome Information Browser</title>
+    <link rel="icon" href="http://140.221.92.12/assets/img/KBase_favicon.ico" type="image/x-icon">
+    <link href="http://140.221.92.12/assets/css/kbase-bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 50px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="http://140.221.92.12/assets/css/bootstrap-responsive.min.css" rel="stylesheet">
+    <link href="http://140.221.92.12/assets/css/jquery.dataTables.css" rel="stylesheet">
+    <link href="http://140.221.92.12/assets/css/kbase-contig-widget.css" rel="stylesheet">
+  </head>
+
+  <body onload="getGenome()">
+    <div class="navbar">
+      <div class="navbar-inner navbar-fixed-top">
+        <a href="http://www.kbase.us/"><img class="logo" src="./KBase Genome Information Browser_files/labs_icon.png" width="46"></a>
+        <a class="brand" href="http://140.221.92.12/genome_info/index.html">Genome Information Browser</a>
+        <ul class="nav">
+          <li class="active"><a href="http://140.221.92.12/genome_info/genome.html">Genomes</a></li>
+          <li><a href="http://140.221.92.12/genome_info/aboutGenome.html">About</a></li>
+          <li><a href="http://140.221.92.12/genome_info/contactGenome.html">Contact</a></li>
+        </ul>
+      </div>
+    </div>
+    <!-- End of page header -->
+
+
+    <div class="container">
+      <!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="container">
+        <div class="well">
+            <span id="genomename" style="font-size: 200%; font-weight: bold; float:left;">Acetivibrio cellulolyticus CD2</span>
+            <span style="float:right"><a href="http://140.221.92.12/genome_info/genome.html">Return to Index</a></span>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="span6" id="dataFlow">
+          <div class="accordion-group">
+            <div class="accordion-heading">
+              <h2><a class="accordion-toggle" href="http://140.221.92.12/genome_info/showGenome.html?id=kb|g.1863#genomeInfo" data-parent="#dataFlow" data-toggle="collapse">Genome Information</a></h2>
+            </div>
+            <div id="genomeInfo" class="accordion-body collapse in">
+              <table class="table table-striped table-bordered" id="genomeInfoTable">
+                <tbody><tr>
+                  <td>
+                    <strong>ID</strong>
+                  </td>
+                  <td id="gID">kb|g.1863</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Scientific Name</strong>
+                  </td>
+                  <td id="gName">Acetivibrio cellulolyticus CD2</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Domain</strong>
+                  </td>
+                  <td id="gDomain">Bacteria</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Complete?</strong>
+                  </td>
+                  <td id="gComp">Yes</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Genome Size</strong>
+                  </td>
+                  <td id="gDNA">6,143,658 bp</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>GC Content</strong>
+                  </td>
+                  <td id="gGC">35.54%</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Number of Contigs</strong>
+                  </td>
+                  <td id="gContigs">192</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Number of Features</strong>
+                  </td>
+                  <td id="gFeats">5379</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Number of Protein Encoding Genes</strong>
+                  </td>
+                  <td id="gPegs">5300</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Number of RNA Features</strong>
+                  </td>
+                  <td id="gRNAs">79</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Source</strong>
+                  </td>
+                  <td id="gSource">SEED: 509191.4</td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Taxonomy</strong>
+                  </td>
+                  <td id="gTax">Bacteria<br>&nbsp;&nbsp;Firmicutes<br>&nbsp;&nbsp;&nbsp;&nbsp;Clostridia<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Clostridiales<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Ruminococcaceae<br>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;Acetivibrio</td>
+                </tr>
+              </tbody></table>
+            </div>
+          </div>
+          <div class="accordion-group">
+            <div class="accordion-heading">
+              <h2><a class="accordion-toggle" href="http://140.221.92.12/genome_info/showGenome.html?id=kb|g.1863#genomeData" data-parent="#dataFlow" data-toggle="collapse">Genome-Related Data</a></h2>
+            </div>
+            <div id="genomeData" class="accordion-body collapse">
+              <table class="table table-striped table-bordered">
+                <tbody><tr>
+                  <td>
+                    <strong>RNA Expression Data</strong>
+                  </td>
+                  <td>
+                    <a onclick="tempLink();">Search in KBase</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Fitness Data</strong>
+                  </td>
+                  <td>
+                    <a onclick="tempLink();">Search in KBase</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Phenotype Data</strong>
+                  </td>
+                  <td>
+                    <a onclick="tempLink();">Search in KBase</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Protein-Protein Interaction Data</strong>
+                  </td>
+                  <td>
+                    <a onclick="tempLink();">Search in KBase</a>
+                  </td>
+                </tr>
+              </tbody></table>
+            </div>
+          </div>
+          <div class="accordion-group">
+            <div class="accordion-heading">
+              <h2><a class="accordion-toggle" href="http://140.221.92.12/genome_info/showGenome.html?id=kb|g.1863#genomeModels" data-parent="#dataFlow" data-toggle="collapse">Genome Models</a></h2>
+            </div>
+            <div id="genomeModels" class="accordion-body collapse">
+              <table class="table table-striped table-bordered">
+                <tbody><tr>
+                  <td>
+                    <strong>Regulatory Models</strong>
+                  </td>
+                  <td>
+                    <a onclick="tempLink();">Search in KBase</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Metabolic Models</strong>
+                  </td>
+                  <td>
+                    <a onclick="tempLink();">Search in KBase</a>
+                  </td>
+                </tr>
+                <tr>
+                  <td>
+                    <strong>Flux Balance Models</strong>
+                  </td>
+                  <td>
+                    <a onclick="tempLink();">Search in KBase</a>
+                  </td>
+                </tr>
+              </tbody></table>
+            </div>
+          </div>
+        </div>
+
+        <div class="span6">
+          <div class="well" id="gBrowser">
+            <div id="contigContainer" align="center">
+              <div id="contigMenuContainer"><div class="span5">Contig: <select id="contigMenu" align="center" onchange="showContig()"><option value="kb|g.1863.c.0">kb|g.1863.c.0 - 238560 bp</option><option value="kb|g.1863.c.1">kb|g.1863.c.1 - 213666 bp</option><option value="kb|g.1863.c.2">kb|g.1863.c.2 - 205932 bp</option><option value="kb|g.1863.c.3">kb|g.1863.c.3 - 188808 bp</option><option value="kb|g.1863.c.4">kb|g.1863.c.4 - 156940 bp</option><option value="kb|g.1863.c.5">kb|g.1863.c.5 - 153730 bp</option><option value="kb|g.1863.c.6">kb|g.1863.c.6 - 151734 bp</option><option value="kb|g.1863.c.7">kb|g.1863.c.7 - 146500 bp</option><option value="kb|g.1863.c.8">kb|g.1863.c.8 - 141956 bp</option><option value="kb|g.1863.c.9">kb|g.1863.c.9 - 137589 bp</option><option value="kb|g.1863.c.10">kb|g.1863.c.10 - 137215 bp</option><option value="kb|g.1863.c.11">kb|g.1863.c.11 - 132321 bp</option><option value="kb|g.1863.c.12">kb|g.1863.c.12 - 127486 bp</option><option value="kb|g.1863.c.13">kb|g.1863.c.13 - 122369 bp</option><option value="kb|g.1863.c.14">kb|g.1863.c.14 - 116726 bp</option><option value="kb|g.1863.c.15">kb|g.1863.c.15 - 115708 bp</option><option value="kb|g.1863.c.16">kb|g.1863.c.16 - 109185 bp</option><option value="kb|g.1863.c.17">kb|g.1863.c.17 - 103997 bp</option><option value="kb|g.1863.c.18">kb|g.1863.c.18 - 103578 bp</option><option value="kb|g.1863.c.19">kb|g.1863.c.19 - 99475 bp</option><option value="kb|g.1863.c.20">kb|g.1863.c.20 - 98942 bp</option><option value="kb|g.1863.c.21">kb|g.1863.c.21 - 98749 bp</option><option value="kb|g.1863.c.22">kb|g.1863.c.22 - 96836 bp</option><option value="kb|g.1863.c.23">kb|g.1863.c.23 - 93844 bp</option><option value="kb|g.1863.c.24">kb|g.1863.c.24 - 90900 bp</option><option value="kb|g.1863.c.25">kb|g.1863.c.25 - 87106 bp</option><option value="kb|g.1863.c.26">kb|g.1863.c.26 - 86722 bp</option><option value="kb|g.1863.c.27">kb|g.1863.c.27 - 85172 bp</option><option value="kb|g.1863.c.28">kb|g.1863.c.28 - 72077 bp</option><option value="kb|g.1863.c.29">kb|g.1863.c.29 - 71289 bp</option><option value="kb|g.1863.c.30">kb|g.1863.c.30 - 68989 bp</option><option value="kb|g.1863.c.31">kb|g.1863.c.31 - 68461 bp</option><option value="kb|g.1863.c.32">kb|g.1863.c.32 - 68314 bp</option><option value="kb|g.1863.c.33">kb|g.1863.c.33 - 67498 bp</option><option value="kb|g.1863.c.34">kb|g.1863.c.34 - 66801 bp</option><option value="kb|g.1863.c.35">kb|g.1863.c.35 - 64275 bp</option><option value="kb|g.1863.c.36">kb|g.1863.c.36 - 63169 bp</option><option value="kb|g.1863.c.37">kb|g.1863.c.37 - 62429 bp</option><option value="kb|g.1863.c.38">kb|g.1863.c.38 - 61653 bp</option><option value="kb|g.1863.c.39">kb|g.1863.c.39 - 60973 bp</option><option value="kb|g.1863.c.40">kb|g.1863.c.40 - 59764 bp</option><option value="kb|g.1863.c.41">kb|g.1863.c.41 - 57677 bp</option><option value="kb|g.1863.c.42">kb|g.1863.c.42 - 57428 bp</option><option value="kb|g.1863.c.43">kb|g.1863.c.43 - 56511 bp</option><option value="kb|g.1863.c.44">kb|g.1863.c.44 - 54701 bp</option><option value="kb|g.1863.c.45">kb|g.1863.c.45 - 54568 bp</option><option value="kb|g.1863.c.46">kb|g.1863.c.46 - 54417 bp</option><option value="kb|g.1863.c.47">kb|g.1863.c.47 - 52659 bp</option><option value="kb|g.1863.c.48">kb|g.1863.c.48 - 51066 bp</option><option value="kb|g.1863.c.49">kb|g.1863.c.49 - 48070 bp</option><option value="kb|g.1863.c.50">kb|g.1863.c.50 - 46724 bp</option><option value="kb|g.1863.c.51">kb|g.1863.c.51 - 43105 bp</option><option value="kb|g.1863.c.52">kb|g.1863.c.52 - 37882 bp</option><option value="kb|g.1863.c.53">kb|g.1863.c.53 - 34591 bp</option><option value="kb|g.1863.c.54">kb|g.1863.c.54 - 33878 bp</option><option value="kb|g.1863.c.55">kb|g.1863.c.55 - 33202 bp</option><option value="kb|g.1863.c.56">kb|g.1863.c.56 - 32941 bp</option><option value="kb|g.1863.c.57">kb|g.1863.c.57 - 32835 bp</option><option value="kb|g.1863.c.58">kb|g.1863.c.58 - 31682 bp</option><option value="kb|g.1863.c.59">kb|g.1863.c.59 - 30364 bp</option><option value="kb|g.1863.c.60">kb|g.1863.c.60 - 29705 bp</option><option value="kb|g.1863.c.61">kb|g.1863.c.61 - 28937 bp</option><option value="kb|g.1863.c.62">kb|g.1863.c.62 - 26352 bp</option><option value="kb|g.1863.c.63">kb|g.1863.c.63 - 23842 bp</option><option value="kb|g.1863.c.64">kb|g.1863.c.64 - 21473 bp</option><option value="kb|g.1863.c.65">kb|g.1863.c.65 - 20685 bp</option><option value="kb|g.1863.c.66">kb|g.1863.c.66 - 20579 bp</option><option value="kb|g.1863.c.67">kb|g.1863.c.67 - 20423 bp</option><option value="kb|g.1863.c.68">kb|g.1863.c.68 - 20149 bp</option><option value="kb|g.1863.c.69">kb|g.1863.c.69 - 20011 bp</option><option value="kb|g.1863.c.70">kb|g.1863.c.70 - 19722 bp</option><option value="kb|g.1863.c.71">kb|g.1863.c.71 - 19592 bp</option><option value="kb|g.1863.c.72">kb|g.1863.c.72 - 18761 bp</option><option value="kb|g.1863.c.73">kb|g.1863.c.73 - 18096 bp</option><option value="kb|g.1863.c.74">kb|g.1863.c.74 - 18093 bp</option><option value="kb|g.1863.c.75">kb|g.1863.c.75 - 18004 bp</option><option value="kb|g.1863.c.76">kb|g.1863.c.76 - 17511 bp</option><option value="kb|g.1863.c.77">kb|g.1863.c.77 - 17332 bp</option><option value="kb|g.1863.c.78">kb|g.1863.c.78 - 16739 bp</option><option value="kb|g.1863.c.79">kb|g.1863.c.79 - 15563 bp</option><option value="kb|g.1863.c.80">kb|g.1863.c.80 - 14960 bp</option><option value="kb|g.1863.c.81">kb|g.1863.c.81 - 14061 bp</option><option value="kb|g.1863.c.82">kb|g.1863.c.82 - 13245 bp</option><option value="kb|g.1863.c.83">kb|g.1863.c.83 - 13130 bp</option><option value="kb|g.1863.c.84">kb|g.1863.c.84 - 12643 bp</option><option value="kb|g.1863.c.85">kb|g.1863.c.85 - 12403 bp</option><option value="kb|g.1863.c.86">kb|g.1863.c.86 - 12149 bp</option><option value="kb|g.1863.c.87">kb|g.1863.c.87 - 11227 bp</option><option value="kb|g.1863.c.88">kb|g.1863.c.88 - 10803 bp</option><option value="kb|g.1863.c.89">kb|g.1863.c.89 - 9043 bp</option><option value="kb|g.1863.c.90">kb|g.1863.c.90 - 8535 bp</option><option value="kb|g.1863.c.91">kb|g.1863.c.91 - 8168 bp</option><option value="kb|g.1863.c.92">kb|g.1863.c.92 - 8106 bp</option><option value="kb|g.1863.c.93">kb|g.1863.c.93 - 7323 bp</option><option value="kb|g.1863.c.94">kb|g.1863.c.94 - 6983 bp</option><option value="kb|g.1863.c.95">kb|g.1863.c.95 - 6066 bp</option><option value="kb|g.1863.c.96">kb|g.1863.c.96 - 5896 bp</option><option value="kb|g.1863.c.97">kb|g.1863.c.97 - 5868 bp</option><option value="kb|g.1863.c.98">kb|g.1863.c.98 - 5655 bp</option><option value="kb|g.1863.c.99">kb|g.1863.c.99 - 5445 bp</option><option value="kb|g.1863.c.100">kb|g.1863.c.100 - 5316 bp</option><option value="kb|g.1863.c.101">kb|g.1863.c.101 - 5245 bp</option><option value="kb|g.1863.c.102">kb|g.1863.c.102 - 4964 bp</option><option value="kb|g.1863.c.103">kb|g.1863.c.103 - 4749 bp</option><option value="kb|g.1863.c.104">kb|g.1863.c.104 - 4196 bp</option><option value="kb|g.1863.c.105">kb|g.1863.c.105 - 4161 bp</option><option value="kb|g.1863.c.106">kb|g.1863.c.106 - 4161 bp</option><option value="kb|g.1863.c.107">kb|g.1863.c.107 - 4069 bp</option><option value="kb|g.1863.c.108">kb|g.1863.c.108 - 3944 bp</option><option value="kb|g.1863.c.109">kb|g.1863.c.109 - 3838 bp</option><option value="kb|g.1863.c.110">kb|g.1863.c.110 - 3785 bp</option><option value="kb|g.1863.c.111">kb|g.1863.c.111 - 3618 bp</option><option value="kb|g.1863.c.112">kb|g.1863.c.112 - 3561 bp</option><option value="kb|g.1863.c.113">kb|g.1863.c.113 - 3558 bp</option><option value="kb|g.1863.c.114">kb|g.1863.c.114 - 3554 bp</option><option value="kb|g.1863.c.115">kb|g.1863.c.115 - 3494 bp</option><option value="kb|g.1863.c.116">kb|g.1863.c.116 - 3441 bp</option><option value="kb|g.1863.c.117">kb|g.1863.c.117 - 3330 bp</option><option value="kb|g.1863.c.118">kb|g.1863.c.118 - 3318 bp</option><option value="kb|g.1863.c.119">kb|g.1863.c.119 - 3244 bp</option><option value="kb|g.1863.c.120">kb|g.1863.c.120 - 3221 bp</option><option value="kb|g.1863.c.121">kb|g.1863.c.121 - 3220 bp</option><option value="kb|g.1863.c.122">kb|g.1863.c.122 - 3217 bp</option><option value="kb|g.1863.c.123">kb|g.1863.c.123 - 3216 bp</option><option value="kb|g.1863.c.124">kb|g.1863.c.124 - 3165 bp</option><option value="kb|g.1863.c.125">kb|g.1863.c.125 - 3148 bp</option><option value="kb|g.1863.c.126">kb|g.1863.c.126 - 3115 bp</option><option value="kb|g.1863.c.127">kb|g.1863.c.127 - 3064 bp</option><option value="kb|g.1863.c.128">kb|g.1863.c.128 - 3000 bp</option><option value="kb|g.1863.c.129">kb|g.1863.c.129 - 2991 bp</option><option value="kb|g.1863.c.130">kb|g.1863.c.130 - 2971 bp</option><option value="kb|g.1863.c.131">kb|g.1863.c.131 - 2854 bp</option><option value="kb|g.1863.c.132">kb|g.1863.c.132 - 2769 bp</option><option value="kb|g.1863.c.133">kb|g.1863.c.133 - 2758 bp</option><option value="kb|g.1863.c.134">kb|g.1863.c.134 - 2738 bp</option><option value="kb|g.1863.c.135">kb|g.1863.c.135 - 2680 bp</option><option value="kb|g.1863.c.136">kb|g.1863.c.136 - 2606 bp</option><option value="kb|g.1863.c.137">kb|g.1863.c.137 - 2548 bp</option><option value="kb|g.1863.c.138">kb|g.1863.c.138 - 2542 bp</option><option value="kb|g.1863.c.139">kb|g.1863.c.139 - 2346 bp</option><option value="kb|g.1863.c.140">kb|g.1863.c.140 - 2263 bp</option><option value="kb|g.1863.c.141">kb|g.1863.c.141 - 2178 bp</option><option value="kb|g.1863.c.142">kb|g.1863.c.142 - 2062 bp</option><option value="kb|g.1863.c.143">kb|g.1863.c.143 - 2060 bp</option><option value="kb|g.1863.c.144">kb|g.1863.c.144 - 2008 bp</option><option value="kb|g.1863.c.145">kb|g.1863.c.145 - 1970 bp</option><option value="kb|g.1863.c.146">kb|g.1863.c.146 - 1938 bp</option><option value="kb|g.1863.c.147">kb|g.1863.c.147 - 1864 bp</option><option value="kb|g.1863.c.148">kb|g.1863.c.148 - 1782 bp</option><option value="kb|g.1863.c.149">kb|g.1863.c.149 - 1736 bp</option><option value="kb|g.1863.c.150">kb|g.1863.c.150 - 1691 bp</option><option value="kb|g.1863.c.151">kb|g.1863.c.151 - 1584 bp</option><option value="kb|g.1863.c.152">kb|g.1863.c.152 - 1502 bp</option><option value="kb|g.1863.c.153">kb|g.1863.c.153 - 1471 bp</option><option value="kb|g.1863.c.154">kb|g.1863.c.154 - 1416 bp</option><option value="kb|g.1863.c.155">kb|g.1863.c.155 - 1388 bp</option><option value="kb|g.1863.c.156">kb|g.1863.c.156 - 1331 bp</option><option value="kb|g.1863.c.157">kb|g.1863.c.157 - 1318 bp</option><option value="kb|g.1863.c.158">kb|g.1863.c.158 - 1290 bp</option><option value="kb|g.1863.c.159">kb|g.1863.c.159 - 1285 bp</option><option value="kb|g.1863.c.160">kb|g.1863.c.160 - 1274 bp</option><option value="kb|g.1863.c.161">kb|g.1863.c.161 - 1270 bp</option><option value="kb|g.1863.c.162">kb|g.1863.c.162 - 1201 bp</option><option value="kb|g.1863.c.163">kb|g.1863.c.163 - 1137 bp</option><option value="kb|g.1863.c.164">kb|g.1863.c.164 - 1085 bp</option><option value="kb|g.1863.c.165">kb|g.1863.c.165 - 1083 bp</option><option value="kb|g.1863.c.166">kb|g.1863.c.166 - 1081 bp</option><option value="kb|g.1863.c.167">kb|g.1863.c.167 - 989 bp</option><option value="kb|g.1863.c.168">kb|g.1863.c.168 - 983 bp</option><option value="kb|g.1863.c.169">kb|g.1863.c.169 - 945 bp</option><option value="kb|g.1863.c.170">kb|g.1863.c.170 - 917 bp</option><option value="kb|g.1863.c.171">kb|g.1863.c.171 - 850 bp</option><option value="kb|g.1863.c.173">kb|g.1863.c.173 - 842 bp</option><option value="kb|g.1863.c.172">kb|g.1863.c.172 - 842 bp</option><option value="kb|g.1863.c.174">kb|g.1863.c.174 - 820 bp</option><option value="kb|g.1863.c.175">kb|g.1863.c.175 - 809 bp</option><option value="kb|g.1863.c.176">kb|g.1863.c.176 - 806 bp</option><option value="kb|g.1863.c.177">kb|g.1863.c.177 - 793 bp</option><option value="kb|g.1863.c.178">kb|g.1863.c.178 - 792 bp</option><option value="kb|g.1863.c.179">kb|g.1863.c.179 - 778 bp</option><option value="kb|g.1863.c.180">kb|g.1863.c.180 - 773 bp</option><option value="kb|g.1863.c.181">kb|g.1863.c.181 - 762 bp</option><option value="kb|g.1863.c.182">kb|g.1863.c.182 - 744 bp</option><option value="kb|g.1863.c.183">kb|g.1863.c.183 - 666 bp</option><option value="kb|g.1863.c.184">kb|g.1863.c.184 - 636 bp</option><option value="kb|g.1863.c.185">kb|g.1863.c.185 - 621 bp</option><option value="kb|g.1863.c.186">kb|g.1863.c.186 - 577 bp</option><option value="kb|g.1863.c.187">kb|g.1863.c.187 - 571 bp</option><option value="kb|g.1863.c.188">kb|g.1863.c.188 - 554 bp</option><option value="kb|g.1863.c.189">kb|g.1863.c.189 - 545 bp</option><option value="kb|g.1863.c.190">kb|g.1863.c.190 - 526 bp</option><option value="kb|g.1863.c.191">kb|g.1863.c.191 - 517 bp</option></select></div></div>
+
+              <div id="contigTrackContainer">
+              <svg width="500" height="100" id="contigWidget"><g><path class="feature" id="kb|g.1863.peg.1650" stroke="black" fill="#F00" d="M9.2 25 L11.5 25 L21.5 32.5 L11.5 40 L9.2 40 Z "></path><path class="feature" id="kb|g.1863.peg.2545" stroke="black" fill="#F00" d="M43.6 25 L82.35 25 L92.35 32.5 L82.35 40 L43.6 40 Z "></path><path class="feature highlight" id="kb|g.1863.peg.3874" stroke="black" fill="#F00" d="M108.3 25 L184.39999999999998 25 L194.39999999999998 32.5 L184.39999999999998 40 L108.3 40 Z " style="fill: #ffff00;"></path><path class="feature" id="kb|g.1863.peg.4820" stroke="black" fill="#F00" d="M590.35 25 L408.95000000000005 25 L398.95000000000005 32.5 L408.95000000000005 40 L590.35 40 Z "></path><path class="feature" id="kb|g.1863.peg.4157" stroke="black" fill="#F00" d="M693.95 45 L558.15 45 L548.15 52.5 L558.15 60 L693.95 60 Z "></path></g><g class="axis" transform="translate(0, 20)"><g style="opacity: 1;" transform="translate(50,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">1,000</text></g><g style="opacity: 1;" transform="translate(100,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">2,000</text></g><g style="opacity: 1;" transform="translate(150,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">3,000</text></g><g style="opacity: 1;" transform="translate(200,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">4,000</text></g><g style="opacity: 1;" transform="translate(250,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">5,000</text></g><g style="opacity: 1;" transform="translate(300,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">6,000</text></g><g style="opacity: 1;" transform="translate(350.00000000000006,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">7,000</text></g><g style="opacity: 1;" transform="translate(400,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">8,000</text></g><g style="opacity: 1;" transform="translate(450,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">9,000</text></g><g style="opacity: 1;" transform="translate(500,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">10,000</text></g><g style="opacity: 1;" transform="translate(0,0)"><line class="tick" y2="-6" x2="0"></line><text y="-9" x="0" dy="0em" text-anchor="middle">0</text></g><path class="domain" d="M0,-6V0H500V-6"></path></g></svg></div>
+
+              <div id="contigButtonContainer" align="center"><button onclick="contigWidget.moveLeftEnd();">&lt;&lt;</button>
+<button onclick="contigWidget.moveLeftStep();">&lt;-</button>
+<button onclick="contigWidget.zoomIn();">+</button>
+<button onclick="contigWidget.zoomOut();">-</button>
+<button onclick="contigWidget.moveRightStep();">-&gt;</button>
+<button onclick="contigWidget.moveRightEnd();">&gt;&gt;</button>
+</div>
+              <br>
+
+              <div id="featureInfoContainer">
+                <table class="table">
+                  <tbody><tr>
+                    <td>
+                      <strong>
+                        Feature ID
+                      </strong>
+                    </td>
+                    <td id="featureID"><a href="http://140.221.92.12/feature_info/feature.html?id=kb|g.1863.peg.3874">kb|g.1863.peg.3874</a></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        Function
+                      </strong>
+                    </td>
+                    <td id="featureFunction"></td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <strong>
+                        Length
+                      </strong>
+                    </td>
+                    <td id="featureLength">1722 bp</td>
+                  </tr>
+                </tbody></table>
+              </div>
+            </div>
+            <div id="gcContainer" style="display:none;">
+              <div id="gcMenuContainer"><div class="span5">Contig: <select id="gcMenu" align="center" onchange="showGCContent()"><option value="kb|g.1863.c.0">kb|g.1863.c.0 - 238560 bp</option><option value="kb|g.1863.c.1">kb|g.1863.c.1 - 213666 bp</option><option value="kb|g.1863.c.2">kb|g.1863.c.2 - 205932 bp</option><option value="kb|g.1863.c.3">kb|g.1863.c.3 - 188808 bp</option><option value="kb|g.1863.c.4">kb|g.1863.c.4 - 156940 bp</option><option value="kb|g.1863.c.5">kb|g.1863.c.5 - 153730 bp</option><option value="kb|g.1863.c.6">kb|g.1863.c.6 - 151734 bp</option><option value="kb|g.1863.c.7">kb|g.1863.c.7 - 146500 bp</option><option value="kb|g.1863.c.8">kb|g.1863.c.8 - 141956 bp</option><option value="kb|g.1863.c.9">kb|g.1863.c.9 - 137589 bp</option><option value="kb|g.1863.c.10">kb|g.1863.c.10 - 137215 bp</option><option value="kb|g.1863.c.11">kb|g.1863.c.11 - 132321 bp</option><option value="kb|g.1863.c.12">kb|g.1863.c.12 - 127486 bp</option><option value="kb|g.1863.c.13">kb|g.1863.c.13 - 122369 bp</option><option value="kb|g.1863.c.14">kb|g.1863.c.14 - 116726 bp</option><option value="kb|g.1863.c.15">kb|g.1863.c.15 - 115708 bp</option><option value="kb|g.1863.c.16">kb|g.1863.c.16 - 109185 bp</option><option value="kb|g.1863.c.17">kb|g.1863.c.17 - 103997 bp</option><option value="kb|g.1863.c.18">kb|g.1863.c.18 - 103578 bp</option><option value="kb|g.1863.c.19">kb|g.1863.c.19 - 99475 bp</option><option value="kb|g.1863.c.20">kb|g.1863.c.20 - 98942 bp</option><option value="kb|g.1863.c.21">kb|g.1863.c.21 - 98749 bp</option><option value="kb|g.1863.c.22">kb|g.1863.c.22 - 96836 bp</option><option value="kb|g.1863.c.23">kb|g.1863.c.23 - 93844 bp</option><option value="kb|g.1863.c.24">kb|g.1863.c.24 - 90900 bp</option><option value="kb|g.1863.c.25">kb|g.1863.c.25 - 87106 bp</option><option value="kb|g.1863.c.26">kb|g.1863.c.26 - 86722 bp</option><option value="kb|g.1863.c.27">kb|g.1863.c.27 - 85172 bp</option><option value="kb|g.1863.c.28">kb|g.1863.c.28 - 72077 bp</option><option value="kb|g.1863.c.29">kb|g.1863.c.29 - 71289 bp</option><option value="kb|g.1863.c.30">kb|g.1863.c.30 - 68989 bp</option><option value="kb|g.1863.c.31">kb|g.1863.c.31 - 68461 bp</option><option value="kb|g.1863.c.32">kb|g.1863.c.32 - 68314 bp</option><option value="kb|g.1863.c.33">kb|g.1863.c.33 - 67498 bp</option><option value="kb|g.1863.c.34">kb|g.1863.c.34 - 66801 bp</option><option value="kb|g.1863.c.35">kb|g.1863.c.35 - 64275 bp</option><option value="kb|g.1863.c.36">kb|g.1863.c.36 - 63169 bp</option><option value="kb|g.1863.c.37">kb|g.1863.c.37 - 62429 bp</option><option value="kb|g.1863.c.38">kb|g.1863.c.38 - 61653 bp</option><option value="kb|g.1863.c.39">kb|g.1863.c.39 - 60973 bp</option><option value="kb|g.1863.c.40">kb|g.1863.c.40 - 59764 bp</option><option value="kb|g.1863.c.41">kb|g.1863.c.41 - 57677 bp</option><option value="kb|g.1863.c.42">kb|g.1863.c.42 - 57428 bp</option><option value="kb|g.1863.c.43">kb|g.1863.c.43 - 56511 bp</option><option value="kb|g.1863.c.44">kb|g.1863.c.44 - 54701 bp</option><option value="kb|g.1863.c.45">kb|g.1863.c.45 - 54568 bp</option><option value="kb|g.1863.c.46">kb|g.1863.c.46 - 54417 bp</option><option value="kb|g.1863.c.47">kb|g.1863.c.47 - 52659 bp</option><option value="kb|g.1863.c.48">kb|g.1863.c.48 - 51066 bp</option><option value="kb|g.1863.c.49">kb|g.1863.c.49 - 48070 bp</option><option value="kb|g.1863.c.50">kb|g.1863.c.50 - 46724 bp</option><option value="kb|g.1863.c.51">kb|g.1863.c.51 - 43105 bp</option><option value="kb|g.1863.c.52">kb|g.1863.c.52 - 37882 bp</option><option value="kb|g.1863.c.53">kb|g.1863.c.53 - 34591 bp</option><option value="kb|g.1863.c.54">kb|g.1863.c.54 - 33878 bp</option><option value="kb|g.1863.c.55">kb|g.1863.c.55 - 33202 bp</option><option value="kb|g.1863.c.56">kb|g.1863.c.56 - 32941 bp</option><option value="kb|g.1863.c.57">kb|g.1863.c.57 - 32835 bp</option><option value="kb|g.1863.c.58">kb|g.1863.c.58 - 31682 bp</option><option value="kb|g.1863.c.59">kb|g.1863.c.59 - 30364 bp</option><option value="kb|g.1863.c.60">kb|g.1863.c.60 - 29705 bp</option><option value="kb|g.1863.c.61">kb|g.1863.c.61 - 28937 bp</option><option value="kb|g.1863.c.62">kb|g.1863.c.62 - 26352 bp</option><option value="kb|g.1863.c.63">kb|g.1863.c.63 - 23842 bp</option><option value="kb|g.1863.c.64">kb|g.1863.c.64 - 21473 bp</option><option value="kb|g.1863.c.65">kb|g.1863.c.65 - 20685 bp</option><option value="kb|g.1863.c.66">kb|g.1863.c.66 - 20579 bp</option><option value="kb|g.1863.c.67">kb|g.1863.c.67 - 20423 bp</option><option value="kb|g.1863.c.68">kb|g.1863.c.68 - 20149 bp</option><option value="kb|g.1863.c.69">kb|g.1863.c.69 - 20011 bp</option><option value="kb|g.1863.c.70">kb|g.1863.c.70 - 19722 bp</option><option value="kb|g.1863.c.71">kb|g.1863.c.71 - 19592 bp</option><option value="kb|g.1863.c.72">kb|g.1863.c.72 - 18761 bp</option><option value="kb|g.1863.c.73">kb|g.1863.c.73 - 18096 bp</option><option value="kb|g.1863.c.74">kb|g.1863.c.74 - 18093 bp</option><option value="kb|g.1863.c.75">kb|g.1863.c.75 - 18004 bp</option><option value="kb|g.1863.c.76">kb|g.1863.c.76 - 17511 bp</option><option value="kb|g.1863.c.77">kb|g.1863.c.77 - 17332 bp</option><option value="kb|g.1863.c.78">kb|g.1863.c.78 - 16739 bp</option><option value="kb|g.1863.c.79">kb|g.1863.c.79 - 15563 bp</option><option value="kb|g.1863.c.80">kb|g.1863.c.80 - 14960 bp</option><option value="kb|g.1863.c.81">kb|g.1863.c.81 - 14061 bp</option><option value="kb|g.1863.c.82">kb|g.1863.c.82 - 13245 bp</option><option value="kb|g.1863.c.83">kb|g.1863.c.83 - 13130 bp</option><option value="kb|g.1863.c.84">kb|g.1863.c.84 - 12643 bp</option><option value="kb|g.1863.c.85">kb|g.1863.c.85 - 12403 bp</option><option value="kb|g.1863.c.86">kb|g.1863.c.86 - 12149 bp</option><option value="kb|g.1863.c.87">kb|g.1863.c.87 - 11227 bp</option><option value="kb|g.1863.c.88">kb|g.1863.c.88 - 10803 bp</option><option value="kb|g.1863.c.89">kb|g.1863.c.89 - 9043 bp</option><option value="kb|g.1863.c.90">kb|g.1863.c.90 - 8535 bp</option><option value="kb|g.1863.c.91">kb|g.1863.c.91 - 8168 bp</option><option value="kb|g.1863.c.92">kb|g.1863.c.92 - 8106 bp</option><option value="kb|g.1863.c.93">kb|g.1863.c.93 - 7323 bp</option><option value="kb|g.1863.c.94">kb|g.1863.c.94 - 6983 bp</option><option value="kb|g.1863.c.95">kb|g.1863.c.95 - 6066 bp</option><option value="kb|g.1863.c.96">kb|g.1863.c.96 - 5896 bp</option><option value="kb|g.1863.c.97">kb|g.1863.c.97 - 5868 bp</option><option value="kb|g.1863.c.98">kb|g.1863.c.98 - 5655 bp</option><option value="kb|g.1863.c.99">kb|g.1863.c.99 - 5445 bp</option><option value="kb|g.1863.c.100">kb|g.1863.c.100 - 5316 bp</option><option value="kb|g.1863.c.101">kb|g.1863.c.101 - 5245 bp</option><option value="kb|g.1863.c.102">kb|g.1863.c.102 - 4964 bp</option><option value="kb|g.1863.c.103">kb|g.1863.c.103 - 4749 bp</option><option value="kb|g.1863.c.104">kb|g.1863.c.104 - 4196 bp</option><option value="kb|g.1863.c.105">kb|g.1863.c.105 - 4161 bp</option><option value="kb|g.1863.c.106">kb|g.1863.c.106 - 4161 bp</option><option value="kb|g.1863.c.107">kb|g.1863.c.107 - 4069 bp</option><option value="kb|g.1863.c.108">kb|g.1863.c.108 - 3944 bp</option><option value="kb|g.1863.c.109">kb|g.1863.c.109 - 3838 bp</option><option value="kb|g.1863.c.110">kb|g.1863.c.110 - 3785 bp</option><option value="kb|g.1863.c.111">kb|g.1863.c.111 - 3618 bp</option><option value="kb|g.1863.c.112">kb|g.1863.c.112 - 3561 bp</option><option value="kb|g.1863.c.113">kb|g.1863.c.113 - 3558 bp</option><option value="kb|g.1863.c.114">kb|g.1863.c.114 - 3554 bp</option><option value="kb|g.1863.c.115">kb|g.1863.c.115 - 3494 bp</option><option value="kb|g.1863.c.116">kb|g.1863.c.116 - 3441 bp</option><option value="kb|g.1863.c.117">kb|g.1863.c.117 - 3330 bp</option><option value="kb|g.1863.c.118">kb|g.1863.c.118 - 3318 bp</option><option value="kb|g.1863.c.119">kb|g.1863.c.119 - 3244 bp</option><option value="kb|g.1863.c.120">kb|g.1863.c.120 - 3221 bp</option><option value="kb|g.1863.c.121">kb|g.1863.c.121 - 3220 bp</option><option value="kb|g.1863.c.122">kb|g.1863.c.122 - 3217 bp</option><option value="kb|g.1863.c.123">kb|g.1863.c.123 - 3216 bp</option><option value="kb|g.1863.c.124">kb|g.1863.c.124 - 3165 bp</option><option value="kb|g.1863.c.125">kb|g.1863.c.125 - 3148 bp</option><option value="kb|g.1863.c.126">kb|g.1863.c.126 - 3115 bp</option><option value="kb|g.1863.c.127">kb|g.1863.c.127 - 3064 bp</option><option value="kb|g.1863.c.128">kb|g.1863.c.128 - 3000 bp</option><option value="kb|g.1863.c.129">kb|g.1863.c.129 - 2991 bp</option><option value="kb|g.1863.c.130">kb|g.1863.c.130 - 2971 bp</option><option value="kb|g.1863.c.131">kb|g.1863.c.131 - 2854 bp</option><option value="kb|g.1863.c.132">kb|g.1863.c.132 - 2769 bp</option><option value="kb|g.1863.c.133">kb|g.1863.c.133 - 2758 bp</option><option value="kb|g.1863.c.134">kb|g.1863.c.134 - 2738 bp</option><option value="kb|g.1863.c.135">kb|g.1863.c.135 - 2680 bp</option><option value="kb|g.1863.c.136">kb|g.1863.c.136 - 2606 bp</option><option value="kb|g.1863.c.137">kb|g.1863.c.137 - 2548 bp</option><option value="kb|g.1863.c.138">kb|g.1863.c.138 - 2542 bp</option><option value="kb|g.1863.c.139">kb|g.1863.c.139 - 2346 bp</option><option value="kb|g.1863.c.140">kb|g.1863.c.140 - 2263 bp</option><option value="kb|g.1863.c.141">kb|g.1863.c.141 - 2178 bp</option><option value="kb|g.1863.c.142">kb|g.1863.c.142 - 2062 bp</option><option value="kb|g.1863.c.143">kb|g.1863.c.143 - 2060 bp</option><option value="kb|g.1863.c.144">kb|g.1863.c.144 - 2008 bp</option><option value="kb|g.1863.c.145">kb|g.1863.c.145 - 1970 bp</option><option value="kb|g.1863.c.146">kb|g.1863.c.146 - 1938 bp</option><option value="kb|g.1863.c.147">kb|g.1863.c.147 - 1864 bp</option><option value="kb|g.1863.c.148">kb|g.1863.c.148 - 1782 bp</option><option value="kb|g.1863.c.149">kb|g.1863.c.149 - 1736 bp</option><option value="kb|g.1863.c.150">kb|g.1863.c.150 - 1691 bp</option><option value="kb|g.1863.c.151">kb|g.1863.c.151 - 1584 bp</option><option value="kb|g.1863.c.152">kb|g.1863.c.152 - 1502 bp</option><option value="kb|g.1863.c.153">kb|g.1863.c.153 - 1471 bp</option><option value="kb|g.1863.c.154">kb|g.1863.c.154 - 1416 bp</option><option value="kb|g.1863.c.155">kb|g.1863.c.155 - 1388 bp</option><option value="kb|g.1863.c.156">kb|g.1863.c.156 - 1331 bp</option><option value="kb|g.1863.c.157">kb|g.1863.c.157 - 1318 bp</option><option value="kb|g.1863.c.158">kb|g.1863.c.158 - 1290 bp</option><option value="kb|g.1863.c.159">kb|g.1863.c.159 - 1285 bp</option><option value="kb|g.1863.c.160">kb|g.1863.c.160 - 1274 bp</option><option value="kb|g.1863.c.161">kb|g.1863.c.161 - 1270 bp</option><option value="kb|g.1863.c.162">kb|g.1863.c.162 - 1201 bp</option><option value="kb|g.1863.c.163">kb|g.1863.c.163 - 1137 bp</option><option value="kb|g.1863.c.164">kb|g.1863.c.164 - 1085 bp</option><option value="kb|g.1863.c.165">kb|g.1863.c.165 - 1083 bp</option><option value="kb|g.1863.c.166">kb|g.1863.c.166 - 1081 bp</option><option value="kb|g.1863.c.167">kb|g.1863.c.167 - 989 bp</option><option value="kb|g.1863.c.168">kb|g.1863.c.168 - 983 bp</option><option value="kb|g.1863.c.169">kb|g.1863.c.169 - 945 bp</option><option value="kb|g.1863.c.170">kb|g.1863.c.170 - 917 bp</option><option value="kb|g.1863.c.171">kb|g.1863.c.171 - 850 bp</option><option value="kb|g.1863.c.173">kb|g.1863.c.173 - 842 bp</option><option value="kb|g.1863.c.172">kb|g.1863.c.172 - 842 bp</option><option value="kb|g.1863.c.174">kb|g.1863.c.174 - 820 bp</option><option value="kb|g.1863.c.175">kb|g.1863.c.175 - 809 bp</option><option value="kb|g.1863.c.176">kb|g.1863.c.176 - 806 bp</option><option value="kb|g.1863.c.177">kb|g.1863.c.177 - 793 bp</option><option value="kb|g.1863.c.178">kb|g.1863.c.178 - 792 bp</option><option value="kb|g.1863.c.179">kb|g.1863.c.179 - 778 bp</option><option value="kb|g.1863.c.180">kb|g.1863.c.180 - 773 bp</option><option value="kb|g.1863.c.181">kb|g.1863.c.181 - 762 bp</option><option value="kb|g.1863.c.182">kb|g.1863.c.182 - 744 bp</option><option value="kb|g.1863.c.183">kb|g.1863.c.183 - 666 bp</option><option value="kb|g.1863.c.184">kb|g.1863.c.184 - 636 bp</option><option value="kb|g.1863.c.185">kb|g.1863.c.185 - 621 bp</option><option value="kb|g.1863.c.186">kb|g.1863.c.186 - 577 bp</option><option value="kb|g.1863.c.187">kb|g.1863.c.187 - 571 bp</option><option value="kb|g.1863.c.188">kb|g.1863.c.188 - 554 bp</option><option value="kb|g.1863.c.189">kb|g.1863.c.189 - 545 bp</option><option value="kb|g.1863.c.190">kb|g.1863.c.190 - 526 bp</option><option value="kb|g.1863.c.191">kb|g.1863.c.191 - 517 bp</option></select></div></div>
+
+              <svg id="gcSVG" width="450" height="500">
+                <g id="gcViewport"></g>
+              </svg>
+
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Le javascript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="./KBase Genome Information Browser_files/jquery.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-transition.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-alert.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-modal.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-dropdown.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-scrollspy.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-tab.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-tooltip.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-popover.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-button.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-collapse.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-carousel.js"></script>
+    <script src="./KBase Genome Information Browser_files/bootstrap-typeahead.js"></script>
+    <script src="./KBase Genome Information Browser_files/d3.v2.min.js"></script>
+    <script src="./KBase Genome Information Browser_files/kbase-cdmi.js"></script>
+    <script src="./KBase Genome Information Browser_files/kbase-protein-info.js"></script>
+    <script src="./KBase Genome Information Browser_files/genome-overview.js"></script>
+    <script src="./KBase Genome Information Browser_files/kbase-contig-widget.js"></script><div style="position: absolute; z-index: 10; visibility: hidden; opacity: 0.8; background-color: rgb(34, 34, 34); color: rgb(255, 255, 255); padding: 0.5em; top: 258px; left: 1174px;">kb|g.1863.peg.3874: </div>
+    <script>
+      var tempLink = function() {
+        window.alert("Sorry, searching is not yet available.\nCheck back soon!");
+      }
+    </script>
+  
+
+</body></html>

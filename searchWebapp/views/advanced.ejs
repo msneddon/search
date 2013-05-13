@@ -1,0 +1,162 @@
+<% include header.html %>
+
+      <div class="jumbotron">
+        <h1>KBase Search<small><img src='/services/search/libs/imgs/beta.gif'/></small></h1>
+        <h6 style='color:#999999;'>Advanced</h6>
+        <dir class='row' style='padding-top:20px;'>
+
+
+	<ul id="myTab" class="nav nav-tabs" style='margin-top:20px;margin-bottom:30px;'>
+              <li class="active"><a href="#facetSearch" data-toggle="tab">Topic Search</a></li>
+              <li><a href="#idSearch" data-toggle="tab">ID Search</a></li>
+              <!--li><a href="#workspaceSearch" data-toggle="tab">Workspace Search</a></li-->
+        </ul>
+
+ 	<div id="myTabContent" class="tab-content">
+              <div class="tab-pane fade in active" id="facetSearch" style='padding-top:20px;'>
+		  <div class="input-append">
+		    <form class="form-wrapper" action='/services/search/processadvancedreturned' id='searchForm' method='post' style='margin-bottom:400px;'>
+		      <select id='searchType' name='searchType'>
+			  <option value='literature'>Literature</option>
+			  <option value='bacteria'>Bacteria</option>
+			  <option value='viruses'>Viruses</option>
+			  <option value='eukaryota'>Eukaryota</option>
+			  <option value='archaea'>Archaea</option>
+			  <option value='gene'>Genes</option>
+			  <option value='locus'>Locus</option>
+			  <option value='prophage'>Prophage</option>
+			  <option value='pseudo'>Pseudogene</option>
+			  <option value='promoters'>Promoter</option>
+			  <option value='operators'>Operator</option>
+			  <option value='bindingsite'>Binding Site</option>
+			  <option value='riboswitch'>Riboswitch</option>
+			  <option value='rna'>RNA</option>
+			  <option value='transposons'>Transposon</option>
+			  <option value='mrna'>mRNA</option>
+			  <option value='srna'>Small RNA</option>
+		      </select><br/><br/>
+		      <input type='text' id='typead' class='typead' style='width:500px;' data-provide='typeahead'/>
+		      <button class="btn" type="button" id='search' >Search</button>
+          <br/><br/>
+
+          <div class="alert alert-error" id='alert' style='display:none;width:50%;text-align:center;margin-left:210px;'>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <h4>Keyword Missing. Please provide a search keyword</h4>
+          </div>
+		    </form>
+		  </div>
+              </div> <!-- End of tab -->
+
+              <div class="tab-pane fade" id="idSearch" style='padding-top:30px;' >
+		    <form class="form-wrapper" name='idsearch' action='/services/search/details' id='idsearchForm' method='get' style='margin-bottom:400px;'>
+		    <div class="input-prepend input-append">
+		      <div class="btn-group">
+			<button class="btn dropdown-toggle" data-toggle="dropdown">Select ID <span class="caret"></span></button>
+			<ul class="dropdown-menu" style='text-align:left;'>
+			  <li><a href="#">KBase ID</a></li>
+			  <li  class="disabled"><a href="#">KBase MD5</a></li>
+			  <li class="divider"></li>
+			  <li  class="disabled"><a href="#">PUBMED ID</a></li>
+			</ul>
+		      </div><!-- /btn-group -->
+		      <input type='text'   placeholder='kb|g.0.peg.1089' id='idsearchInput' style='width:500px;' value='kb|g.0.peg.1089' />
+		      <button class="btn" type="button" id='idsearch' >Search</button>
+		      </div>
+		      <span>E.g.: kb|g.0.peg.1089</span>
+          <br/><br/>
+
+          <div class="alert alert-error" id='alert2' style='display:none;width:50%;text-align:center;margin-left:210px;'>
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+            <h4>ID Missing. Please provide a search ID</h4>
+          </div>
+		    </form>
+              </div> <!-- End of tab -->
+
+              <div class="tab-pane fade" id="workspaceSearch">
+              	<div class="tab-pane fade" id="idSearch" style='padding-top:30px;' >
+			<span style='width:100%;text-align:center;'>Still Cooking .. </span>
+		</div>
+              </div> <!-- End of tab -->
+        </div>
+
+        </div>
+      </div>
+
+
+<% include footer.html %>
+
+<script type="text/javascript" src="http://twitter.github.com/bootstrap/assets/js/bootstrap-typeahead.js"></script>
+
+<script type="text/javascript">
+
+    $('#myTab a').click(function (e) {
+	e.preventDefault();
+	$(this).tab('show');
+    }); 
+
+    $('#idsearch').click(function() {
+	$('#idsearchForm').get(0).setAttribute('action', '/services/search/details/' + $('#idsearchInput').val());
+	$('#idsearchForm').submit();
+    });
+    var type = 'Literature';
+    var query = '';
+
+    $('#searchType').change( function() {
+	    type = $('#searchType').val();
+    });
+
+    jQuery(document).ready(function() {
+        var alCities = ['Baltimore', 'Boston', 'New York', 'Tampa Bay', 'Toronto', 'Chicago', 'Cleveland', 'Detroit', 'Kansas City', 'Minnesota', 'Los Angeles', 'Oakland', 'Seattle', 'Texas'].sort();
+        $('#typead').typeahead({
+	        source: function (query, process) {
+		                query = query;
+		                return $.get('/services/search/processadvanced/'+ query + '/' + type, { query: query, type: type }, function (data) {
+		                  return process(data.options);
+		                });
+    	    }
+          , items:5
+          , minLength:3
+          , highlighter: function(item){
+        	    var retValu =  "<div style='text-align:left;height:50px;width:460px;'><i class='icon-search'></i> &nbsp; "+item+"<span class='label label-important' style='float:right;margin-top:10px;'>"+ type +"</span></div>";
+              retValu = retValu.replace(query, '<span class="color:#ffff00;">' + query + '</span>');	
+              return retValu;
+          }
+          , updater: function( item ) {
+              var url = 'http://kbase.us/services/search/';
+	            var type = $('#searchType').val();
+              url = url + type + '/' + this.query;
+              window.location = url;
+              //console.log(this);
+          }
+        });
+    });
+
+  $("#searchForm").submit(function(){
+    var isFormValid = true;
+
+
+    if ($.trim($('#typead').val()).length == 0){
+      isFormValid = false;
+    }
+
+    //if (!isFormValid) alert("Please provide a search keyword");
+    if (!isFormValid) $('#alert').show();
+
+    return isFormValid;
+  });
+
+  $("#idsearchForm").submit(function(){
+    var isFormValid = true;
+
+
+    if ($.trim($('#idsearchInput').val()).length == 0){
+      isFormValid = false;
+    }
+
+    //if (!isFormValid) alert("Please provide a search keyword");
+    if (!isFormValid) $('#alert2').show();
+
+    return isFormValid;
+  });
+  
+</script>
