@@ -1,7 +1,7 @@
 {
-  "name": "KBase Search Service",
+  "name": "KBase Search Doc Application",
   "version": "0.0.1",
-  "description": "KBase Search Service Documentation",
+  "description": "KBase Search Service API Documentation",
   "homepage": "http://kbase.us",
   "keywords": [
     "documentation",
@@ -14,7 +14,8 @@
     "jade": "0.13",
     "oauth": "0.9.3",
     "redis": ">= 0.7.0",
-    "querystring": "0.1.0"
+    "querystring": "0.1.0",
+	"forever":"*"
   },
   "devDependencies": {},
   "main": "index",

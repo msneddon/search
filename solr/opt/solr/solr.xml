@@ -52,14 +52,5 @@
     <core name="genomes" instanceDir="genomes" />
     <core name="literature" instanceDir="literature" />
     <core name="models" instanceDir="models" />
-    <core name="ontologies" instanceDir="ontologies" />
-    <core name="networks" instanceDir="networks" />
-    <core name="pathways" instanceDir="pathways" />
-    <core name="biomass" instanceDir="biomass" />
-    <core name="compounds" instanceDir="compounds" />
-    <core name="ecnumber" instanceDir="ecnumber" />
-    <core name="media" instanceDir="media" />
-    <core name="model" instanceDir="model" />
-    <core name="reactions" instanceDir="reactions" />
   </cores>
 </solr>
