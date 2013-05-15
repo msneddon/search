@@ -391,8 +391,8 @@ testTomcat() {
 startTomcat() {
 	log restarting tomcat
 
-	pushd $SOLR_PREFIX/bin > /dev/null
-	./tomcatStart.sh
+	pushd $TOMCAT_BASE/bin > /dev/null
+	./startup.sh
 	popd > /dev/null
 
 	log status OK

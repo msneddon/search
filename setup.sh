@@ -600,11 +600,28 @@ installAll() {
 }
 
 ##
+# Tomcat start
+##
+startTomcat() {
+	log restarting tomcat
+
+	pushd $TOMCAT_BASE/bin > /dev/null
+	./startup.sh &> /dev/null
+	popd > /dev/null
+
+	log status OK
+
+	echo ;
+}
+
+
+##
 # Import All
 ##
 importAll() {
 	test -d $SOLR_PREFIX || alert "Run --install before importing"
 	checks
+	startTomcat
 	importPublications literature publication.txt
 	importGenomes genomes GenomeTaxonomy.txt
 	importModels models ModelGenomeTaxonomy.txt
