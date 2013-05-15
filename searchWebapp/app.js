@@ -87,6 +87,7 @@ app.post('/ajax/contigs/:id', ajax.getContigs );
 
 app.get('/test', routes.test);
 
+/*
 app.get('/genomes', routes.genomes);
 app.post('/genomes', routes.genomesSearch);
 
@@ -120,6 +121,7 @@ app.get('/testCountCalls/:keyword', function(req, res ) {
   res.render( 'testCount', {keyword: req.params.keyword});
 });
 
+*/
 
 app.listen(CONFIG.system.port, function(){
   console.log("**   KBase Search is running on localhost:" + CONFIG.system.port);
