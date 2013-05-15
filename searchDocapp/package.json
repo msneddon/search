@@ -1,5 +1,5 @@
 {
-  "name": "KBase Search Doc Application",
+  "name": "KBaseSearchDocApplication",
   "version": "0.0.1",
   "description": "KBase Search Service API Documentation",
   "homepage": "http://kbase.us",
@@ -10,7 +10,7 @@
   "author": "Guruprasad Kora ORNL <koragh@ornl.gov>",
   "dependencies": {
     "connect-redis": "1.0.6",
-    "express": "*",
+    "express": "2.5.0",
     "jade": "0.13",
     "oauth": "0.9.3",
     "redis": ">= 0.7.0",

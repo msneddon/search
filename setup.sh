@@ -17,6 +17,7 @@ echo
 # Globals
 ##
 VERSION="0.0.1"
+SERVICE="search"
 LOCALBASE=`pwd`
 L_PREFIX=$LOCALBASE/build
 PREFIX=${PREFIX-/kb/deployment}
@@ -42,25 +43,25 @@ TOMCAT_USER=root
 
 # Solr
 SOLR_L_PREFIX=$L_PREFIX/solr
-SOLR_PREFIX=$PREFIX/services/solr
+SOLR_PREFIX=$PREFIX/services/$SERVICE/solr
 SOLR_DESCRIPTOR=$TOMCAT_ETC/Catalina/localhost/search.xml
 SOLR_DATA_DIR=$SOLR_PREFIX/data
 
 # Search API
 API=$LOCALBASE/searchService
-API_PREFIX=$PREFIX/services/searchService
+API_PREFIX=$PREFIX/services/$SERVICE/searchService
 API_HOST="localhost"
 API_PORT=7078
 
 # Search Application
 APPN=$LOCALBASE/searchWebapp
-APPN_PREFIX=$PREFIX/services/searchWebapp
+APPN_PREFIX=$PREFIX/services/$SERVICE/searchWebapp
 APPN_HOST="localhost"
 APPN_PORT=7079
 
 # Search Doc Application
 APPDOC=$LOCALBASE/searchDocapp
-APPDOC_PREFIX=$PREFIX/services/searchDocapp
+APPDOC_PREFIX=$PREFIX/services/$SERVICE/searchDocapp
 APPDOC_HOST="localhost"
 APPDOC_PORT=7080
 
@@ -417,19 +418,19 @@ importFeatures() {
 
 	pushd $LOCALBASE/dataInput > /dev/null
 
-	#declare -a featureData=(FeatureGenomeTaxonomy0.txt);
+	declare -a featureData=(FeatureGenomeTaxonomy0.txt);
 
-	declare -a featureData=(FeatureGenomeTaxonomy0.txt FeatureGenomeTaxonomy1.txt FeatureGenomeTaxonomy2.txt \
-		FeatureGenomeTaxonomy3.txt FeatureGenomeTaxonomy4.txt FeatureGenomeTaxonomy5.txt \
-		FeatureGenomeTaxonomy6.txt FeatureGenomeTaxonomy7.txt FeatureGenomeTaxonomy8.txt \
-		FeatureGenomeTaxonomy9.txt FeatureGenomeTaxonomy10.txt FeatureGenomeTaxonomy11.txt \
-		FeatureGenomeTaxonomy12.txt FeatureGenomeTaxonomy13.txt FeatureGenomeTaxonomy14.txt \
-		FeatureGenomeTaxonomy15.txt FeatureGenomeTaxonomy16.txt FeatureGenomeTaxonomy17.txt \
-		FeatureGenomeTaxonomy18.txt FeatureGenomeTaxonomy19.txt FeatureGenomeTaxonomy20.txt \
-		FeatureGenomeTaxonomy21.txt FeatureGenomeTaxonomy22.txt FeatureGenomeTaxonomy23.txt \
-		FeatureGenomeTaxonomy24.txt FeatureGenomeTaxonomy25.txt FeatureGenomeTaxonomy26.txt \
-		FeatureGenomeTaxonomy27.txt FeatureGenomeTaxonomy28.txt FeatureGenomeTaxonomy29.txt \
-		FeatureGenomeTaxonomy30.txt FeatureGenomeTaxonomy31.txt FeatureGenomeTaxonomy32.txt);
+#	declare -a featureData=(FeatureGenomeTaxonomy0.txt FeatureGenomeTaxonomy1.txt FeatureGenomeTaxonomy2.txt \
+#		FeatureGenomeTaxonomy3.txt FeatureGenomeTaxonomy4.txt FeatureGenomeTaxonomy5.txt \
+#		FeatureGenomeTaxonomy6.txt FeatureGenomeTaxonomy7.txt FeatureGenomeTaxonomy8.txt \
+#		FeatureGenomeTaxonomy9.txt FeatureGenomeTaxonomy10.txt FeatureGenomeTaxonomy11.txt \
+#		FeatureGenomeTaxonomy12.txt FeatureGenomeTaxonomy13.txt FeatureGenomeTaxonomy14.txt \
+#		FeatureGenomeTaxonomy15.txt FeatureGenomeTaxonomy16.txt FeatureGenomeTaxonomy17.txt \
+#		FeatureGenomeTaxonomy18.txt FeatureGenomeTaxonomy19.txt FeatureGenomeTaxonomy20.txt \
+#		FeatureGenomeTaxonomy21.txt FeatureGenomeTaxonomy22.txt FeatureGenomeTaxonomy23.txt \
+#		FeatureGenomeTaxonomy24.txt FeatureGenomeTaxonomy25.txt FeatureGenomeTaxonomy26.txt \
+#		FeatureGenomeTaxonomy27.txt FeatureGenomeTaxonomy28.txt FeatureGenomeTaxonomy29.txt \
+#		FeatureGenomeTaxonomy30.txt FeatureGenomeTaxonomy31.txt FeatureGenomeTaxonomy32.txt);
 
 	for i in ${featureData[@]}
 	do
@@ -476,12 +477,16 @@ checks() {
 # Import All
 ##
 importAll() {
+
+	log importing "Data"
 	test -d $SOLR_PREFIX || alert "Please run make first."
 	checks
 	importPublications literature publication.txt
 	importGenomes genomes GenomeTaxonomy.txt
 	importModels models ModelGenomeTaxonomy.txt
 	importFeatures features
+
+	log status "import done"
 }
 
 
@@ -557,6 +562,10 @@ configAppDoc() {
 	cp  -r $APPDOC  $APPDOC_PREFIX
 
 	log install "KBase Search doc app dependencies"
+	apt-get install redis-server  &> /dev/null
+	add-apt-repository -y ppa:chris-lea/redis-server &> /dev/null
+	apt-get update &> /dev/null
+	apt-get install -y redis-server &> /dev/null
 	pushd $APPDOC_PREFIX > /dev/null
 	npm install -q &> /dev/null
 	popd > /dev/null
@@ -574,6 +583,32 @@ testAppDoc() {
 	log testing "KBase Search Doc Application"
 	is_ok  "$INSTANCE:$APPDOC_PORT"
 	echo ;
+}
+
+##
+# Install
+##
+installAll() {
+	checks
+	installTomcat
+	configService
+	configApp
+	configAppDoc
+	
+	cp startService $PREFIX/services/$SERVICE
+	cp stopService $PREFIX/services/$SERVICE
+}
+
+##
+# Import All
+##
+importAll() {
+	test -d $SOLR_PREFIX || alert "Run --install before importing"
+	checks
+	importPublications literature publication.txt
+	importGenomes genomes GenomeTaxonomy.txt
+	importModels models ModelGenomeTaxonomy.txt
+	importFeatures features
 }
 
 
