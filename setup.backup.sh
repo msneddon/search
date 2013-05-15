@@ -33,8 +33,8 @@ CURL=""
 NODE=""
 
 # Tomcat
-TOMCAT_BASE="$RUNTIME/tomcat"
-TOMCAT_ETC="$TOMCAT_BASE/conf"
+TOMCAT_BASE='$RUNTIME/tomcat'
+TOMCAT_ETC=="$TOMCAT_BASE/conf"
 TOMCAT_INIT="$TOMCAT_BASE/bin"
 TOMCAT_PID="$TOMCAT_BASE/tomcat.pid"
 TOMCAT_PORT=7077
@@ -85,9 +85,7 @@ displayHelp() {
     -x, --stop               Stop all search related services/apps
     -t, --test               Test all the services and apps
 
-    --install-tomcat         Install tomcat
     --test-tomcat            Test tomcat
-
     --test-pubs              Test literature
     --test-genomes           Test genomes
     --test-model             Test models
@@ -178,10 +176,16 @@ checkGit() {
 # Test and see if JDK is installed 
 ##
 checkJava() {
-	log checking java
-	test -n "$JAVA_HOME" || \
-		abort 'JAVA_HOME variable not set, Did you source user_env.sh ?'
-	log status "\$JAVA_HOME - $JAVA_HOME"
+	log checking JDK;
+	a=`type -P java` &> /dev/null \
+		&& {
+			log found "$a";
+			JAVA=$a;
+		} \
+		|| {
+			abort "Need Sun JDK 6, please install it."
+		}
+
 	echo ;
 }
 
@@ -242,10 +246,13 @@ checkNode() {
 ##
 checkTomcat() {
 	log checking tomcat
-	test -n "$CATALINA_HOME" || \
-		abort 'CATALINA_HOME variable not set, Did you source user_env.sh ?'
-	log status "\$CATALINA_HOME - $CATALINA_HOME"
+	(test -d "$TOMCAT_BASE" && \
+	test -d "$TOMCAT_ETC"  && \
+	test -f "$TOMCAT_INIT" ) || \
+	abort "Tomcat missing, please install it."
+	log status OK
 	echo ;
+
 }
 
 ##
@@ -291,26 +298,72 @@ is_ok() {
 }
 
 
+## 
+# Make sure you have the build directory - NOT NECESSARY
 ##
-# install tomcat
+generalconf() {
+	log checking "build directory - $L_PREFIX"
+	test -d $L_PREFIX || { log creating $L_PREFIX; mkdir -p $L_PREFIX; }
+	log status OK;
+	echo ;
+}
+
 ##
-installTomcat() {
-	checkTomcat
+# Main configuration Page
+##
+configuration() {
 	log tuning "tomcat for solr"
 	
 	log changing "tomcat port"
 	sed -i s#port=\"8080\"#port=\"${TOMCAT_PORT}\"#g $TOMCAT_ETC/server.xml
 
-
 	log adding "kbase search deployment descriptor"
-	test -f $SOLR_DESCRIPTOR && rm $SOLR_DESCRIPTOR
-	cp  -r $LOCALBASE/solr/Catalina  $TOMCAT_ETC
+	test -f $SOLR_DESCRIPTOR || rm $SOLR_DESCRIPTOR
+	cp  $LOCALBASE/solr$SOLR_DESCRIPTOR  $SOLR_DESCRIPTOR
 	sed -i s#SOLR_PREFIX#${SOLR_PREFIX}#g $SOLR_DESCRIPTOR
-
 
 	log creating "solr deployment templates"
 	test -d $SOLR_PREFIX || { log creating $SOLR_PREFIX; mkdir -p $SOLR_PREFIX; }
-	log creating cores
+	cp -r $LOCALBASE/solr/opt/solr/* $SOLR_PREFIX
+	chown -R tomcat6:tomcat6 $SOLR_DATA_DIR
+	pushd $SOLR_PREFIX > /dev/null
+	find . -name "solrconfig.xml" -print | xargs sed -i s#SOLR_DATA_DIR#${SOLR_DATA_DIR}#g 
+	popd > /dev/null
+	echo;
+
+}
+
+##
+# Check Catalina
+##
+checkCatalina() {
+
+
+	log checking tomcat
+	test -n "$CATALINA_HOME" || \
+		abort 'CATALINA_HOME variable not set, Did you source user_env.sh ?'
+	log status OK
+	echo ;
+
+}
+
+##
+# install tomcat
+##
+installTomcat() {
+	checkCatalina
+	log tuning "tomcat for solr"
+	
+	log changing "tomcat port"
+	sed -i s#port=\"8080\"#port=\"${TOMCAT_PORT}\"#g $TOMCAT_ETC/server.xml
+
+	log adding "kbase search deployment descriptor"
+	test -f $SOLR_DESCRIPTOR || rm $SOLR_DESCRIPTOR
+	cp  -r $LOCALBASE/solr/Catalina  $TOMCAT_ETC
+	sed -i s#SOLR_PREFIX#${SOLR_PREFIX}#g $SOLR_DESCRIPTOR
+
+	log creating "solr deployment templates"
+	test -d $SOLR_PREFIX || { log creating $SOLR_PREFIX; mkdir -p $SOLR_PREFIX; }
 	cp -r $LOCALBASE/solr/opt/solr/* $SOLR_PREFIX
 	chown -R $TOMCAT_USER:$TOMCAT_USER $SOLR_DATA_DIR
 	cp -r  $LOCALBASE/solr/run $SOLR_PREFIX/
@@ -318,8 +371,6 @@ installTomcat() {
 	pushd $SOLR_PREFIX > /dev/null
 	find . -name "solrconfig.xml" -print | xargs sed -i s#SOLR_DATA_DIR#${SOLR_DATA_DIR}#g 
 	popd > /dev/null
-
-	log status OK
 	echo;
 
 }
@@ -332,6 +383,58 @@ testTomcat() {
 	log testing "tomcat on http://$INSTANCE:$TOMCAT_PORT/search/"
 	is_ok "$INSTANCE:$TOMCAT_PORT/search/#/"
 
+}
+
+##
+# Tomcat start
+##
+startTomcat() {
+	log restarting tomcat
+
+	pushd $SOLR_PREFIX/bin > /dev/null
+	./tomcatStart.sh
+	popd > /dev/null
+
+	log status OK
+
+	echo ;
+}
+
+##
+# Tomcat restart
+##
+restartTomcat() {
+	log restarting tomcat
+
+	test -f $TOMCAT_PID && $TOMCAT_INIT restart > /dev/null 
+	sleep 2
+
+	test -f $TOMCAT_PID && \
+		log status "Tomcat started on $TOMCAT_PORT with pid `cat $TOMCAT_PID`" || \
+		abort "Problem starting tomcat"
+
+	echo ;
+}
+
+##
+# Restric access to admin area
+##
+addAuthConstraint() {
+	echo 'Add contraint';
+}
+
+##
+# Check list & order.
+##
+checks() {
+	checkPermission
+	checkGit
+	checkJava
+	checkWget
+	checkCurl
+	checkNode
+	checkTomcat
+	checkRedis
 }
 
 ##
@@ -458,30 +561,79 @@ importFeatureData() {
 	echo ;
 
 }
+
 ##
-# Check list & order.
+# Purge Solr Hot Contents
 ##
-checks() {
-	checkPermission
-	checkGit
-	checkWget
-	checkCurl
-	checkNode
-	checkJava
-	checkTomcat
-	#checkRedis
+purgeContents() {
+
+	log purging "$1 contents"
+
+	curl http://$INSTANCE:$TOMCAT_PORT/search/$1/update?commit=true -H "Content-Type: text/xml" --data-binary '<delete><query>*:*</query></delete>' > /dev/null
+	log waiting "Waiting for commit ..."
+	sleep 10
+
+	log reload "Reloading index $1 ..."
+	curl "http://$INSTANCE:$TOMCAT_PORT/search/admin/cores?wt=json&action=RELOAD&core=$1" > /dev/null
+	sleep 5
+
+	log status OK
+	echo ;
+
+}
+
+
+##
+# Test Publications
+##
+testPublications() {
+
+	log testing "$1 data in solr, checking for total number of docs"
+	str=`curl -s "$INSTANCE:$TOMCAT_PORT/search/$1/select?q=*&wt=xml&rows=0" | grep numFound`
+	str=`echo ${str#*numFound=\"}`
+	str=`echo ${str%\" start*}`
+	log found "$str number of docs"
+	echo;
+}
+
+
+##
+# Test Genomes
+##
+testGenomes() {
+
+	log testing "$1 data in solr, checking for total number of docs"
+	str=`curl -s "$INSTANCE:$TOMCAT_PORT/search/$1/select?q=*&wt=xml&rows=0" | grep numFound`
+	str=`echo ${str#*numFound=\"}`
+	str=`echo ${str%\" start*}`
+	log found "$str number of docs"
+	echo ;
 }
 
 ##
-# Import All
+# Test Models
 ##
-importAll() {
-	test -d $SOLR_PREFIX || alert "Please run make first."
-	checks
-	importPublications literature publication.txt
-	importGenomes genomes GenomeTaxonomy.txt
-	importModels models ModelGenomeTaxonomy.txt
-	importFeatures features
+testModels() {
+
+	log testing "$1 data in solr, checking for total number of docs"
+	str=`curl -s "$INSTANCE:$TOMCAT_PORT/search/$1/select?q=*&wt=xml&rows=0" | grep numFound`
+	str=`echo ${str#*numFound=\"}`
+	str=`echo ${str%\" start*}`
+	log found "$str number of docs"
+	echo ;
+}
+
+##
+# Test Features
+##
+testFeatures() {
+
+	log testing "$1 data in solr, checking for total number of docs"
+	str=`curl -s "$INSTANCE:$TOMCAT_PORT/search/$1/select?q=*&wt=xml&rows=0" | grep numFound`
+	str=`echo ${str#*numFound=\"}`
+	str=`echo ${str%\" start*}`
+	log found "$str number of docs"
+	echo ;
 }
 
 
@@ -505,6 +657,38 @@ configService() {
 }
 
 ##
+# Service Start
+##
+startService() {
+	log starting "starting KBase Search API Service"
+	
+	pushd $API_PREFIX > /dev/null
+	bin/startservice > /dev/null
+	sleep 2
+	popd > /dev/null
+
+	log status OK
+	echo ;
+
+}
+
+##
+# Service Stop
+##
+stopService() {
+	log stoping "stoping KBase Search API Service"
+	
+	pushd $API_PREFIX > /dev/null
+	bin/stopservice 2> /dev/null
+	sleep 2
+	popd > /dev/null
+
+	log status OK
+	echo ;
+
+}
+
+##
 # Test Service
 ##
 testService() {
@@ -513,7 +697,6 @@ testService() {
 	is_ok  "$INSTANCE:$API_PORT/search/literature/coli"
 	echo ;
 }
-
 
 
 ##
@@ -535,6 +718,37 @@ configApp() {
 
 }
 
+##
+# Application Start
+##
+startApp() {
+	log starting "starting KBase Search Application"
+	
+	pushd $APPN_PREFIX > /dev/null
+	bin/startservice > /dev/null
+	sleep 2
+	popd > /dev/null
+
+	log status OK
+	echo ;
+
+}
+
+##
+# Application Stop
+##
+stopApp() {
+	log stoping "stoping KBase Search Application"
+	
+	pushd $APPN_PREFIX > /dev/null
+	bin/stopservice 2> /dev/null
+	sleep 2
+	popd > /dev/null
+
+	log status OK
+	echo ;
+
+}
 
 ##
 # Test Application
@@ -565,6 +779,37 @@ configAppDoc() {
 
 }
 
+##
+# Search Doc Appn Start
+##
+startAppDoc() {
+	log starting "starting KBase Search Doc Application"
+	
+	pushd $APPDOC_PREFIX > /dev/null
+	bin/startservice > /dev/null
+	sleep 2
+	popd > /dev/null
+
+	log status OK
+	echo ;
+
+}
+
+##
+# Search Doc Appn Stop
+##
+stopAppDoc() {
+	log stoping "stoping KBase Search Doc Application"
+	
+	pushd $APPDOC_PREFIX > /dev/null
+	bin/stopservice 2> /dev/null
+	sleep 2
+	popd > /dev/null
+
+	log status OK
+	echo ;
+
+}
 
 ##
 # Test Search Doc Appn
@@ -576,6 +821,111 @@ testAppDoc() {
 	echo ;
 }
 
+
+## 
+# Start all
+#
+startAll() {
+	redis_running
+	startTomcat
+	startService
+	startApp
+	startAppDoc
+}
+
+## 
+# Stop all
+##
+stopAll() {
+	stopAppDoc
+	stopApp
+	stopService
+}
+
+##
+# Install
+##
+installAll() {
+	configuration
+	configService
+	configApp
+	configAppDoc
+}
+
+##
+# Import All
+##
+importAll() {
+	test -d $SOLR_PREFIX || alert "Run --install before importing"
+	checks
+	importPublications literature publication.txt
+	importGenomes genomes GenomeTaxonomy.txt
+	importModels models ModelGenomeTaxonomy.txt
+	importFeatures features
+}
+
+##
+# Test All
+##
+testAll() {
+	testPublications literature
+	testGenomes genomes
+	testModels models
+	testFeatures features
+	testService
+	testApp
+	testAppDoc
+}
+
+# Perform checks
+#checks
+
+
+# Perform configurations
+#configuration
+
+# Start
+#startTomcat
+
+# Testing tomcat
+#testTomcat
+
+# All imports
+#importPublications literature publication.txt
+#importGenomes genomes GenomeTaxonomy.txt
+#importModels models ModelGenomeTaxonomy.txt
+#importFeatures features
+
+# All purges
+#purgeContents features
+
+# All tests
+#testPublications literature
+#testGenomes genomes
+#testModels models
+#testFeatures features
+#testService
+#testApp
+#testAppDoc
+
+                                                               
+# Service
+#configService
+#startService
+#stopService
+#testService
+
+# Application
+#configApp
+#startApp
+#stopApp
+#testApp
+
+# Application Doc
+#configAppDoc
+#startAppDoc
+#stopAppDoc
+#testAppDoc
 
 ##
 # Handle arguments
@@ -594,32 +944,24 @@ else
       -s|--start|startall) startAll; exit ;;
       -x|--stop|stopall) stopAll; exit ;;
       -t|--test|test) testAll; exit ;;
-			--install-tomcat) installTomcat; exit;;
-			--install-service) configService; exit;;
-			--install-app) configApp; exit;;
-			--install-doc) configAppDoc; exit;;
-			--test-service) testService; exit;;
-			--test-app) testApp; exit;;
-			--test-doc) testAppDoc; exit;;
-			--test-tomcat) testTomcat; exit;;
-			--check-redis) redis_running; exit;;
-			--check-catalina) checkCatalina; exit;;
-			--purge-contents) purgeContents $2; exit;;
-			--restart-tomcat) restartTomcat; exit;;
-			--test-tomcat) testTomcat; exit;;
-			--test-pubs) testPublications literature; exit;;
-			--test-genomes) testGenomes genomes; exit;;
-			--test-models) testModels models; exit;;
-			--test-features) testFeatures features; exit;;
-			--test-service) testService; exit;;
-			--test-app) testApp; exit;;
-			--test-docapp) testAppDoc; exit;;
-			--start-service) startService; exit;;
-			--start-app) startApp; exit;;
-			--start-docapp) startAppDoc; exit;;
-			--stop-service) stopService; exit;;
-			--stop-app) stopApp; exit;;
-			--stop-docapp) stopAppDoc; exit;;
+	  --check-redis) redis_running; exit;;
+	  --check-catalina) checkCatalina; exit;;
+	  --purge-contents) purgeContents $2; exit;;
+	  --restart-tomcat) restartTomcat; exit;;
+	  --test-tomcat) testTomcat; exit;;
+	  --test-pubs) testPublications literature; exit;;
+	  --test-genomes) testGenomes genomes; exit;;
+	  --test-models) testModels models; exit;;
+	  --test-features) testFeatures features; exit;;
+	  --test-service) testService; exit;;
+	  --test-app) testApp; exit;;
+	  --test-docapp) testAppDoc; exit;;
+	  --start-service) startService; exit;;
+	  --start-app) startApp; exit;;
+	  --start-docapp) startAppDoc; exit;;
+	  --stop-service) stopService; exit;;
+	  --stop-app) stopApp; exit;;
+	  --stop-docapp) stopAppDoc; exit;;
       *) displayHelp; exit ;;
     esac
     shift
