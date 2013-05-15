@@ -15,13 +15,13 @@ SERVICE="solr"
 DEPLOYMENT=${DEPLOY-/kb/deployment}
 RUNTIME=${RUNTIME-/kb/runtime}
 CATALINA_HOME="$RUNTIME/tomcat"
-CATALINE_PID="$DEPLOYMENT/services/$SERVICE/run/tomcat.pid"
+CATALINE_PID="$DEPLOYMENT/services/search/$SERVICE/run/tomcat.pid"
 
 log executing startup
 
 pushd $CATALINA_HOME > /dev/null
 bin/startup.sh > /dev/null
-popd > dev/null
+popd > /dev/null
 
 log status OK
 echo ;
