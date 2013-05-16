@@ -595,8 +595,8 @@ installAll() {
 	configApp
 	configAppDoc
 	
-	cp startService $PREFIX/services/$SERVICE
-	cp stopService $PREFIX/services/$SERVICE
+	cp start_service $PREFIX/services/$SERVICE
+	cp stop_service $PREFIX/services/$SERVICE
 }
 
 ##
