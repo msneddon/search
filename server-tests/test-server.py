@@ -79,6 +79,24 @@ resp = get_response('Genome/coli?count=1?start=3')
 
 #deep_eq(resp, expected, _assert=True)
 
+print 'test borked param string start with &'
+resp = get_response('Genome/coli&count=1')
+
+# TODO alter test when proper error responses available
+
+# TODO assert False until test fixed
+
+#deep_eq(resp, expected, _assert=True)
+
+print 'test borked param string ask for bad format'
+resp = get_response('Genome/coli?count=1&format=yaml')
+
+# TODO alter test when proper error responses available
+
+# TODO assert False until test fixed
+
+#deep_eq(resp, expected, _assert=True)
+
 
 
 print resp  
