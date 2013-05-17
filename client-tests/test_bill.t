@@ -1,4 +1,20 @@
 #!/usr/bin/perl -w
+
+# A bunch of happy path tests for the search service, via REST.
+# These all use multiple starts and counts, and (hopefully) appropriate search terms
+# that return something testable.
+#
+# A few categories were mislabeled in the docs, and a little exploration showed
+# how they should be used. These are labeled below
+# (doc term -> working term)
+# rsw -> riboswitch
+# pseudo -> pseudogene
+# trnspn -> transposon
+#
+# Bill Riehl
+# wjriehl@lbl.gov
+# May 17, 2013
+
 use strict;
 
 use Data::Dumper;
@@ -97,7 +113,7 @@ my $test_commands = {
 		'count' => [1, 10],
 		'format' => ['json']
 	},
-	'pseudo' => { 
+	'pseudogene' => { 
 		'keyword' => 'stevor',
 		'start' => [0, 1],
 		'count' => [1, 10],
@@ -123,7 +139,7 @@ my $test_commands = {
 		'count' => [1, 10],
 		'format' => ['json']
 	},
-	'rsw' => { 
+	'riboswitch' => { 
 		'keyword' => 'glycine',
 		'start' => [0, 1],
 		'count' => [1, 10],
@@ -143,7 +159,7 @@ my $test_commands = {
 		'count' => [1, 10],
 		'format' => ['json']
 	},
-	'trnspn' => { 
+	'transposon' => { 
 		'keyword' => 'Tn3',
 		'start' => [0, 1],
 		'count' => [1, 10],
