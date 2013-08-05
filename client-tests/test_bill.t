@@ -24,7 +24,7 @@ use JSON;
 my $num_tests = 0;
 
 my $root_url;
-open CFG, "../test.cfg" or die "Can't open test config file!";
+open CFG, "test.cfg" or die "Can't open test config file!";
 while (<CFG>) {
 	chomp;
 	my @pair = split("=");
@@ -182,74 +182,7 @@ my $test_commands = {
 		'start' => [0, 1],
 		'count' => [1, 10],
 		'format' => ['json']
-	},
-
-	# ontologies
-	'ontologies' => { 
-		'keyword' => 'oxygen',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-	'ontologiescount' => { 
-		'keyword' => 'oxygen',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-
-	# systems
-	'pathways' => { 
-		'keyword' => 'glycolysis',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-	'pathwayscount' => { 
-		'keyword' => 'glycolysis',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-	'networks' => { 
-		'keyword' => 'streptococcus',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-	'networkscount' => { 
-		'keyword' => 'streptococcus',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-
-	# KBase
-	'workspace' => { 
-		'keyword' => 'coli',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-	'workspacecount' => { 
-		'keyword' => 'coli',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-	'adm' => { 
-		'keyword' => 'drainage',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-	'admcount' => { 
-		'keyword' => 'drainage',
-		'start' => [0, 1],
-		'count' => [1, 10],
-		'format' => ['json']
-	},
-
+	}
 };
 
 foreach my $command (keys %{ $test_commands }) {

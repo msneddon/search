@@ -117,7 +117,7 @@ displayHelp() {
     setup.sh --import
     setup.sh --install
     setup.sh --start
-    setup.sh --test:
+    setup.sh --test
 
 
 help
@@ -314,7 +314,7 @@ installTomcat() {
 	log creating cores
 	cp -r $LOCALBASE/solr/opt/solr/* $SOLR_PREFIX
 	chown -R $TOMCAT_USER:$TOMCAT_USER $SOLR_DATA_DIR
-	cp -r  $LOCALBASE/solr/run $SOLR_PREFIX/
+	#cp -r  $LOCALBASE/solr/run $SOLR_PREFIX/
 	cp -r  $LOCALBASE/solr/bin $SOLR_PREFIX/
 	pushd $SOLR_PREFIX > /dev/null
 	find . -name "solrconfig.xml" -print | xargs sed -i s#SOLR_DATA_DIR#${SOLR_DATA_DIR}#g 
@@ -583,6 +583,22 @@ testAppDoc() {
 	log testing "KBase Search Doc Application"
 	is_ok  "$INSTANCE:$APPDOC_PORT"
 	echo ;
+}
+
+##
+# Test App, API, Service, Doc Service
+##
+testAll() {
+
+	log setup "KBase All Tests"
+	echo ;
+
+	testService
+	testAppDoc
+	testApp
+	echo ;
+
+	log status OK
 }
 
 ##

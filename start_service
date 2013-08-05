@@ -37,6 +37,7 @@ SERVICE_DOC_HOME="$SERVICE_HOME/searchDocapp"
 CATALINE_PID="$DEPLOYMENT/services/$SERVICE/solr/run/tomcat.pid"
 
 export PATH=$JAVA_PATH/bin:$PATH
+source $DEPLOYMENT/user-env.sh
 
 pushd $SERVICE_SOLR_HOME > /dev/null
 ./bin/tomcatStart.sh > /dev/null
@@ -61,6 +62,7 @@ log starting "doc service"
 pushd $SERVICE_DOC_HOME > /dev/null
 ./bin/startservice > /dev/null
 popd > /dev/null
+log status OK
 echo ;
 
 log status "OK: All services started"
