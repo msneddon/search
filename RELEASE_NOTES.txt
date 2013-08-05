@@ -1,0 +1,29 @@
+OVERVIEW
+-----------------------------------------
+This KBase application provides search capabilities for KBase Central Store and few other data stores.
+
+VERSION: 0.0.3 (Released 8/05/2013)
+-----------------------------------------
+NEW UPDATES:
+-Finetuned API meaningful and graceful REST returns.
+-Numerous front-end updates to finetune look and feel and browser compatibilities.
+
+VERSION: 0.0.2 (Released 5/17/2013)
+-----------------------------------------
+NEW FEATURES:
+-Automatic orchestration and update machanism built into the system.
+-Added inline documentation and test framework to the system.
+
+NEW UPDATES:
+-Search made compatible to KBase release engineering process.
+
+
+VERSION: 0.0.1 (Released 3/16/2013)
+-----------------------------------------
+NEW FEATURES:
+-Initial release of the search application.
+-Most of the central store data is available as index.
+-New search specific categorized REST service available for applications to call and get access directly.
+-New documentation service that shows complete API documentation along with ability to make sample queries.
+-New low level Solr service is available along with the KBase application level API.
+
