@@ -54,10 +54,17 @@ SERVER_TESTS = $(wildcard server-tests/*.t)
 default:
 	./setup.sh --install
 
+install:
+	./start_service
+
 # Test Section
 
-test: test-client test-scripts test-service
-	@echo "running client and script tests"
+test: test-init test-client test-scripts test-service
+
+
+test-init: 
+	./setup.sh --test
+	
 
 # test-all is deprecated. 
 # test-all: test-client test-scripts test-service
@@ -69,7 +76,15 @@ test: test-client test-scripts test-service
 # to the test-client target if it makes sense to you. This test
 # example assumes there is already a tested running server.
 test-client:
-	@echo "running client and test-client"
+	# run each test
+	for t in $(CLIENT_TESTS) ; do \
+		if [ -f $$t ] ; then \
+			$(DEPLOY_RUNTIME)/bin/perl $$t ; \
+			if [ $$? -ne 0 ] ; then \
+				exit 1 ; \
+			fi \
+		fi \
+	done
 
 # What does it mean to test a script? A script test should test
 # the command line scripts. If the script is a client in a client-
