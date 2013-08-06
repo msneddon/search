@@ -41,6 +41,7 @@ log stoping "doc service"
 pushd $SERVICE_DOC_HOME > /dev/null
 ./bin/stopservice > /dev/null
 popd > /dev/null
+log status OK
 echo ;
 
 log stoping "Web App service"
