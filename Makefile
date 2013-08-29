@@ -52,10 +52,10 @@ SERVER_TESTS = $(wildcard server-tests/*.t)
 
 
 default:
-	./setup.sh --install
+	echo Default target is currently a no-op.
 
 install:
-	./start_service
+	./setup.sh --install
 
 # Test Section
 
