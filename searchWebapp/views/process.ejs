@@ -224,8 +224,8 @@
       <div class='row'>
         <div class="pagination pagination-centered">
           <ul>
-            <li class="disabled"><a href="#">«</a></li>
             <!--
+            <li class="disabled"><a href="#">«</a></li>
             <li class="active"><a href="#">1</a></li>
             <li><a href="/services/search/processget/<%= keyword %>?start=11&count=10">2</a></li>
             <li><a href="/services/search/processget/<%= keyword %>?start=21&count=10">3</a></li>
@@ -235,33 +235,59 @@
             -->
             <% 
 
-              var rowsize = 10;
-              var pageCount = 1;
-              var initialPageCount = pageCount;
-              var item = parseInt(start);
-              for ( var i = 0; i < size; i = i + rowsize  ) {
-                var highlightrow = '';
-
-                if ( item == i + 1) highlightrow = 'active';
-
-                if ( pageCount == initialPageCount + 5 ) {
-
-                  %> <li class='<%= highlightrow %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= i+1 %>&count=<%= rowsize %>">»</a></li> <%
-
-                  break;
-
-                }
-
-                if ( (size - i ) < rowsize ) {
-                  // Last
-                  
-                  %> <li class='<%= highlightrow %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= i+1 %>&count=<%= rowsize %>">Last</a></li> <%
-                } else {
-                  %> <li class='<%= highlightrow %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= i+1 %>&count=<%= rowsize %>"><%= pageCount %></a></li> <%
-                }
-                pageCount = pageCount + 1;
-
+              var itemStart = parseInt(start);
+              var rowSize = 10;
+              var currentPage = Math.floor(itemStart/rowSize) + 1;
+              var totalPages = Math.floor(size/rowSize) + 1;
+              var numPageLinks = 10;
+              
+              console.log(totalPages);
+              
+              var pagePosition = currentPage % numPageLinks;
+              
+              // if we are on page numPageLinks, we need to make sure the position is not 0
+              if (pagePosition == 0) {
+                pagePosition = numPageLinks;
               }
+              
+              var highlightPageMarker = '';
+              
+              var linksInserted = 0;
+                            
+              // check to see if we should present a link to the previous page set
+              if (currentPage > 1 && currentPage > numPageLinks) {                
+                %> <li class='<%= highlightPageMarker %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= (currentPage - pagePosition - 1) * rowSize %>&count=<%= rowSize %>"><</a></li> <%                                
+              }
+
+              // insert links for all the pages up to the current page in this page set
+              for ( var p = currentPage - pagePosition + 1; p < currentPage; p++, linksInserted++ ) {
+                %> <li class='<%= highlightPageMarker %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= (p - 1) * rowSize %>&count=<%= rowSize %>"><%= p %></a></li> <%                                  
+              }                 
+
+              // insert the link for the current page and set it to be highlighted              
+              highlightPageMarker = 'active';
+              %> <li class='<%= highlightPageMarker %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= (currentPage - 1) * rowSize %>&count=<%= rowSize %>"><%= currentPage %></a></li> <%                                  
+              linksInserted++;
+              
+              highlightPageMarker = '';
+              // make sure that we have results for all the remaining page links  
+              if (totalPages > currentPage + (numPageLinks - linksInserted)) { 
+                console.log("remaining links");
+                console.log(currentPage + (numPageLinks - linksInserted));
+                // insert the links for the default size page set
+                for ( var p = currentPage + 1; p < currentPage + (numPageLinks - linksInserted) + 1; p++ ) {
+                  %> <li class='<%= highlightPageMarker %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= (p - 1) * rowSize %>&count=<%= rowSize %>"><%= p %></a></li> <%                                  
+                }                 
+                // insert the link to the next set of pages
+                %> <li class='<%= highlightPageMarker %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= (currentPage + (numPageLinks - linksInserted)) * rowSize %>&count=<%= rowSize %>">></a></li> <%                   
+              }
+              else {
+                // insert the links for the actual remaining page set                
+                for ( var p = currentPage + 1; p < totalPages + 1; p++ ) {
+                  %> <li class='<%= highlightPageMarker %>' ><a href="/services/search/processget/<%= keyword %>?start=<%= (p - 1) * rowSize %>&count=<%= rowSize %>"><%= p %></a></li> <%                                  
+                }
+              }                                  
+
             %> 
 
           </ul>
