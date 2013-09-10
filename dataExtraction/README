@@ -11,3 +11,22 @@ run Split script on combined feature file for easier solr loading
 run collate script with domain files to add to split files
 run smartpaste script with external id files to add to split files
 (need notes on generating these files)
+
+generate external ids:
+
+# -q: don't cache; reduces client memory footprint
+# -B: don't decorate output
+# these queries not well tested
+mysql -q -B -uidmappingselect -p -h devdb1.newyork.kbase.us idmapping -e \
+ 'select k.identifier as fid,e.identifier as externalid,d.name as externaldb from idmapping.idmapping_kbaseid k join idmapping.idmapping_kbaseid_externalids ke on (k.id=ke.kbaseid_id) join idmapping.idmapping_externalid e on (e.id=ke.externalid_id) join idmapping.idmapping_externaldb d on (e.externaldb_id=d.id) limit 5'
+
+# HMM domains
+mysql -q -B -uidmappingselect -p -h devdb1.newyork.kbase.us idmapping -e \
+'select k.identifier as fid,ld.locusId,ld.domainId,seqBegin,seqEnd,domainBegin,domainEnd,score,evalue,domainDb,domainName,iprId,iprName from idmapping.idmapping_kbaseid k join idmapping.idmapping_kbaseid_externalids ke on (k.id=ke.kbaseid_id) join idmapping.idmapping_externalid e on (e.id=ke.externalid_id) join genomics_dev.Locus2Domain ld on (e.identifier=ld.locusId) join genomics_dev.DomainInfo di using (domainId) where e.externaldb_id=5 limit 5'
+
+# COG families
+mysql -q -B -uidmappingselect -p -h devdb1.newyork.kbase.us idmapping -e \
+ 'select k.identifier as fid,ld.locusId,CONCAT("COG",ld.subject) as domainId,qBegin as seqBegin,qEnd as seqEnd,sBegin as domainBegin,sEnd as domainEnd,score,evalue,"COG",di.description,funCode,cf.description from idmapping.idmapping_kbaseid k join idmapping.idmapping_kbaseid_externalids ke on (k.id=ke.kbaseid_id) join idmapping.idmapping_externalid e on (e.id=ke.externalid_id) join genomics_dev.COGrpsblast ld on (e.identifier=ld.locusId) join genomics_dev.COGInfo di on (subject=cogInfoId) join genomics_dev.COGFun cf USING (funCode) where e.externaldb_id=5 limit 5'
+
+# need to combine and sort the HMM and COG files on the first column
+# in order to run collate script
