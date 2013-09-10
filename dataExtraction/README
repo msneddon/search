@@ -8,9 +8,15 @@ run Flatten script to combine to one
 run Split script on combined feature file for easier solr loading
 (need to generate scientific_name_sort field)
 
-run collate script with domain files to add to split files
+for genomes core, need to combine Genome and Taxonomy files, and
+generate scientific_name_sorted column (tr/ /_/;tr /[A-Z]/[a-z]/;)
+
+for features core:
+
+generate scientific_name_sorted column (tr/ /_/;tr /[A-Z]/[a-z]/;)
 run smartpaste script with external id files to add to split files
-(need notes on generating these files)
+run collate script with domain files to add to split files
+(need better notes on generating these files)
 
 generate external ids:
 
