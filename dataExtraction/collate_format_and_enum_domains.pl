@@ -4,7 +4,7 @@
 # Config
 #
 $merge_str = ': ';
-$join_str = ' !KK! ';
+$join_str = ' !##! ';
 
 $merge_cols = +[ 
     +[ 2 ], 
