@@ -10,6 +10,18 @@ my %new_field = ();
 # hack to handle initial line of files
 # may not work with tacking on domains
 $new_field{'fid'} = 'external_id';
+my @new_field_names=qw/
+external_id
+/;
+
+# not sure how to handle this situation
+# need a switch to decide how many columns are being pasted on
+# if pasting multiple columns, need fid column to be unique in
+# the stdin file
+@new_field_names=qw/
+domain_id
+domain_desc
+/;
 
 # needs the file extension on argv[1]
 my $extension=shift @ARGV;
@@ -31,7 +43,15 @@ while (<STDIN>) {
         $mt_vals_str = join ("\t", @mt_vals);
     }
 
-    $new_field{$id} = join ("\t", @vals);
+    # this won't work if there are multiple rows per fid
+    # how to handle?
+    # yuck, but shouldn't matter for solr
+    if ((scalar @new_field_names) == 1)
+    {
+    	$new_field{$id} .= join (' ', ' ', @vals);
+    } else {
+    	$new_field{$id} = join ("\t", @vals);
+    }
 
 #    if (defined $new_field{$id}) {
 #        $new_field{$id} .= " ". (join "\t",@vals);
