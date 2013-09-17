@@ -28,7 +28,7 @@ a.category-link:visited { color: black; }
     margin-right:1em;
 }
 
-.row-fluid {
+.row {
     margin-right: 0;
     padding-right: 0;
 }
@@ -51,6 +51,10 @@ td {
 #result-sort-type {
     min-width: 125px;
     min-height: 20px;
+}
+
+#result-set-list td{
+    padding: 4px;
 }
 
 .btn-search {
@@ -77,4 +81,11 @@ td {
 	color: #FFFFFF;
 	background-color: #611BBD;
 	*background-color: #003bb3;
+}
+#all-results{
+    padding-top: 20px;
+}
+.white{
+    color: #ccc;
+    background-color: #222;
 }
