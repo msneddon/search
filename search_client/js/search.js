@@ -26,8 +26,12 @@ var defaultSearchOptions = {"category": {"Genomes": {"itemsPerPage": 25, "page":
                                         }
                             };
 
+var searchCategories = ["Genomes", "Genes", "Publications"];
+
+/*
 var searchCategories = {"Central Store": ["CSGenomes", "CSGenes", "CSPublications"],
                         "User Stores": ["WSGenomes", "WSGenes", "WSModels", "WSMedia", "WSFBA", "WSPhenotypeSet"]};
+*/
 var categoryCounts = {"Genomes": 0, "Genes": 0, "Publications": 0};
 var numCounts = 0;
 
