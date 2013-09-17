@@ -54,16 +54,16 @@ API_HOST="localhost"
 API_PORT=7078
 
 # Search Application
-APPN=$LOCALBASE/searchWebapp
-APPN_PREFIX=$PREFIX/services/$SERVICE/searchWebapp
-APPN_HOST="localhost"
-APPN_PORT=7079
+#APPN=$LOCALBASE/searchWebapp
+#APPN_PREFIX=$PREFIX/services/$SERVICE/searchWebapp
+#APPN_HOST="localhost"
+#APPN_PORT=7079
 
 # Search Doc Application
-APPDOC=$LOCALBASE/searchDocapp
-APPDOC_PREFIX=$PREFIX/services/$SERVICE/searchDocapp
-APPDOC_HOST="localhost"
-APPDOC_PORT=7080
+#APPDOC=$LOCALBASE/searchDocapp
+#APPDOC_PREFIX=$PREFIX/services/$SERVICE/searchDocapp
+#APPDOC_HOST="localhost"
+#APPDOC_PORT=7080
 
 
 ##

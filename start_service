@@ -31,8 +31,8 @@ SERVICE="search"
 SERVICE_HOME="$DEPLOYMENT/services/$SERVICE"
 SERVICE_SOLR_HOME="$SERVICE_HOME/solr"
 SERVICE_SERVICE_HOME="$SERVICE_HOME/searchService"
-SERVICE_APP_HOME="$SERVICE_HOME/searchWebapp"
-SERVICE_DOC_HOME="$SERVICE_HOME/searchDocapp"
+#SERVICE_APP_HOME="$SERVICE_HOME/searchWebapp"
+#SERVICE_DOC_HOME="$SERVICE_HOME/searchDocapp"
 
 CATALINE_PID="$DEPLOYMENT/services/$SERVICE/solr/run/tomcat.pid"
 
@@ -50,20 +50,20 @@ pushd $SERVICE_SERVICE_HOME > /dev/null
 popd > /dev/null
 log status OK
 
-echo ;
-log starting "Web App service"
-pushd $SERVICE_APP_HOME > /dev/null
-./bin/startservice > /dev/null
-popd > /dev/null
-log status OK
-echo ;
+#echo ;
+#log starting "Web App service"
+#pushd $SERVICE_APP_HOME > /dev/null
+#./bin/startservice > /dev/null
+#popd > /dev/null
+#log status OK
+#echo ;
 
-log starting "doc service"
-pushd $SERVICE_DOC_HOME > /dev/null
-./bin/startservice > /dev/null
-popd > /dev/null
-log status OK
-echo ;
+#log starting "doc service"
+#pushd $SERVICE_DOC_HOME > /dev/null
+#./bin/startservice > /dev/null
+#popd > /dev/null
+#log status OK
+#echo ;
 
 log status "OK: All services started"
 echo ;
