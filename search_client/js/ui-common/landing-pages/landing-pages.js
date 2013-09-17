@@ -1,20 +1,34 @@
 
+/*
+ *   Add nav bar and signin to html.
+ *   Set workspace and starting url router
+ */
+
 $(function() {
     // add navigation to page
-    $('#navigation').load('../common/templates/nav.html', function(){
+    $('#navigation').load('assets/templates/nav.html', function(){
         //fix me
         $('#signin-button').kbaseLogin({style: 'text', 
             login_callback: reload_window, logout_callback: reload_window});
         USER_TOKEN = $("#signin-button").kbaseLogin('session').token;
+    
+        // global state object to store state
+        state = new State();
 
-        router()
+        // set the currently selected workspace.
+        set_selected_workspace();
+
+        //simple caching mechanism
+        //objectspace = new ObjectSpace();
+
+        router();
     })
 })
 
-function navEvent() {
-    console.log('nav event');
-    $(document).trigger("navEvent");
-}
+
+/*
+ *   URL router for maping urls to "views".
+ */
 
 function router() {
     // App routes
@@ -26,10 +40,42 @@ function router() {
 
     Path.map("#/workspace-browser").to(function(){
         workspace_view();
-    }).enter(navEvent);    
+    }).enter(navEvent);
 
     // Data routes
-    Path.map("#/genomes").to(function(){ empty_page() });
+    Path.map("#/genomes")
+        .to(function() {
+            genome_view();
+        })
+        .enter(navEvent)
+        .exit(function() { $("#genomes").KBaseGenomeCardManager("destroy"); });
+
+    Path.map("#/genomes/cs/:genome_id")
+        .to(function(){ 
+            genome_view({'genomeID': this.params['genome_id']});
+        })
+        .enter(navEvent)
+        .exit(function() { $("#genomes").KBaseGenomeCardManager("destroy"); });
+
+    Path.map("#/genomes/:ws_id")
+        .to(function() {
+            genome_view({'workspaceID': this.params['ws_id']});
+        })
+        .enter(navEvent)
+        .exit(function() { $("#genomes").KBaseGenomeCardManager("destroy"); });
+
+    Path.map("#/genomes/:ws_id/:genome_id")
+        .to(function() {
+            genome_view(
+                {
+                    'workspaceID': this.params['ws_id'],
+                    'genomeID': this.params['genome_id']
+                }
+            );
+        })
+        .enter(navEvent)
+        .exit(function() { $("#genomes").KBaseGenomeCardManager("destroy"); });
+
     Path.map("#/organisms").to(function(){ empty_page() });
 
     Path.map("#/models").to(function(){
@@ -72,18 +118,22 @@ function router() {
         ws_media_view();
     }).enter(navEvent);
 
+    Path.map("#/media/:ws_id").to(function(){ 
+        ws_media_view(this.params['ws_id']);
+    }).enter(navEvent);
+
     Path.map("#/media/:ws_id/:id").to(function(){ 
         media_view(this.params['ws_id'], this.params['id']);
     }).enter(navEvent);
 
 
-    // Analysis Routes
-    Path.map("#/run-fba/:ws_id").to(function(){ 
-        run_fba_view(this.params['ws_id']);
+    // analysis Routes
+    Path.map("#/run-fba/:ws_id/:id").to(function(){ 
+        run_fba_view(this.params['ws_id'], this.params['id']);
     }).enter(navEvent);
 
 
-    // help routes
+    // help page route
     Path.map("#/data-view-api").to(function(){ 
         help_view();
     }).enter(navEvent);
@@ -96,24 +146,63 @@ function router() {
     Path.listen();
 }
 
+
+
+
+/*
+ *   landing page app helper functions
+ */
+
 function empty_page() {
-    $('#app').html('comming soon')
+    $('#app').html('coming soon');
 }
 
 function page_not_found() {
-    $('#app').html('no object data not found')
+    $('#app').html('object data not found');
 }
 
 function reload_window() {
     window.location.reload();
 }
 
+function get_selected_ws() {
+    return state.get('selected')[0];
+}
+
+function set_selected_workspace() {
+    if (state.get('selected')) {
+        $('#selected-workspace').html(state.get('selected')[0]);
+    }
+}
+
+function navEvent() {
+    console.log('nav event');
+    $(document).trigger("navEvent");
+}
 
 /*
- *  "Views" which load widgets on page.
+ *   "Views" which load widgets on page.
  */
 
- function ws_model_view(ws_id) {
+function genome_view(params) {
+    /* params has
+     * genomeID = the id for the genome in question
+     * workspaceID = the id for a workspace containing the genome (if it exists)
+     */
+    $('#app').html(simple_layout2('genomes'));
+
+    if (!params)
+        $("#genomes").append("No id given");
+    else {
+        $("#genomes").KBaseGenomeCardManager(params);
+        // if (params.genomeId)
+        //     $("#genomes").append(" - " + params.genomeId);
+        // if (params.workspaceId)
+        //     $("#genomes").append(" - " + params.workspaceId);
+    }
+}
+
+function ws_model_view(ws_id) {
     var ws_id = ws_id ? ws_id : 'KBaseCDMModels';
 
     $('#app').html(simple_layout2('ws-models') )
@@ -140,7 +229,7 @@ function model_view(ws_id, id) {
 
     $('#model-opts').kbaseModelOpts({id : id, 
                                  workspace : ws_id,
-                                 auth: USER_TOKEN});    
+                                 auth: USER_TOKEN});   
 
     $('#model-tabs').kbaseModelTabs({ids : [id], 
                                      workspaces : [ws_id],
@@ -215,7 +304,6 @@ function ws_media_view(ws_id) {
 
     $(document).off("mediaClick");
     $(document).on("mediaClick", function(e, data) {
-        console.log(data)
         window.location.hash = /media/+ws_id+'/'+data.media;
     });   
 }
@@ -227,22 +315,26 @@ function media_view(ws_id, id) {
     var media_view = $('#media-editor').kbaseMediaEditor({auth: USER_TOKEN, 
                                                             ws: ws_id,
                                                             id:id});
-    var save_ws_modal = $('#save-ws-modal').kbaseSimpleWSSelect({auth: USER_TOKEN});   
+    var save_ws_modal = $('#save-ws-modal').kbaseSimpleWSSelect({auth: USER_TOKEN,
+                                                                 defaultWS: get_selected_ws()});
 
     $(document).off("saveToWSClick");
-    $(document).on("saveToWSClick", function(e, data) {
-        console.log('save to ws click event');
+    $(document).on("saveToWSClick", function(e, newmedia) {
+        console.log(newmedia);
+        //fba.addmedia(newmedia);
         save_ws_modal.show();
     });
 
     $(document).off("selectedWS");
-    $(document).on("selectedWS", function(e, data) {
-        console.log(data.ws);
+    $(document).on("selectedWS", function(e, newMediaInfo) {
+        console.log(newMediaInfo);
+        //fba.addmedia(newMediaInfo);
+        media_view.show();
     });
 }
 
 function help_view() {
-    $('#app').load('../common/templates/data-view-api.html', function() {
+    $('#app').load('assets/templates/data-view-api.html', function() {
         $('.api-url-submit').click(function() {
             var form = $(this).parents('form')
             var url = '/'+form.attr('type')+'/'+form.find('#input1').val();
@@ -254,40 +346,53 @@ function help_view() {
     });
 }
 
-//
-// Analysis Views
-//
-function run_fba_view(ws_id) {
-    var ws_id = ws_id ? ws_id : 'KBaseCDMModels';
-    console.log(ws_id)
 
-    $('#app').html(simple_layout2('media-table') )
+
+/*
+ * Analysis Views
+ */
+function run_fba_view(ws_id, id) {
+    $('#app').html(simple_layout4('media-table', 'formulation-form', 'fba-opts') )
     
     $('#media-table').kbaseWSMediaTable({ws : ws_id,
-                                     auth: USER_TOKEN});
+                                     auth: USER_TOKEN,
+                                    title: "Select a media:"});
+
+    $('#formulation-form').kbaseFormulationForm({ws : ws_id,
+                                 auth: USER_TOKEN,
+                                title: "Formulation"});
+
+    $('#fba-opts').kbaseRunFba({ws : ws_id, id: id, auth: USER_TOKEN});
 }
 
 
-//
-// "apps"
-//
+
+
+/*
+ *  "Apps"
+ */
 
 function workspace_view() {
     // load template
-    $('#app').load('../common/app-templates/ws-browser.html', function() {
+    $('#app').load('assets/app-templates/ws-browser.html', function() {
         $('#app').html(simple_layout3('ws-selector', 'ws-object-table') );
 
         objectTable = $('#ws-object-table').kbaseWSObjectTable({auth:USER_TOKEN})
 
         wsSelector = $('#ws-selector').kbaseWSSelector({userToken: USER_TOKEN,
                                                 selectHandler: selectHandler});
+
+        //Fixme: Need to add events here.
     })
 }
 
 
-//
-//  Layouts.  This could be part of a template system or whatever
-//
+
+
+/*
+ *  Layouts.  This could be part of a template system or whatever
+ */
+
 function simple_layout1(id1, id2, id3, id4) {
     var simple_layout = '<div class="row">\
                             <div class="col-md-4">\
@@ -332,134 +437,153 @@ function simple_layout3(id1, id2) {
 }
 
 
+function simple_layout4(id1, id2, id3) {
+    var simple_layout = '<div class="row">\
+                            <div class="col-md-12">\
+                                <div id="'+id1+'"></div>\
+                            </div>\
+                        </div>\
+                        <div class="row">\
+                            <div class="col-md-6">\
+                                <div id="'+id2+'"></div>\
+                            </div>\
+                            <div class="col-md-6">\
+                                <div id="'+id3+'"></div>\
+                            </div>\
+                        </div>'                     
+    return simple_layout;
+}
 
 
-/////////////////////////////////////////////////////////////////////////////////////////////
-//
-// workspace browser handler
-//
-/////////////////////////////////////////////////////////////////////////////////////////////
-    var first = true;
-    var prevPromises = []; // store previous promises to cancel
-    function selectHandler(selected) {
-        workspaces = wsSelector.workspaces;
 
-        // tell the previous promise(s) not to fire
-        prevPromises.cancel = true;
 
-        // workspaces might have data loaded already
-        var promises = [];
-        prevPromises = promises;
 
-        // loop through selected workspaces and download objects if they haven't been downloaded yet
-        for (var i=0; i<selected.length; i++) {
-            var workspace = selected[i];
 
-            var objType = $.type(workspace.objectData);
-            if (objType === 'undefined') {
-                // no data and not being downloaded
-                var p = workspace.getAllObjectsMeta();
-                workspace.objectData = p; // save the promise
-                promises.push(p);
 
-                // provide closure over workspace
-                (function(workspace) {
-                    p.done(function(data) {
-                    // save the data and tell workspace selector that the workspace has it's data
-                        workspace.objectData = data;
-                        wsSelector.setLoaded(workspace);
-                    });
-                })(workspace);
-            } else if (objType === 'object') {
-                // data being downloaded (objectData is a promise)
-                promises.push(workspace.objectData);
-            }
-        }
 
-        if (promises.length > 0) {
-            // may take some time to load
-            objectTable.loading(true);
-        }
 
-        // when all the promises are done...
-        $.when.apply($, promises).done(function() {
-            if (promises.cancel) {
-                // do nothing if it was cancelled
-                return;
-            }
+/***************************  END landing page stuff  ********************************/
 
-            // reload the object table
-            objectTable.reload(selected).done(function() {
-                if (promises.cancel) {
-                    return;
-                }
 
-                if (first) {
-                    firstSelect();
-                    first = false;
-                }
-            });
-        });
 
-        // this function is called upon the first selection event
-        //  it sets absolute position for the data table so that it scrolls nicely
-        function firstSelect() {
-            objectTable.fixColumnSize();
+/*
+ *   workspace browser handler
+ */
 
-            // move table element into new scrollable div with absolute position
-            var otable = $('#object-table');
-            var parts = otable.children().children();
-                    
-            var header = parts.eq(0);
-            var table = parts.eq(1);
-            var footer = parts.eq(2);
+var first = true;
+var prevPromises = []; // store previous promises to cancel
+function selectHandler(selected) {
+    workspaces = wsSelector.workspaces;
+    set_selected_workspace()
 
-            header.css({
-                position: 'absolute',
-                top: '0px',
-                left: '0px',
-                right: '0px'
-            });
+    // tell the previous promise(s) not to fire
+    prevPromises.cancel = true;
 
-            table.css({
-                position: 'absolute',
-                top: (header.height() + 2) + 'px',
-                left: '0px',
-                right: '0px',
-                bottom: (footer.height() + 2) + 'px'
-            });
+    // workspaces might have data loaded already
+    var promises = [];
+    prevPromises = promises;
 
-            table.find('.dataTables_scrollBody').css({
-                position: 'absolute',
-                height: '',
-                width: '',
-                top: table.find('.dataTables_scrollHead').height(),
-                left: '0px',
-                right: '0px',
-                bottom: '0px'
-            });
+    // loop through selected workspaces and download objects if they haven't been downloaded yet
+    for (var i=0; i<selected.length; i++) {
+        var workspace = selected[i];
 
-            footer.css({
-                position: 'absolute',
-                bottom: '0px',
-                left: '0px',
-                right: '0px'
-            });
+        var objType = $.type(workspace.objectData);
+        if (objType === 'undefined') {
+            // no data and not being downloaded
+            var p = workspace.getAllObjectsMeta();
+            workspace.objectData = p; // save the promise
+            promises.push(p);
+
+            // provide closure over workspace
+            (function(workspace) {
+                p.done(function(data) {
+                // save the data and tell workspace selector that the workspace has it's data
+                    workspace.objectData = data;
+                    wsSelector.setLoaded(workspace);
+                });
+            })(workspace);
+        } else if (objType === 'object') {
+            // data being downloaded (objectData is a promise)
+            promises.push(workspace.objectData);
         }
     }
 
+    if (promises.length > 0) {
+        // may take some time to load
+        objectTable.loading(true);
+    }
 
+    // when all the promises are done...
+    $.when.apply($, promises).done(function() {
+        if (promises.cancel) {
+            // do nothing if it was cancelled
+            return;
+        }
 
+        // reload the object table
+        objectTable.reload(selected).done(function() {
+            if (promises.cancel) {
+                return;
+            }
+
+            if (first) {
+                firstSelect();
+                first = false;
+            }
+        });
+    });
+
+    // this function is called upon the first selection event
+    //  it sets absolute position for the data table so that it scrolls nicely
+    function firstSelect() {
+        objectTable.fixColumnSize();
+
+        // move table element into new scrollable div with absolute position
+        var otable = $('#object-table');
+        var parts = otable.children().children();
+                
+        var header = parts.eq(0);
+        var table = parts.eq(1);
+        var footer = parts.eq(2);
+
+        header.css({
+            position: 'absolute',
+            top: '0px',
+            left: '0px',
+            right: '0px'
+        });
+
+        table.css({
+            position: 'absolute',
+            top: (header.height() + 2) + 'px',
+            left: '0px',
+            right: '0px',
+            bottom: (footer.height() + 2) + 'px'
+        });
+
+        table.find('.dataTables_scrollBody').css({
+            position: 'absolute',
+            height: '',
+            width: '',
+            top: table.find('.dataTables_scrollHead').height(),
+            left: '0px',
+            right: '0px',
+            bottom: '0px'
+        });
+
+        footer.css({
+            position: 'absolute',
+            bottom: '0px',
+            left: '0px',
+            right: '0px'
+        });
+    }
+}
 
 
 
 /*
  *  Function to store state in local storage.
- * 
- *  Better than storing list of selected workspaces
- *  in the URL (e.g. #workspace1&workspace2&workspace3...)
- * 
- *  Not optimized for large quantities of data
  */
 function State() {
     // Adapted from here: http://diveintohtml5.info/storage.html

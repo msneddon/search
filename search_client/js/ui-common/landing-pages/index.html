@@ -1,71 +1,100 @@
-
+<!DOCTYPE HTML>
 
 <html>
     <head>
         <title>KBase Data Pages</title>
-        <link rel="icon" href="../common/img/KBase_favicon.ico" type="image/x-icon">
+        <link rel="icon" href="assets/img/KBase_favicon.ico" type="image/x-icon">
 
-        <!-- Global KBass css -->
-        <link href="../common/css/bootstrap.css" rel="stylesheet">
+        <!-- Global KBase css -->
+        <link href="../ext/bootstrap/3.0.0/css/bootstrap.css" rel="stylesheet">
+
         <!--<link href="../common/css/bootstrap2.css" rel="stylesheet">-->
         <!--<link href="../common/css/jquery.dataTables.css" rel="stylesheet">-->
-        <link rel="stylesheet" type="text/css" href="../common/css/dataTables.bootstrap.css">        
-        <link href="../common/css/ws-browser.css" rel="stylesheet">
-        <link href="../common/css/landing-pages.css" rel="stylesheet">
+        <link href="../ext/jquery-ui/1.10.3/css/ui-lightness/jquery-ui-1.10.3.custom.min.css" rel="stylesheet" type="text/css">
+        <link href="assets/css/dataTables.bootstrap.css" rel="stylesheet" type="text/css" >        
+        <link href="assets/css/ws-browser.css" rel="stylesheet">
+        <link href="assets/css/landing-pages.css" rel="stylesheet">
+
+        <!-- KBase widget css -->
+        <link rel="stylesheet" href="../widgets/css/kbaseGenomeOverview.css" type="text/css" />
+        <link rel="stylesheet" href="../widgets/css/kbaseContigBrowser.css" type="text/css" />
+        <link rel="stylesheet" href="../widgets/css/kbaseWidget.css" type="text/css" />
+        <link rel="stylesheet" href="../widgets/css/kbaseLandingPageCard.css" type="text/css" />
 
 
-        <!-- dependancies for KBase view (if not already included) -->
-        <script src="../common/js/jquery.min.js"></script>
-        <!--<script src="../kbase_labs/javascript/lib/min/1.0.0/kbase-ui-min.js"></script>-->
-        <script src="../src/kbwidget.js"></script>
-        <script src="../widgets/kbasePrompt.js"></script> 
-        <script src="../widgets/kbaseLogin.js"></script>
 
-        <script src="../common/js/bootstrap.js"></script>
-        <script src="../common/js/jquery.dataTables.js"></script>
-        <script type="text/javascript" language="javascript" src="../common/js/dataTables.bootstrap.js"></script>
+        <!-- External javascript packages -->
+        <script src="../ext/jquery/jquery-1.10.2.min.js"></script>
+        <script src="../ext/jquery-ui/1.10.3/js/jquery-ui-1.10.3.custom.min.js"></script>
+        <script src="../ext/d3/d3.v3.min.js"></script>
+        <script src="../ext/bootstrap/3.0.0/js/bootstrap.js"></script>
+        <script src="../ext/dataTables/1.9.4/js/jquery.dataTables.js"></script>
+        <script src="assets/js/dataTables.bootstrap.js"></script>
 
-        <!--<script src="../common/js/bootstrap2.js"></script>-->
-        <script src="../common/js/jquery.scrollTo.min.js"></script>
-        <script src="../common/js/jquery.cookie.min.js"></script>
-        <script src="../common/js/viz/raphael-min.js"></script>
+        <script src="assets/js/jquery.scrollTo.min.js"></script>
+        <script src="assets/js/jquery.cookie.min.js"></script>
+        <script src="assets/js/viz/raphael-min.js"></script>
 
-        <script src="../common/js/path.js"></script>        
+        <script src="assets/js/path.js"></script>        
 
-        <script src="../common/js/kbclient/kbase.js"></script>
+
+        <!-- KBase client library javascript -->
+        <script src="assets/js/kbclient/kbase.js"></script>
 
         <!-- these are deps for seq search mockup -->
-        <script src="../common/js/jquery.dataTables.rowGrouping.js"></script>
-        <script src="../common/js/kbclient/seqSearch.js"></script>        
+        <script src="assets/js/jquery.dataTables.rowGrouping.js"></script>
+        <script src="assets/js/kbclient/seqSearch.js"></script>        
+
 
         <!-- widgets -->
-        <script src="../widgets/kbaseWSModelTable.js"></script>
-        <script src="../widgets/kbaseWSFbaTable.js"></script>
-        <script src="../widgets/kbaseWSMediaTable.js"></script>        
+        <script src="../src/kbwidget.js"></script>
 
-        <script src="../widgets/kbaseModelMeta.js"></script>
-        <script src="../widgets/kbaseModelTabs.js"></script>
-        <script src="../widgets/kbaseModelCore.js"></script>
 
-        <script src="../widgets/kbaseFbaTabs.js"></script>
+        <!-- helper widgets --> 
+        <script src="../src/widgets/kbasePanel.js"></script>
+        <script src="../src/widgets/kbaseModal.js"></script>        
+        <!-- end helper widgets -->        
 
-        <script src="../widgets/kbaseBioRxnTable.js"></script>
-        <script src="../widgets/kbaseBioCpdTable.js"></script>
+        <script src="../src/widgets/kbasePrompt.js"></script>
+        <script src="../src/widgets/kbaseLogin.js"></script>
 
-        <script src="../widgets/kbaseMediaEditor.js"></script>
-        <script src="../widgets/kbaseRxnModal.js"></script>
+        <script src="../src/widgets/models/kbaseModelMeta.js"></script>
+        <script src="../src/widgets/models/kbaseModelTabs.js"></script>
+        <script src="../src/widgets/models/kbaseModelCore.js"></script>
+        <script src="../src/widgets/models/kbaseModelOpts.js"></script>        
 
-        <script src="../widgets/kbaseModelOpts.js"></script>
-        <script src="../widgets/kbaseSimpleWSSelect.js"></script>
+        <script src="../src/widgets/fbas/kbaseFbaTabs.js"></script>
+        <script src="../src/widgets/fbas/kbaseFormulationForm.js"></script>
+        <script src="../src/widgets/fbas/kbaseRunFba.js"></script>
 
-        <script src="../widgets/kbaseSeqSearch.js"></script>
-        <script src="../widgets/kbaseWSHandler.js"></script>        
-        <script src="../widgets/kbaseWSSelector.js"></script>
-        <script src="../widgets/kbaseWSObjectTable.js"></script>
+        <script src="../src/widgets/biochemistry/kbaseBioRxnTable.js"></script>
+        <script src="../src/widgets/biochemistry/kbaseBioCpdTable.js"></script>
 
-        <!--<script src="../widgets/wsBrowser.js"></script>-->
+        <script src="../src/widgets/media/kbaseMediaEditor.js"></script>
 
-        <!--<script data-main="../widgets/wsBrowser.js" src="../common/js/require-jquery.js"></script>-->
+        <script src="../src/widgets/biochemistry/kbaseRxnModal.js"></script>
+
+        <script src="../src/widgets/misc/kbaseSeqSearch.js"></script>
+
+        <script src="../src/widgets/workspaces/kbaseWSModelTable.js"></script>
+        <script src="../src/widgets/workspaces/kbaseWSFbaTable.js"></script>
+        <script src="../src/widgets/workspaces/kbaseWSMediaTable.js"></script>
+        <script src="../src/widgets/workspaces/kbaseSimpleWSSelect.js"></script>        
+        <script src="../src/widgets/workspaces/kbaseWSHandler.js"></script>
+        <script src="../src/widgets/workspaces/kbaseWSSelector.js"></script>
+        <script src="../src/widgets/workspaces/kbaseWSObjectTable.js"></script>
+
+        <!-- Genome widgets -->
+        <script src = "../src/widgets/kbaseLandingPageCard.js"></script>
+        <script src = "../src/widgets/genomes/kbaseContigBrowserButtons.js"></script>
+        <script src = "../src/widgets/genomes/kbaseContigBrowser.js"></script>
+        <script src = "../src/widgets/genomes/kbaseGenomeOverview.js"></script>
+        <script src = "../src/widgets/genomes/kbaseGeneInfo.js"></script>
+        <script src = "../src/widgets/kbaseCardManager.js"></script>
+        <script src = "../src/widgets/genomes/kbaseGenomeCardManager.js"></script>
+        <!-- End Genome widgets -->
+
+
         <script src="landing-pages.js"></script>
     </head>
 
