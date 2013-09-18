@@ -35,9 +35,13 @@ var searchCategories = {"Central Store": ["CSGenomes", "CSGenes", "CSPublication
 var categoryCounts = {"Genomes": 0, "Genes": 0, "Publications": 0};
 var numCounts = 0;
 
+var token;
+
 
 $(window).load(function(){
-    $("#login-area").kbaseLogin({style: 'button'});
+    $("#login-area").kbaseLogin({style: "text",
+                                 login_callback: function() { console.log("logging in"); token = $("#login-area").kbaseLogin("session", "token");},
+                                 logout_callblack: function() {}});
 
     searchOptions = defaultSearchOptions;
 
@@ -463,6 +467,8 @@ function hideLoadingMessage(element) {
     }        
 }
 
+
+/*
 function login(user_id, password) {
     var initializeUser = function (token) {
         userData = jQuery.extend(true, {}, defaultUserData);
@@ -532,4 +538,4 @@ function logout() {
     
     location.reload(); 
 }
-
+*/

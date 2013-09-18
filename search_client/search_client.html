@@ -24,34 +24,41 @@
     <body>
         <div class="container">
             <div class="row">                
-                <div class="col-md-3">
+                <div class="col-md-2 col-lg-2">
                     <img src="http://kbase.us/themes/kbase/images/Kbase_Logo.png" class="img-responsive"/>                
                 </div>
-                <div class="input-group col-md-6" style="margin-top:30px;">
-                    <a class="input-group-addon btn btn-default dropdown-toggle" data-toggle="dropdown">
-                        All
-                        <span class="caret"></span>
-                    </a>
-                    <ul class="dropdown-menu">
-                        <li><a tabindex="-1" href="#">Test</a></li>
-                    </ul>
-                    <input id="searchTextInput" class="form-control" style="width: 90%;" type="text"/>
-                    <button type="submit" class="btn btn-default white" id="searchButton" onclick="startSearch($.trim($('#searchTextInput')[0].value),searchOptions)"><span class="glyphicon glyphicon-search"></button>
+                <div class="input-group imput-group-md input-group-lg col-md-2 col-lg-9" style="margin-top:30px;">
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-inverse dropdown-toggle" data-toggle="dropdown">
+                            All <span class="caret"></span>
+                        </button>
+                        <ul class="dropdown-menu" role="menu">
+                            <li><a tabindex="-1" href="">Genomes</a></li>
+                            <li><a tabindex="-1" href="">Features</a></li>
+                            <li><a tabindex="-1" href="">Publications</a></li>
+                        </ul>
+                    </div>
+                    <input id="searchTextInput" class="form-control" style="width: 100%;" type="text"/>
+                    <div class="input-group-btn">
+                        <button type="button" class="btn btn-search" id="searchButton" onclick="startSearch($.trim($('#searchTextInput')[0].value),searchOptions)">
+                            <span class="glyphicon glyphicon-search white"></span>
+                        </button>
+                    </div>
                 </div>
-                <div id="login-area" class="col-md-3"></div>
+                <div id="login-area" style="margin-top:30px;" class="col-med-1 col-lg-1"></div>
                                   
             </div>
             <div id="all-results" class="row hidden">
-                <div id="filters" class="form col-md-2">
+                <div id="filters" class="form col-md-2 col-lg-2">
                     <div id="categories" class="row" style="margin-top:50px">
                     </div>
                     <div id="facets" class="row">
                     </div>
                 </div>
-                <div id="result-set-row" class="col-md-10" style="margin-left:0px">                    
+                <div id="result-set-row" class="col-md-10 col-lg-10" style="margin-left:0px">                    
                     <div id="result-set-header" class="row">
-                        <form class="form-inline col-md-12">
-                            <label id="result-position" class="nowrap space-right"></label>
+                        <form class="form-inline col-md-12 col-lg-12">
+                            <label id="result-position" class="col-md-2 col-md-offset2 col-lg-2 col-lg-offset2 nowrap space-right"></label>
                             <label id="result-per-page-label" for="result-per-page">Results per page</label>
                             <select id="result-per-page" class="input-small space-right" onchange="setResultsPerPage(selectedCategory,$(this)[0]['selectedOptions'][0].text)">
                                 <option value="10">10</option>
@@ -67,7 +74,7 @@
                         </form>
                     </div>
                     <div style="width: 100%;">
-                        <table id="result-set-list"  style="width: 100%;">
+                        <table id="result-set-list">
                         </table>
                     </div>
                     <div class="row">
