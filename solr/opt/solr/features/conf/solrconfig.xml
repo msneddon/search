@@ -101,7 +101,7 @@
        replication is in use, this should match the replication
        configuration.
     -->
-    <dataDir>SOLR_DATA_DIR/features</dataDir>
+    <dataDir>/kb/deployment/services/search/solr/data/features</dataDir>
 
 
   <!-- The DirectoryFactory to use for indexes.

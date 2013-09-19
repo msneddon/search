@@ -65,10 +65,14 @@
 
  <fields>
         
-   <field name="pid" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
-   <field name="title" type="text_general" indexed="true" stored="true"/>
-   <field name="link" type="text_general" indexed="true" stored="true"/>
+   <field name="pubmed_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="pubmed_url" type="text_general" indexed="true" stored="true"/>
+   <field name="journal_title" type="text_general" indexed="true" stored="true"/>
+   <field name="article_title" type="text_general" indexed="true" stored="true"/>
+   <field name="article_title_sort" type="string" indexed="true" stored="true"/>
    <field name="pubdate" type="text_general" indexed="true" stored="true"/>
+   <field name="authors" type="text_general" indexed="true" stored="true"/>
+   <field name="abstract" type="text_general" indexed="true" stored="true"/>
 
    <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
 
@@ -77,15 +81,17 @@
 
  </fields>
 
- <uniqueKey>pid</uniqueKey>
+ <uniqueKey>pubmed_id</uniqueKey>
 
   <!-- copyField commands copy one field to another at the time a document
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
 
-   <copyField source="pid" dest="text"/>
-   <copyField source="title" dest="text"/>
-
+   <copyField source="pubmed_id" dest="text"/>
+   <copyField source="journal_title" dest="text"/>
+   <copyField source="article_title" dest="text"/>
+   <copyField source="authors" dest="text"/>
+   <copyField source="abstract" dest="text"/>
  
   <types>
     <!-- field type definitions. The "name" attribute is
