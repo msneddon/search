@@ -8,7 +8,7 @@
     <core instanceDir="wsModels/" name="wsModels"/>
     <core instanceDir="wsMedia/" name="wsMedia"/>
     <core instanceDir="wsPhenotypeSets/" name="wsPhenotypeSets"/>
-    <core instanceDir="wsAcls/" name="wsAcls" dataDir="data"/>
-    <core instanceDir="literature/" name="literature" dataDir="data"/>
+    <core instanceDir="wsAcls/" name="wsAcls"/>
+    <core instanceDir="literature/" name="literature"/>
   </cores>
 </solr>
