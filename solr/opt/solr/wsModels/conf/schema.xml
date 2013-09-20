@@ -74,6 +74,7 @@ these fields are for any document in the wsModels core
    <field name="model_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
    <field name="model_workspace" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="gid" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="scientific_name" type="text_general" indexed="true" stored="true"/>
    <field name="genome_workspace_uuid" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="model_name" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="model_type" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
@@ -106,6 +107,13 @@ these fields are for both reactions and compounds
    <field name="modelcompartment_id" type="string" indexed="true" stored="true"/>
 
 <!--
+these fields are kbase housekeeping
+-->
+
+   <field name="alpha_sort" type="string" indexed="true" stored="true"/>
+   <field name="model_id_uniq" type="string" indexed="true" stored="true"/>
+
+<!--
 these fields are solr housekeeping
 -->
 
@@ -127,6 +135,7 @@ these fields are solr housekeeping
    <copyField source="model_id" dest="text"/>
    <copyField source="model_workspace" dest="text"/>
    <copyField source="gid" dest="text"/>
+   <copyField source="scientific_name" dest="text"/>
    <copyField source="genome_workspace_uuid" dest="text"/>
    <copyField source="model_name" dest="text"/>
    <copyField source="model_type" dest="text"/>
@@ -147,6 +156,9 @@ these fields are solr housekeeping
    <copyField source="compound_name" dest="text"/>
 
    <copyField source="modelcompartment_id" dest="text"/>
+
+   <copyField source="alpha_sort" dest="text"/>
+   <copyField source="model_id_uniq" dest="text"/>
 
   <types>
     <!-- field type definitions. The "name" attribute is
