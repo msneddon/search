@@ -1,0 +1,8 @@
+{
+    "category": "MGShotguns",
+    "display": "Shotgun Metagenomes",
+    "solr": {
+        "core": "metagenomes",
+        "query_string": "&fq=text:WGS"
+    }
+}

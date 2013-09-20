@@ -1,0 +1,9 @@
+{
+    "category": "WSMedia",
+    "display": "Media",
+    "solr": {
+        "secure": true,
+        "core": "wsMedia",
+        "query_string": ""
+    }
+}

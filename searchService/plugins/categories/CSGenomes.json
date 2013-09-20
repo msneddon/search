@@ -1,0 +1,8 @@
+{
+    "category": "CSGenomes",
+    "display": "Genomes",
+    "solr": {
+        "core": "genomes",
+        "query_string": ""
+    }
+}

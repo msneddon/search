@@ -1,0 +1,9 @@
+{
+    "category": "WSFeatures",
+    "display": "Features",
+    "solr": {
+        "secure": true,
+        "core": "wsGenomeFeatures",
+        "query_string": "&fq=object_type:Feature"
+    }
+}

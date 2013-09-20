@@ -2,7 +2,8 @@ var cdmi_url = "http://kbase.us/services/cdmi_api/";
 var login_url = "https://kbase.us/services/authorization/Sessions/Login/";
 var workspace_url = "https://kbase.us/services/workspace_service/";
 var fba_url = "https://kbase.us/services/fba_model_services/";
-var search_api_url = "https://niya.qb3.berkeley.edu/services/search?";
+//var search_api_url = "https://niya.qb3.berkeley.edu/services/search?";
+var search_api_url = "https://140.221.84.235/services/search?";
 
 var genome_landing_page = "http://140.221.84.217/genome_info/showGenome.html?id=";
 var feature_landing_page = "http://140.221.84.217/feature_info/feature.html?id=";
@@ -17,66 +18,152 @@ var numPageLinks = 10;
 var selectedCategory;
 var searchOptions;
 
-var defaultCategorySorts = {"Genomes": "alphabetical", "Genes": "alphabetical", "Publications": "alphabetical"};
+var defaultSearchOptions = {"general": {"itemsPerPage": 25},
+                            "perCategory": {}
+                           };
 
-var defaultSearchOptions = {"category": {"Genomes": {"itemsPerPage": 25, "page": 1},
-                                         "Genes": {"itemsPerPage": 25, "page": 1},
-                                         "Publications" : {"itemsPerPage": 25, "page": 1},
-                                         "default": {"itemsPerPage": 25, "page": 1}                                         
-                                        }
-                            };
+var searchCategories = [];
 
-var searchCategories = ["Genomes", "Genes", "Publications"];
+var genomeCategories = ["CSGenomes","CSArchaea","CSBacteria","CSFungi","CSPlants","CSOtherEukaryotes",
+                        "WSGenomes","WSArchaea","WSBacteria","WSFungi","WSPlants","WSOtherEukaryotes"];
+var featureCategories = ["CSFeatures","CSCRISPRSpacers","CSPlantLoci","CSPlantmRNAs","CSPromoters","CSProteinGenes","CSProteinBindingSites","CSPseudoGenes","CSRNAGenes",
+                         "WSFeatures","WSCRISPRSpacers","WSPlantLoci","WSPlantmRNAs","WSPromoters","WSProteinGenes","WSProteinBindingSites","WSPseudoGenes","WSRNAGenes"];
+var metagenomeCategories = ["MGShotguns","MGAmplicons","MGOthers"];
 
-/*
-var searchCategories = {"Central Store": ["CSGenomes", "CSGenes", "CSPublications"],
-                        "User Stores": ["WSGenomes", "WSGenes", "WSModels", "WSMedia", "WSFBA", "WSPhenotypeSet"]};
-*/
-var categoryCounts = {"Genomes": 0, "Genes": 0, "Publications": 0};
+
+
+var nestedCategories = { "Published": {
+                             "subcategories": {
+                                 "Genomes": {
+                                     "category": "CSGenomes",
+                                     "subcategories": {
+                                         "Archaea":          {"category": "CSArchaea"},
+                                         "Bacteria":         {"category": "CSBacteria"},
+                                         "Fungi":            {"category": "CSFungi"},
+                                         "Plants":           {"category": "CSPlants"},
+                                         "Other Eukaryotes": {"category": "CSOtherEukaryotes"}
+                                     }
+                                 }, 
+                                 "Features": {
+                                     "category": "CSFeatures",
+                                     "subcategories": {
+                                         "CRISPR/Spacers":            {"category": "CSCRISPRSpacers"},
+                                         "Plant Loci":                {"category": "CSPlantLoci"},
+                                         "Plant mRNAs":               {"category": "CSPlantmRNAs"},
+                                         "Promoters":                 {"category": "CSPromoters"},
+                                         "Protein Encoding Genes":    {"category": "CSProteinGenes"},
+                                         "Protein Binding Sites":     {"category": "CSProteinBindingSites"},
+                                         "PseudoGenes":               {"category": "CSPseudoGenes"},
+                                         "RNA Genes":                 {"category": "CSRNAGenes"}
+                                     }
+                                 }, 
+                                 "Metagenomes": {
+                                     "category": "MGAll",
+                                     "subcategories": {
+                                         "Shotgun Metagenomes":  {"category": "MGShotguns"},
+                                         "Amplicon Metagenomes": {"category": "MGAmplicons"},
+                                         "Other Metagenomes":    {"category": "MGOthers"}
+                                     }
+                                 },
+                                 "Publications": {"category": "CSPublications"}
+                             }
+                         },
+                         "User Shared": {
+                             "subcategories": {
+                                 "Genomes": {
+                                     "category": "WSGenomes",
+                                     "subcategories": {
+                                         "Archaea":          {"category": "WSArchaea"},
+                                         "Bacteria":         {"category": "WSBacteria"},
+                                         "Fungi":            {"category": "WSFungi"},
+                                         "Plants":           {"category": "WSPlants"},
+                                         "Other Eukaryotes": {"category": "WSOtherEukaryotes"}
+                                     }
+                                 },
+                                 "Features": {
+                                     "category": "WSFeatures",
+                                     "subcategories": {
+                                         "CRISPR/Spacers":             {"category": "WSCRISPRSpacers"},
+                                         "Plant Loci":                 {"category": "WSPlantLoci"},
+                                         "Plant mRNAs":                {"category": "WSPlantmRNAs"},
+                                         "Promoters":                  {"category": "WSPromoters"},
+                                         "Protein Encoding Genes":     {"category": "WSProteinGenes"},
+                                         "Protein Binding Site Genes": {"category": "WSProteinBindingSites"},
+                                         "PseudoGenes":                {"category": "WSPseudoGenes"},
+                                         "RNA Genes":                  {"category": "WSRNAGenes"}
+                                     }
+                                 },
+                                 "Media":          {"category": "WSMedia"},
+                                 "Models":         {"category": "WSModels"},
+                                 "FBAs":           {"category": "WSFBAs"},
+                                 "Phenotypes":     {"category": "WSPhenotypes"},
+                                 "Phenotype Sets": {"category": "WSPhenotypeSets"}
+                            }
+                        }
+                       };
+
+
+var categoryCounts = {};
 var numCounts = 0;
-
 var token;
 
 
-$(window).load(function(){
-    $("#login-area").kbaseLogin({style: "text",
-                                 login_callback: function() { console.log("logging in"); token = $("#login-area").kbaseLogin("session", "token");},
-                                 logout_callblack: function() {}});
-
-    searchOptions = defaultSearchOptions;
+$(window).load(function() {
+    $("#login-area").kbaseLogin({style: "text"});
 
     $("#searchTextInput").on("keypress", function (evt) {
         if (evt.keyCode === 13) {
             var input = $.trim($('#searchTextInput')[0].value);
             
             if (input !== null && input !== '') {
-                startSearch(input,searchOptions);
+                startSearch(input);
             }
         }
     });
     
+    fetchCategories(nestedCategories);
     
     //register for login event, then capture token
-    //$(document).on('loggedIn.kbase', function() { var token = $("#login-area").kbaseLogin("session", "token"); });
-    //$(document).on('loggedOut.kbase', function() {});
+    $(document).on('loggedIn.kbase', function() { searchOptions["general"]["token"] = $("#login-area").kbaseLogin("session", "token"); });
+    $(document).on('loggedOut.kbase', function() { searchOptions["general"]["token"] = null; });
 });
 
 
-function startSearch(queryString, options) {
+function fetchCategories(resource) {
+    if (resource.hasOwnProperty("category")) {
+        searchCategories.push(resource["category"]);
+        
+        if (resource.hasOwnProperty("subcategories")) {
+            fetchCategories(resource["subcategories"]);
+        }
+    }
+    else {
+        for (var prop in resource) {
+            if (resource.hasOwnProperty(prop)) {
+                fetchCategories(resource[prop]);
+            }        
+        }    
+    }
+}
+
+
+function startSearch(queryString) {
     if (queryString === null || queryString === '') {
         return;
     }
 
-    searchOptions = {"category": {"Genomes": {"itemsPerPage": 25, "page": 1},
-                                  "Genes": {"itemsPerPage": 25, "page": 1},
-                                  "Publications" : {"itemsPerPage": 25, "page": 1},
-                                  "default": {"itemsPerPage": 25, "page": 1}                                         
-                                 }
-                    };
+    searchOptions = defaultSearchOptions;
+
+    try {
+        searchOptions["general"]["token"] = $("#login-area").kbaseLogin("session", "token");
+    }
+    catch (e) {
+        searchOptions["general"]["token"] = null;
+    }
 
     selectedCategory = null;
     
-    searchOptions['q'] = queryString;
+    searchOptions["general"]['q'] = queryString;
 
     $("#categories").empty();
     $("#page-links").empty();
@@ -126,27 +213,29 @@ function pushGenomeToWorkspace(genome_id, workspace_id, token) {
 function setResultsPerPage(category, value) {
     //calculate new starting page
     var itemsPerPage = parseInt(value);
-    var page = parseInt(searchOptions["category"][category]['page']);
-    var startItem = (page - 1) * searchOptions["category"][category]['itemsPerPage'];
+    var page = parseInt(searchOptions["perCategory"][category]['page']);
+    var startItem = (page - 1) * searchOptions["general"]['itemsPerPage'];
     
-    searchOptions["category"][category]['itemsPerPage'] = value;    
-    searchOptions["category"][category]['page'] = Math.floor(startItem/itemsPerPage) + 1;
+    searchOptions["general"]['itemsPerPage'] = value;    
+    searchOptions["perCategory"][category]['page'] = Math.floor(startItem/itemsPerPage) + 1;
     
     getResults(category, searchOptions);
 }
 
 
 function setSortType(category, value) {
-    searchOptions["category"][category]['sortType'] = value;
+    searchOptions["perCategory"][category]['sortType'] = value;
     getResults(category, searchOptions);
 }
 
 
 function selectCategory(value) {
-    console.log(value);
     selectedCategory = value;
-    console.log(selectedCategory);
-    console.log("category set");
+    
+    if (!searchOptions["perCategory"].hasOwnProperty(value)) {
+        searchOptions["perCategory"][value] = {"page": 1};
+    }
+    
     $("#result-set-header").removeClass('hidden');
     getResults(value, searchOptions);
 }
@@ -154,7 +243,7 @@ function selectCategory(value) {
 
 // move to a different page of results
 function transitionToPageSet(category, page) {
-    searchOptions["category"][category]['page'] = page;
+    searchOptions["perCategory"][category]['page'] = page;
     getResults(category, searchOptions);
 }
 
@@ -174,13 +263,13 @@ function displayCategories() {
     $("#result-set-header").addClass('hidden');
     $("#result-set-list").empty();
 
-    var content = "<tr>";    
+    var content = "<div class='row'>";    
     for (var prop in categoryCounts) {
         if (categoryCounts.hasOwnProperty(prop)) {
-            content += "<td><a onclick='selectCategory(\"" + prop + "\")'>" + prop + " (" + categoryCounts[prop] + ")</span></td>";    
+            content += "<div class='col-md-3'><a onclick='selectCategory(\"" + prop + "\")'>" + prop + " (" + categoryCounts[prop] + ")</span></div>";    
         }
     }
-    content += "</tr>";
+    content += "</div>";
     
     $("#result-set-list").append(content);
     $("#all-results").removeClass("hidden");
@@ -197,8 +286,8 @@ function displayResults(category, jsonResults) {
     var totalRecords = jsonResults['found'];
     var currentRecords = jsonResults['items'];
     var recordCount = jsonResults['itemCount'];    
-    var currentRecordLocation = (currentPage - 1) * searchOptions["category"][category]['itemsPerPage'];
-    var totalPages = Math.floor(totalRecords/searchOptions["category"][category]['itemsPerPage']) + 1;
+    var currentRecordLocation = (currentPage - 1) * searchOptions["general"]['itemsPerPage'];
+    var totalPages = Math.floor(totalRecords/searchOptions["general"]['itemsPerPage']) + 1;
     var currentPageMarker = currentPage % numPageLinks;
     var linksInserted = 0;
     
@@ -207,14 +296,14 @@ function displayResults(category, jsonResults) {
                                    (currentRecordLocation + 1) + "-" + (currentRecordLocation + recordCount) + 
                                    "</strong> out of <strong>" + totalRecords + "</strong>.");
         
-        $("#result-per-page").val(searchOptions["category"][category]['itemsPerPage']);
-        $("#result-sort-type").val(searchOptions["category"][category]['sortType']);
+        $("#result-per-page").val(searchOptions["general"]['itemsPerPage']);
+        $("#result-sort-type").val(searchOptions["perCategory"][category]['sortType']);
         
         $("#result-set-list").empty();
 
         var resultItem = "";
 
-        if (selectedCategory === "Genomes") {
+        if ($.inArray(selectedCategory, genomeCategories) > -1) {
             $("#result-set-list").append("<tr><td><label class='checkbox'><input type='checkbox' id='select-all' onchange='selectAll()'></input></label></td>" +
                                          "<td><span style='min-width:80px'><strong>Select all</strong></span></td>" + 
                                          "<td><strong>Type</strong></td>" + "<td><strong>Genome Species</strong></td>" + "<td><strong>Genome Identifier</strong></td>" +
@@ -238,7 +327,7 @@ function displayResults(category, jsonResults) {
                 $("#result-set-list").append(resultItem);                                                    
             }        
         }
-        else if (selectedCategory === "Genes") {
+        else if ($.inArray(selectedCategory, featureCategories) > -1) {
             $("#result-set-list").append("<tr>" +
                                          "<td><label class='checkbox'><input type='checkbox' id='select-all' onchange='selectAll()'></input></label></td>" +
                                          "<td><span style='min-width:80px'><strong>Select all</strong></span></td>" + 
@@ -265,19 +354,164 @@ function displayResults(category, jsonResults) {
                 $("#result-set-list").append(resultItem);                                 
             }                
         }
-        else if (selectedCategory === "Publications") {
+        else if ($.inArray(selectedCategory, metagenomeCategories) > -1) {
+            $("#result-set-list").append("<tr><td><label class='checkbox'><input type='checkbox' id='select-all' onchange='selectAll()'></input></label></td>" +
+                                         "<td><span style='min-width:80px'><strong>Select all</strong></span></td>" + 
+                                         "<td><strong>Type</strong></td>" + "<td><strong>Genome Species</strong></td>" + "<td><strong>Genome Identifier</strong></td>" +
+                                         "<td><strong>Genome Sequence Length</strong></td>" + "<td><strong>Contigs</strong></td>" + "<td><strong>Coding Sequences</strong></td>" +
+                                         "<td><strong>RNAs</strong></td>" + 
+                                         "</tr>");        
+                                         
+            for (var i = 0; i < recordCount; i++) {
+                resultItem = "<tr class='typedRecord'><td><label class='checkbox' id='" + currentRecords[i]['gid'] + "'><input type='checkbox'></input></label></td>" + 
+                             "<td><span class='space-right'>" + (currentRecordLocation + i + 1) + ".</span></td>" +
+                             "<td><span class='label label-success space-right'><a style='color:white' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>Genome</a></span></td>" + 
+                             "<td><span><a class='space-right' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>" +
+                             "<strong><em>" + currentRecords[i]['scientific_name'] + "</em></strong>" +
+                             "</a></span></td>" +  
+                             "<td><span id='gid' class='space-right'>" + currentRecords[i]['gid'] + "</span></td>" +  
+                             "<td><span class='space-right'>" + currentRecords[i]['dna_size'] + " bp </span></td>" + 
+                             "<td><span>" + currentRecords[i]['contigs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['pegs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['rnas'] + "</span></td>" +
+                             "</tr>";
+                $("#result-set-list").append(resultItem);                                                    
+            }        
+        }
+        else if (selectedCategory === "WSMedias") {
+            $("#result-set-list").append("<tr><td><label class='checkbox'><input type='checkbox' id='select-all' onchange='selectAll()'></input></label></td>" +
+                                         "<td><span style='min-width:80px'><strong>Select all</strong></span></td>" + 
+                                         "<td><strong>Type</strong></td>" + "<td><strong>Genome Species</strong></td>" + "<td><strong>Genome Identifier</strong></td>" +
+                                         "<td><strong>Genome Sequence Length</strong></td>" + "<td><strong>Contigs</strong></td>" + "<td><strong>Coding Sequences</strong></td>" +
+                                         "<td><strong>RNAs</strong></td>" + 
+                                         "</tr>");        
+                                         
+            for (var i = 0; i < recordCount; i++) {
+                resultItem = "<tr class='typedRecord'><td><label class='checkbox' id='" + currentRecords[i]['gid'] + "'><input type='checkbox'></input></label></td>" + 
+                             "<td><span class='space-right'>" + (currentRecordLocation + i + 1) + ".</span></td>" +
+                             "<td><span class='label label-success space-right'><a style='color:white' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>Genome</a></span></td>" + 
+                             "<td><span><a class='space-right' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>" +
+                             "<strong><em>" + currentRecords[i]['scientific_name'] + "</em></strong>" +
+                             "</a></span></td>" +  
+                             "<td><span id='gid' class='space-right'>" + currentRecords[i]['gid'] + "</span></td>" +  
+                             "<td><span class='space-right'>" + currentRecords[i]['dna_size'] + " bp </span></td>" + 
+                             "<td><span>" + currentRecords[i]['contigs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['pegs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['rnas'] + "</span></td>" +
+                             "</tr>";
+                $("#result-set-list").append(resultItem);                                                    
+            }        
+        }
+        else if (selectedCategory === "WSModels") {
+            $("#result-set-list").append("<tr><td><label class='checkbox'><input type='checkbox' id='select-all' onchange='selectAll()'></input></label></td>" +
+                                         "<td><span style='min-width:80px'><strong>Select all</strong></span></td>" + 
+                                         "<td><strong>Type</strong></td>" + "<td><strong>Genome Species</strong></td>" + "<td><strong>Genome Identifier</strong></td>" +
+                                         "<td><strong>Genome Sequence Length</strong></td>" + "<td><strong>Contigs</strong></td>" + "<td><strong>Coding Sequences</strong></td>" +
+                                         "<td><strong>RNAs</strong></td>" + 
+                                         "</tr>");        
+                                         
+            for (var i = 0; i < recordCount; i++) {
+                resultItem = "<tr class='typedRecord'><td><label class='checkbox' id='" + currentRecords[i]['gid'] + "'><input type='checkbox'></input></label></td>" + 
+                             "<td><span class='space-right'>" + (currentRecordLocation + i + 1) + ".</span></td>" +
+                             "<td><span class='label label-success space-right'><a style='color:white' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>Genome</a></span></td>" + 
+                             "<td><span><a class='space-right' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>" +
+                             "<strong><em>" + currentRecords[i]['scientific_name'] + "</em></strong>" +
+                             "</a></span></td>" +  
+                             "<td><span id='gid' class='space-right'>" + currentRecords[i]['gid'] + "</span></td>" +  
+                             "<td><span class='space-right'>" + currentRecords[i]['dna_size'] + " bp </span></td>" + 
+                             "<td><span>" + currentRecords[i]['contigs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['pegs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['rnas'] + "</span></td>" +
+                             "</tr>";
+                $("#result-set-list").append(resultItem);                                                    
+            }        
+        }
+        else if (selectedCategory === "WSFBAs") {
+            $("#result-set-list").append("<tr><td><label class='checkbox'><input type='checkbox' id='select-all' onchange='selectAll()'></input></label></td>" +
+                                         "<td><span style='min-width:80px'><strong>Select all</strong></span></td>" + 
+                                         "<td><strong>Type</strong></td>" + "<td><strong>Genome Species</strong></td>" + "<td><strong>Genome Identifier</strong></td>" +
+                                         "<td><strong>Genome Sequence Length</strong></td>" + "<td><strong>Contigs</strong></td>" + "<td><strong>Coding Sequences</strong></td>" +
+                                         "<td><strong>RNAs</strong></td>" + 
+                                         "</tr>");        
+                                         
+            for (var i = 0; i < recordCount; i++) {
+                resultItem = "<tr class='typedRecord'><td><label class='checkbox' id='" + currentRecords[i]['gid'] + "'><input type='checkbox'></input></label></td>" + 
+                             "<td><span class='space-right'>" + (currentRecordLocation + i + 1) + ".</span></td>" +
+                             "<td><span class='label label-success space-right'><a style='color:white' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>Genome</a></span></td>" + 
+                             "<td><span><a class='space-right' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>" +
+                             "<strong><em>" + currentRecords[i]['scientific_name'] + "</em></strong>" +
+                             "</a></span></td>" +  
+                             "<td><span id='gid' class='space-right'>" + currentRecords[i]['gid'] + "</span></td>" +  
+                             "<td><span class='space-right'>" + currentRecords[i]['dna_size'] + " bp </span></td>" + 
+                             "<td><span>" + currentRecords[i]['contigs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['pegs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['rnas'] + "</span></td>" +
+                             "</tr>";
+                $("#result-set-list").append(resultItem);                                                    
+            }        
+        }
+        else if (selectedCategory === "WSPhenotypes") {
+            $("#result-set-list").append("<tr><td><label class='checkbox'><input type='checkbox' id='select-all' onchange='selectAll()'></input></label></td>" +
+                                         "<td><span style='min-width:80px'><strong>Select all</strong></span></td>" + 
+                                         "<td><strong>Type</strong></td>" + "<td><strong>Genome Species</strong></td>" + "<td><strong>Genome Identifier</strong></td>" +
+                                         "<td><strong>Genome Sequence Length</strong></td>" + "<td><strong>Contigs</strong></td>" + "<td><strong>Coding Sequences</strong></td>" +
+                                         "<td><strong>RNAs</strong></td>" + 
+                                         "</tr>");        
+                                         
+            for (var i = 0; i < recordCount; i++) {
+                resultItem = "<tr class='typedRecord'><td><label class='checkbox' id='" + currentRecords[i]['gid'] + "'><input type='checkbox'></input></label></td>" + 
+                             "<td><span class='space-right'>" + (currentRecordLocation + i + 1) + ".</span></td>" +
+                             "<td><span class='label label-success space-right'><a style='color:white' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>Genome</a></span></td>" + 
+                             "<td><span><a class='space-right' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>" +
+                             "<strong><em>" + currentRecords[i]['scientific_name'] + "</em></strong>" +
+                             "</a></span></td>" +  
+                             "<td><span id='gid' class='space-right'>" + currentRecords[i]['gid'] + "</span></td>" +  
+                             "<td><span class='space-right'>" + currentRecords[i]['dna_size'] + " bp </span></td>" + 
+                             "<td><span>" + currentRecords[i]['contigs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['pegs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['rnas'] + "</span></td>" +
+                             "</tr>";
+                $("#result-set-list").append(resultItem);                                                    
+            }        
+        }
+        else if (selectedCategory === "WSPhenotypeSets") {
+            $("#result-set-list").append("<tr><td><label class='checkbox'><input type='checkbox' id='select-all' onchange='selectAll()'></input></label></td>" +
+                                         "<td><span style='min-width:80px'><strong>Select all</strong></span></td>" + 
+                                         "<td><strong>Type</strong></td>" + "<td><strong>Genome Species</strong></td>" + "<td><strong>Genome Identifier</strong></td>" +
+                                         "<td><strong>Genome Sequence Length</strong></td>" + "<td><strong>Contigs</strong></td>" + "<td><strong>Coding Sequences</strong></td>" +
+                                         "<td><strong>RNAs</strong></td>" + 
+                                         "</tr>");        
+                                         
+            for (var i = 0; i < recordCount; i++) {
+                resultItem = "<tr class='typedRecord'><td><label class='checkbox' id='" + currentRecords[i]['gid'] + "'><input type='checkbox'></input></label></td>" + 
+                             "<td><span class='space-right'>" + (currentRecordLocation + i + 1) + ".</span></td>" +
+                             "<td><span class='label label-success space-right'><a style='color:white' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>Genome</a></span></td>" + 
+                             "<td><span><a class='space-right' target='_blank' href='" + genome_landing_page + currentRecords[i]['gid'] + "'>" +
+                             "<strong><em>" + currentRecords[i]['scientific_name'] + "</em></strong>" +
+                             "</a></span></td>" +  
+                             "<td><span id='gid' class='space-right'>" + currentRecords[i]['gid'] + "</span></td>" +  
+                             "<td><span class='space-right'>" + currentRecords[i]['dna_size'] + " bp </span></td>" + 
+                             "<td><span>" + currentRecords[i]['contigs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['pegs'] + "</span></td>" +
+                             "<td><span>" + currentRecords[i]['rnas'] + "</span></td>" +
+                             "</tr>";
+                $("#result-set-list").append(resultItem);                                                    
+            }        
+        }
+        else if (selectedCategory === "CSPublications") {
             $("#result-set-list").append("<tr>" + 
                                          "<td><span></span></td>" +
-                                         "<td><span><strong>Type</strong></span></td>" + 
                                          "<td><span><strong>Pubmed Identifier</strong></span></td>" + 
-                                         "<td><span><strong>Title</strong></span></td>" + 
+                                         "<td><span><strong>Publication Date</strong></span></td>" + 
+                                         "<td><span><strong>Article Title</strong></span></td>" + 
+                                         "<td><span><strong>Author List</strong></span></td>" + 
                                          "</tr>");        
 
             for (var i = 0; i < recordCount; i++) {
                 resultItem = "<tr><td><span class='space-right'>" + (currentRecordLocation + i + 1) + ".</span></td>" +
-                             "<td><span class='label label-success space-right'><a style='color:white' target='_blank' href='" + currentRecords[i]['link'] + "'>Publication</a></span></td>" + 
-                             "<td><span class='nowrap space-right'>" + currentRecords[i]['pid'] + "</span></td>" +                           
-                             "<td><span><a target='_blank' href='" + currentRecords[i]['link'] + "'>" +
+                             "<td><span class='label label-success space-right'><a style='color:white' target='_blank' href='" + currentRecords[i]['pubmed_url'] + "'>" + currentRecords[i]['pubmed_id'] + "</a></span></td>" + 
+                             "<td><span class='nowrap space-right'>" + currentRecords[i]['article_title'] + "</span></td>" +                           
+                             "<td><span><a target='_blank' href='" + currentRecords[i]['author_list'] + "'>" +
                              "<strong>" + currentRecords[i]['title'] + "</strong>" +
                              "</a></span></td>" +  
                              "</tr>";                                                                 
@@ -337,15 +571,38 @@ function displayResults(category, jsonResults) {
     // display categories
     $("#categories").empty();
     
-    var keys;
-    for (var i = 0; i < searchCategories.length; i++) {
-        $("#categories").append("<div class='row-fluid'><a class='category-link btn btn-link' onclick='selectCategory(\"" + 
-                                searchCategories[i] + "\")'>" + searchCategories[i] + "   (" + categoryCounts[searchCategories[i]] + ")</a></div>");
+    var nesting;
+    for (var prop in nestedCategories) {
+        console.log(prop);
+        console.log(nestedCategories[prop]);
+        $("#categories").append("<div class='row'><a class='category-link btn btn-link col-md-offset-1 col-lg-offset-1'>" + prop  + "</a></div>");    
+
+        if (nestedCategories.hasOwnProperty(prop)) {
+            showLeftCategories(prop,nestedCategories[prop],0);
+        }
     }    
     
     $("#all-results").removeClass("hidden");    
 }
 
+
+function showLeftCategories(displayName, categoryObject, nestingLevel) {
+    if (categoryObject.hasOwnProperty("category")) {
+        var hidden = "";
+        if (nestingLevel > 1) {
+            hidden = "hidden";
+        }
+        
+        $("#categories").append("<div class='row " + hidden + "'><a class='category-link btn btn-link col-md-offset-" + (nestingLevel + 2) + " col-lg-offset-" + (nestingLevel +2) + "' onclick='selectCategory(\"" + 
+                                categoryObject["category"] + "\")'>" + displayName + "   (" + categoryCounts[categoryObject["category"]] + ")</a></div>");    
+    }
+
+    if (categoryObject.hasOwnProperty("subcategories")) {
+        for (var prop in categoryObject["subcategories"]) {
+            showLeftCategories(prop, categoryObject["subcategories"][prop], nestingLevel + 1);    
+        }
+    }
+}
 
 
 function displayCount(category) {
@@ -358,9 +615,12 @@ function getCount(options, category) {
     var queryOptions = {};
     
     for (var prop in options) {
-        queryOptions[prop] = options[prop];        
+        if (options.hasOwnProperty(prop)) {
+            queryOptions[prop] = options[prop];
+        }        
     }
     
+    queryOptions["page"] = 1;
     queryOptions["itemsPerPage"] = 0;
     queryOptions["category"] = category;
 
@@ -399,12 +659,28 @@ function getCount(options, category) {
 
 
 function getResults(category, options) {
+    console.log(category);
+    console.log(options);
+
     if (selectedCategory === null) {
-        var queryOptions = {'q': options['q']};
+        var queryOptions = {'q': options["general"]['q']};
+
+        if (options["general"].hasOwnProperty("token") && options["general"]["token"] !== null) {
+            queryOptions["token"] = options["general"]["token"];
+        }
 
         numCounts = 0;
         for (var i = 0; i < searchCategories.length; i++) {
-            getCount(queryOptions, searchCategories[i]);            
+            console.log(searchCategories[i]);
+            console.log(searchCategories[i].indexOf("WS"));
+            console.log(searchCategories[i].indexOf("WS") === 0);
+            console.log(queryOptions);
+            if (searchCategories[i].indexOf("WS") !== 0 || (searchCategories[i].indexOf("WS") === 0 && queryOptions.hasOwnProperty("token") && queryOptions.token !== null)) {
+                getCount(queryOptions, searchCategories[i]);            
+            }
+            else {
+                categoryCounts[category] = 0;
+            }
         }
         
         return;
@@ -414,15 +690,23 @@ function getResults(category, options) {
     
     queryOptions["category"] = selectedCategory;
     for (var prop in options) {        
-        if (prop !== "category") {
-            queryOptions[prop] = options[prop];
-        }
-        else {
-            for (var cat_prop in options["category"][selectedCategory]) {
-                queryOptions[cat_prop] = options["category"][selectedCategory][cat_prop];
+        if (prop === "general") {
+            for (var gen_prop in options["general"]) {
+                if (options["general"].hasOwnProperty(gen_prop)) {
+                    queryOptions[gen_prop] = options["general"][gen_prop];
+                }
+            }
+        }        
+        else if (prop === "perCategory") {
+            for (var cat_prop in options["perCategory"][selectedCategory]) {
+                if (options["perCategory"][selectedCategory].hasOwnProperty(cat_prop)) {
+                    queryOptions[cat_prop] = options["perCategory"][selectedCategory][cat_prop];
+                }
             }
         }    
     }
+    
+    console.log(queryOptions);
     
     jQuery.ajax({
         type: 'GET',

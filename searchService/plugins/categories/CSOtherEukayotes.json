@@ -1,0 +1,8 @@
+{
+    "category": "CSOtherEukaryotes",
+    "display": "Other Eukaryotes",
+    "solr": {
+        "core": "genomes",
+        "query_string": "&fq=!domain:Archaea&fq=!domain:Bacteria&fq=!domain:Fungi&fq=!domain:Viridiplantae"
+    }
+}

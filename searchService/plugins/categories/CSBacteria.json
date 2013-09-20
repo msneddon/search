@@ -1,0 +1,8 @@
+{
+    "category": "CSBacteria",
+    "display": "Bacteria",
+    "solr": {
+        "core": "genomes",
+        "query_string": "&fq=domain:Bacteria"
+    }
+}

@@ -1,0 +1,8 @@
+{
+    "category": "CSPromoters",
+    "display": "Promoters",
+    "solr": {
+        "core": "features",
+        "query_string": "&fq=feature_type:prm"
+    }
+}

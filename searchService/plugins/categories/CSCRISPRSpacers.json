@@ -1,0 +1,8 @@
+{
+    "category": "CSCRISPRSpacers",
+    "display": "CRISPR Spacers",
+    "solr": {
+        "core": "features",
+        "query_string": "&fq=feature_type:crspr&fq=feature_type:crs"
+    }
+}

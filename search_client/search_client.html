@@ -27,27 +27,24 @@
                 <div class="col-md-2 col-lg-2">
                     <img src="http://kbase.us/themes/kbase/images/Kbase_Logo.png" class="img-responsive"/>                
                 </div>
-                <div class="input-group imput-group-md input-group-lg col-md-2 col-lg-9" style="margin-top:30px;">
+                <div class="input-group col-md-9 col-lg-9" style="margin-top:30px;">
                     <div class="input-group-btn">
                         <button type="button" class="btn btn-inverse dropdown-toggle" data-toggle="dropdown">
                             All <span class="caret"></span>
                         </button>
-                        <ul class="dropdown-menu" role="menu">
-                            <li><a tabindex="-1" href="">Genomes</a></li>
-                            <li><a tabindex="-1" href="">Features</a></li>
-                            <li><a tabindex="-1" href="">Publications</a></li>
+                        <ul id="category-preselect" class="dropdown-menu" role="menu">
                         </ul>
                     </div>
                     <input id="searchTextInput" class="form-control" style="width: 100%;" type="text"/>
                     <div class="input-group-btn">
-                        <button type="button" class="btn btn-search" id="searchButton" onclick="startSearch($.trim($('#searchTextInput')[0].value),searchOptions)">
+                        <button type="button" class="btn btn-search" id="searchButton" onclick="startSearch($.trim($('#searchTextInput')[0].value))">
                             <span class="glyphicon glyphicon-search white"></span>
                         </button>
                     </div>
                 </div>
-                <div id="login-area" style="margin-top:30px;" class="col-med-1 col-lg-1"></div>
-                                  
+                <div id="login-area" style="margin-top:30px;" class="col-md-1"></div>                                              
             </div>
+            <div id="category-choices" class="row hidden"></div>
             <div id="all-results" class="row hidden">
                 <div id="filters" class="form col-md-2 col-lg-2">
                     <div id="categories" class="row" style="margin-top:50px">
@@ -57,20 +54,22 @@
                 </div>
                 <div id="result-set-row" class="col-md-10 col-lg-10" style="margin-left:0px">                    
                     <div id="result-set-header" class="row">
-                        <form class="form-inline col-md-12 col-lg-12">
-                            <label id="result-position" class="col-md-2 col-md-offset2 col-lg-2 col-lg-offset2 nowrap space-right"></label>
-                            <label id="result-per-page-label" for="result-per-page">Results per page</label>
-                            <select id="result-per-page" class="input-small space-right" onchange="setResultsPerPage(selectedCategory,$(this)[0]['selectedOptions'][0].text)">
-                                <option value="10">10</option>
-                                <option value="25">25</option>
-                                <option valus="50">50</option>
-                                <option value="100">100</option>
-                            </select>
-                            <label id="result-sort-type-label" for="result-sort-type">Sorted by</label>
-                            <select id="result-sort-type" class="input-small" onchange="setSortType(selectedCategory,$(this)[0]['selectedOptions'][0].text)">
-                                <option value="alphabetical">alphabetical</option>
-                                <option value="relevance">relevance</option>
-                            </select>
+                        <form class="col-md-12 col-lg-12">
+                            <div id="result-position" class="col-md-2 col-md-offset-2 nowrap space-right"></div>
+                            <div class="form-horizontal col-md-6 col-md-offset-1">
+                                <label id="result-per-page-label" for="result-per-page">Results per page</label>
+                                <select id="result-per-page" class="input-small space-right" onchange="setResultsPerPage(selectedCategory,$(this)[0]['selectedOptions'][0].text)">
+                                    <option value="10">10</option>
+                                    <option value="25">25</option>
+                                    <option valus="50">50</option>
+                                    <option value="100">100</option>
+                                </select>
+                                <label id="result-sort-type-label" for="result-sort-type">Sorted by</label>
+                                <select id="result-sort-type" class="input-small" onchange="setSortType(selectedCategory,$(this)[0]['selectedOptions'][0].text)">
+                                    <option value="alphabetical">alphabetical</option>
+                                    <option value="relevance">relevance</option>
+                                </select>
+                            </div>
                         </form>
                     </div>
                     <div style="width: 100%;">
@@ -87,8 +86,8 @@
         </div>
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script>
-        <script src="js/jquery.cookie.min.js"></script>
         <script src="bootstrap-3.0.0/js/bootstrap.js"></script>
+        <script src="js/jquery.cookie.min.js"></script>
         <script src="js/ui-common/src/kbwidget.js"></script>
         <script src="js/ui-common/src/widgets/kbasePrompt.js"></script>
         <script src="js/ui-common/src/widgets/kbaseLogin.js"></script>
