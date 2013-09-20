@@ -3,7 +3,7 @@ var login_url = "https://kbase.us/services/authorization/Sessions/Login/";
 var workspace_url = "https://kbase.us/services/workspace_service/";
 var fba_url = "https://kbase.us/services/fba_model_services/";
 //var search_api_url = "https://niya.qb3.berkeley.edu/services/search?";
-var search_api_url = "https://140.221.84.235/services/search?";
+var search_api_url = "https://niya.qb3.berkeley.edu/services/search?";
 
 var genome_landing_page = "http://140.221.84.217/genome_info/showGenome.html?id=";
 var feature_landing_page = "http://140.221.84.217/feature_info/feature.html?id=";
