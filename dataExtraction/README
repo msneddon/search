@@ -2,7 +2,7 @@
 
 #CDM:
 
-#use all_entities_Genome, all_entities_Feature, all_entities_Taxonomy
+#use all_entities_Genome, all_entities_Feature, genomes_to_taxonomy
 #to get tables
 #run Flatten script to combine to one
 # Split script on combined feature file for easier solr loading
