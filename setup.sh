@@ -16,7 +16,7 @@ echo
 ## 
 # Globals
 ##
-VERSION="0.0.1"
+VERSION="0.1.0"
 SERVICE="search"
 LOCALBASE=`pwd`
 L_PREFIX=$LOCALBASE/build
@@ -308,7 +308,12 @@ installTomcat() {
 	cp  -r $LOCALBASE/solr/Catalina  $TOMCAT_ETC
 	sed -i s#SOLR_PREFIX#${SOLR_PREFIX}#g $SOLR_DESCRIPTOR
 
+	log status OK
+	echo;
 
+}
+
+installSolr() {
 	log creating "solr deployment templates"
 	test -d $SOLR_PREFIX || { log creating $SOLR_PREFIX; mkdir -p $SOLR_PREFIX; }
 	log creating cores
@@ -635,7 +640,7 @@ startTomcat() {
 # Import All
 ##
 importAll() {
-	test -d $SOLR_PREFIX || alert "Run --install before importing"
+	test -d $SOLR_PREFIX || alert "Run --install-solr before importing"
 	checks
 	startTomcat
 	importPublications literature publication.txt
@@ -663,6 +668,7 @@ else
       -x|--stop|stopall) stopAll; exit ;;
       -t|--test|test) testAll; exit ;;
 			--install-tomcat) installTomcat; exit;;
+			--install-solr) installSolr; exit;;
 			--install-service) configService; exit;;
 			--install-app) configApp; exit;;
 			--install-doc) configAppDoc; exit;;
