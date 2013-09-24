@@ -503,6 +503,7 @@ configService() {
 	
 	log adding "KBase Search API configuration"
 	test -d $API_PREFIX && rm -rf $API_PREFIX
+	test -d $API_PREFIX || { log creating $API_PREFIX; mkdir -p $API_PREFIX; }
 	cp  -r $API  $API_PREFIX
 
 	log install "KBase Search API dependencies"

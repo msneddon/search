@@ -178,6 +178,12 @@ deploy-scripts:
 deploy-service:
 	./setup.sh --install
 
+deploy-solr:
+	./setup.sh --install-solr
+
+deploy-data:
+	./setup.sh --import
+
 # Deploying docs here refers to the deployment of documentation
 # of the API. We'll include a description of deploying documentation
 # of command line interface scripts when we have a better understanding of
