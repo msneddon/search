@@ -33,6 +33,9 @@ WGET=""
 CURL=""
 NODE=""
 
+# Deployment
+DEPLOY_BASE=$PREFIX/services/$SERVICE
+
 # Tomcat
 TOMCAT_BASE="$RUNTIME/tomcat"
 TOMCAT_ETC="$TOMCAT_BASE/conf"
@@ -503,7 +506,7 @@ configService() {
 	
 	log adding "KBase Search API configuration"
 	test -d $API_PREFIX && rm -rf $API_PREFIX
-	test -d $API_PREFIX || { log creating $API_PREFIX; mkdir -p $API_PREFIX; }
+	test -d $DEPLOY_BASE || { log creating $DEPLOY_BASE; mkdir -p $DEPLOY_BASE; }
 	cp  -r $API  $API_PREFIX
 
 	log install "KBase Search API dependencies"
