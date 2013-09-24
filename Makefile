@@ -176,7 +176,7 @@ deploy-scripts:
 # The start server script needs to know the service port and needs
 # to set the $KB_DEPLOYMENT_CONFIG environment variable.
 deploy-service:
-	./setup.sh --import
+	./setup.sh --install
 
 # Deploying docs here refers to the deployment of documentation
 # of the API. We'll include a description of deploying documentation
