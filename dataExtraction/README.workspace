@@ -1,0 +1,9 @@
+To index workspaces
+
+get a data dump of the workspace (no process for this yet)
+use parsers to create tab-delimited files
+post the files to solr
+
+Todo: be able to dump workspace objects ourselves
+Big to do: be able to be notified of workspace objects that
+have changed, and post the changes to solr in real time
