@@ -81,7 +81,7 @@ displayHelp() {
     -h, --help               Display help information
     -c, --check	             Make dependency checks
     -I, --import             Import the data into Solr
-    -i, --install            Install all - service, app and doc app
+    -i, --install            Install tomcat and service code
     -s, --start              Start all search related services/apps
     -x, --stop               Stop all search related services/apps
     -t, --test               Test all the services and apps
@@ -613,8 +613,8 @@ installAll() {
 	checks
 	installTomcat
 	configService
-	configApp
-	configAppDoc
+#	configApp
+#	configAppDoc
 	
 	cp start_service $PREFIX/services/$SERVICE
 	cp stop_service $PREFIX/services/$SERVICE
