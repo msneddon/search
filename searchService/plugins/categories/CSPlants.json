@@ -3,6 +3,6 @@
     "display": "Plants",
     "solr": {
         "core": "genomes",
-        "query_string": "&fq=domain:Viridiplantae"
+        "query_string": "&fq=taxonomy:Viridiplantae"
     }
 }

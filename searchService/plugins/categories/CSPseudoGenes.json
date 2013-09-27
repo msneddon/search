@@ -3,6 +3,6 @@
     "display": "PseudoGenes",
     "solr": {
         "core": "features",
-        "query_string": "&fq=pseudo"
+        "query_string": "&fq=feature_type:pseudo"
     }
 }

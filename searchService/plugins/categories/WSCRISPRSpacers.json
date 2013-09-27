@@ -4,6 +4,6 @@
     "solr": {
         "secure": true,
         "core": "wsGenomeFeatures",
-        "query_string": "&fq=object_type:Feature&fq=feature_type:crspr&fq=feature_type:crs"
+        "query_string": "&fq=object_type:Feature AND (feature_type:crispr OR feature_type:crs)"
     }
 }
