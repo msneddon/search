@@ -3,6 +3,6 @@
     "display": "Bacteria",
     "solr": {
         "core": "genomes",
-        "query_string": "&fq=domain:Bacteria"
+        "query_string": "&fq=taxonomy:Bacteria"
     }
 }

@@ -3,6 +3,6 @@
     "display": "Fungi",
     "solr": {
         "core": "genomes",
-        "query_string": "&fq=domain:Fungi"
+        "query_string": "&fq=taxonomy:Fungi"
     }
 }

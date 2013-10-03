@@ -1,7 +1,7 @@
 {
     "name": "KBaseSearchService"
   , "description": "KBase Search API Service. It is designed to be utilized by developers. It encompasses all CDM, ADM and Workspace data."
-  , "version": "0.0.3"
+  , "version": "0.1.0"
   , "private": true
   , "dependencies": {
       "express": ">= 0.0.1"
@@ -10,5 +10,7 @@
     , "forever": "*"
     , "underscore": "*"
     , "underscore.string": "*"
+    , "watchr": "*"
+    , "async" : "*"
   }
 }

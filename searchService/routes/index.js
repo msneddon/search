@@ -1,7 +1,7 @@
-var hostname = 'niya.qb3.berkeley.edu';
+var hostname = 'localhost';
 var port = 7077;
 
-var hostURL = "http://niya.qb3.berkeley.edu:7077/";
+var hostURL = "http://localhost:7077/";
 var solrURL = hostURL;
 
 var currentRequest;
@@ -140,6 +140,10 @@ function validateInputs(req, res) {
 
     }
 
+    // check for and set the category, which will determine which core we search within
+    if (req.query.hasOwnProperty('category') && req.query.category !== null && req.query.category !== '') {
+        validatedParams.category = req.query.category;
+    }
 
     // check for and set the number of items per page
     if (req.query.hasOwnProperty('itemsPerPage') && req.query.itemsPerPage !== null && req.query.itemsPerPage !== '') {
@@ -167,10 +171,13 @@ function validateInputs(req, res) {
         }
 
         if (sortType === "alphabetical") {
-            if (core === "genomes" || core === "features") {
+            if (plugins[validatedParams.category].solr.core === "genomes" || plugins[validatedParams.category].solr.core === "features") {
                 validatedParams.sort = "scientific_name_sort";
             }
-            else if (core === "literature") {
+            else if (plugins[validatedParams.category].solr.core === "metagenomes") {
+                validatedParams.sort = "mixs_project_and_mg_name_sort";
+            }
+            else if (plugins[validatedParams.category].solr.core === "literature") {
                 validatedParams.sort = "title";
             }
             else {
@@ -210,13 +217,6 @@ function validateInputs(req, res) {
         validatedParams.queryString = "&q=''";   
     }
 
-
-    // check for and set the category, which will determine which core we search within
-    if (req.query.hasOwnProperty('category') && req.query.category !== null && req.query.category !== '') {
-        validatedParams.category = req.query.category;
-    }
-
-
     return validatedParams;
 }
 
@@ -241,6 +241,8 @@ function computeSolrQuery(options) {
         paramString = plugins[options.category].solr.query_string;
     }
     else {
+        console.log(plugins);
+        console.log(options);
         throw new Error("No such category '" + options.category + "' !");
     }
 
@@ -277,10 +279,8 @@ function computeSolrQuery(options) {
 function processRequest(ws_list) {
     var workspace_filter = "";
 
-    console.log(ws_list);
-
     for (var i = ws_list.length - 1; i >= 0; i--) {
-        if (ws_list[i][4] != 'n' || ws_list[i][5] != 'n') {
+        if (ws_list[i][4] !== 'n' || ws_list[i][5] !== 'n') {
             workspace_filter += "&fq=workspace_id:'" + ws_list[i][0] + "'";
         }
     }
