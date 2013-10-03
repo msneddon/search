@@ -24,8 +24,34 @@ cat externalids/kbFidTo*.tab | perl smartPaste.pl 1 extids solrSplitFiles/Featur
 
 # sort domains by fid
 #run collate script with sorted domain file to generate smartpaste input
+# this takes many hours
+perl ~/kbase/git/dev_container/modules/search.workspace/dataExtraction/collate_format_and_enum_domains.pl fid2allDomains.sorted.tab > fid2allDomains.sorted.collated
 #run smartpaste script with collated domain file to add to split files
+# (currently uses ~35GB memory for ~41m rows (but is relatively fast))
+# (could be rewritten to go through both sets of input files simultaneously
+# in order to save lots of memory)
+cat proteinDomains/fid2allDomains.sorted.collated | perl ~/kbase/git/dev_container/modules/search.workspace/dataExtraction/smartPaste.pl 2 domains solrSplitFiles/FeatureGenomeTaxonomy.tab.*.extids 2> err.domains
+
 #(need better notes on generating these files)
+
+# loading into solr
+
+# delete old records (this is destructive!)
+curl "http://localhost:7077/search/features/update?stream.body=<delete><query>*:*</query></delete>"
+curl "http://localhost:7077/search/admin/cores?wt=json&action=RELOAD&core=features"
+
+# add new ones
+# will take a long time! predicted ~8hr for ~40m rows
+for file in solrSplitFiles/FeatureGenomeTaxonomy.tab.sj.alphasort.extids.domains
+do
+  date
+  echo $file
+  cat ./featureHeaders.tab $file | curl http://localhost:7077/search/features/update?wt=json\&separator=%09 --data-binary @- -H 'Content-type:application/csv; charset=utf-8'
+  date
+  sleep 10
+  curl "http://localhost:7077/search/admin/cores?wt=json&action=RELOAD&core=features"
+done > features.log
+
 
 #generate external ids:
 
