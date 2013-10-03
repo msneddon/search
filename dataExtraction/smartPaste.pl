@@ -18,12 +18,19 @@ external_id
 # need a switch to decide how many columns are being pasted on
 # if pasting multiple columns, need fid column to be unique in
 # the stdin file
-@new_field_names=qw/
+# (yes, this is a stupid way to handle this switch, needs
+# to be fixed later)
+my $numColumns=shift @ARGV;
+if ($numColumns > 1)
+{
+	@new_field_names=qw/
 domain_id
 domain_desc
-/;
+	/;
+}
 
-# needs the file extension on argv[1]
+# needs the file extension on argv[2]
+# this should also be converted to a switch
 my $extension=shift @ARGV;
 
 #open (FILE, $ARGV[1]);
@@ -31,7 +38,6 @@ my $extension=shift @ARGV;
 my $i;
 while (<STDIN>) {
 	++$i;
-	warn $i . ': ' . $_ unless $i%100000;
     chomp;
     next if (/^\s*$/);
     my ($id, @vals) = split (/\t/, $_);
@@ -52,6 +58,8 @@ while (<STDIN>) {
     } else {
     	$new_field{$id} = join ("\t", @vals);
     }
+
+	warn $i . ' :: ' . $_  . ' :: ' . $new_field{$id} . "\n" unless $i%100000;
 
 #    if (defined $new_field{$id}) {
 #        $new_field{$id} .= " ". (join "\t",@vals);

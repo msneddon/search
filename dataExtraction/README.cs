@@ -14,12 +14,16 @@
 #for features core:
 
 # need to strip out " characters
+# should strip ' characters too?
 #generate scientific_name_sorted column (tr/ /_/;tr /[A-Z]/[a-z]/;)
  perl -F\\t -ane '$sortName=$F[9];$sortName=~tr/ /_/;$sortName=~tr/[A-Z]/[a-z]/;print join "\t",$F[0],$sortName;print "\n"' /kb/indexing/IndexFiles/IndexFile_*.txt > fids2scientificsortname.tab
+cat fids2scientificsortname.tab | perl smartPaste.pl 1 alphasort solrSplitFiles/FeatureGenomeTaxonomy.tab.* 2> err.alphasort
 
 #run smartpaste script with external id files to add to split files
-cat kbTo*.tab | perl smartPaste.pl extids /kb/indexing/IndexFiles/IndexFile_*.txt 2> err.extids
-#run collate script with domain files to generate smartpaste input
+cat externalids/kbFidTo*.tab | perl smartPaste.pl 1 extids solrSplitFiles/FeatureGenomeTaxonomy.tab.*.alphasort 2> err.extids
+
+# sort domains by fid
+#run collate script with sorted domain file to generate smartpaste input
 #run smartpaste script with collated domain file to add to split files
 #(need better notes on generating these files)
 
@@ -32,15 +36,26 @@ mysql -q -B -uidmappingselect -p -h devdb1.newyork.kbase.us idmapping -e \
  'select k.identifier as fid,e.identifier as externalid,d.name as externaldb from idmapping.idmapping_kbaseid k join idmapping.idmapping_kbaseid_externalids ke on (k.id=ke.kbaseid_id) join idmapping.idmapping_externalid e on (e.id=ke.externalid_id) join idmapping.idmapping_externaldb d on (e.externaldb_id=d.id) limit 5'
 
 # HMM domains
+## TIGRFAM/Pfam
+mysql -q -B -ugenomicsselect -p -h devdb1.newyork.kbase.us genomics_dev -e \
+'select f2d.fid,f2d.domainId,seqBegin,seqEnd,domainBegin,domainEnd,score,evalue,domainDb,domainName,iprId,iprName from Fid2Domain f2d join DomainInfo di using (domainId) limit 5'
+# all the rest: still need MO mappings (and some fids will not have)
+# eventually all domains should go into Fid2Domain
 mysql -q -B -uidmappingselect -p -h devdb1.newyork.kbase.us idmapping -e \
-'select k.identifier as fid,ld.locusId,ld.domainId,seqBegin,seqEnd,domainBegin,domainEnd,score,evalue,domainDb,domainName,iprId,iprName from idmapping.idmapping_kbaseid k join idmapping.idmapping_kbaseid_externalids ke on (k.id=ke.kbaseid_id) join idmapping.idmapping_externalid e on (e.id=ke.externalid_id) join genomics_dev.Locus2Domain ld on (e.identifier=ld.locusId) join genomics_dev.DomainInfo di using (domainId) where e.externaldb_id=5 limit 5'
+'select k.identifier as fid,ld.locusId,ld.domainId,seqBegin,seqEnd,domainBegin,domainEnd,score,evalue,domainDb,domainName,iprId,iprName from idmapping.idmapping_kbaseid k join idmapping.idmapping_kbaseid_externalids ke on (k.id=ke.kbaseid_id) join idmapping.idmapping_externalid e on (e.id=ke.externalid_id) join genomics_dev.Locus2Domain ld on (e.identifier=ld.locusId) join genomics_dev.DomainInfo di using (domainId) where domainDb NOT IN ("PFAM","TIGRFAMs") AND e.externaldb_id=5 limit 5'
 
 # COG families
 # Need to join the COG table to not select every single rpsblast hit to COG
-mysql -q -B -uidmappingselect -p -h devdb1.newyork.kbase.us idmapping -e \
- 'select k.identifier as fid,ld.locusId,CONCAT("COG",ld.subject) as domainId,qBegin as seqBegin,qEnd as seqEnd,sBegin as domainBegin,sEnd as domainEnd,score,evalue,"COG",di.description,funCode,cf.description from idmapping.idmapping_kbaseid k join idmapping.idmapping_kbaseid_externalids ke on (k.id=ke.kbaseid_id) join idmapping.idmapping_externalid e on (e.id=ke.externalid_id) join genomics_dev.COGrpsblast ld on (e.identifier=ld.locusId) join genomics_dev.COG c on (ld.subject=c.cogInfoId and ld.locusId=c.locusId) join genomics_dev.COGInfo di USING (cogInfoId) join genomics_dev.COGFun cf USING (funCode) where e.externaldb_id=5 limit 5'
+### new query using kbase fids
+mysql -q -B -ugenomicsselect -p -h devdb1.newyork.kbase.us genomics_dev -e \
+ 'select rps.fid,CONCAT("COG",rps.subject) as domainId,qBegin as seqBegin,qEnd as seqEnd,sBegin as domainBegin,sEnd as domainEnd,score,evalue,"COG",di.description,funCode,cf.description from genomics_dev.Fid2COGrpsblast rps join Fid2COG c on (rps.subject=c.cogInfoId and rps.fid=c.fid) join COGInfo di USING (cogInfoId) join COGFun cf USING (funCode) limit 5'
 
-# old COG query; captured all hits, not just assignments
+
+### old query using MO ids
+#mysql -q -B -uidmappingselect -p -h devdb1.newyork.kbase.us idmapping -e \
+# 'select k.identifier as fid,ld.locusId,CONCAT("COG",ld.subject) as domainId,qBegin as seqBegin,qEnd as seqEnd,sBegin as domainBegin,sEnd as domainEnd,score,evalue,"COG",di.description,funCode,cf.description from idmapping.idmapping_kbaseid k join idmapping.idmapping_kbaseid_externalids ke on (k.id=ke.kbaseid_id) join idmapping.idmapping_externalid e on (e.id=ke.externalid_id) join genomics_dev.COGrpsblast ld on (e.identifier=ld.locusId) join genomics_dev.COG c on (ld.subject=c.cogInfoId and ld.locusId=c.locusId) join genomics_dev.COGInfo di USING (cogInfoId) join genomics_dev.COGFun cf USING (funCode) where e.externaldb_id=5 limit 5'
+
+# old old COG query; captured all hits, not just assignments
 #  'select k.identifier as fid,ld.locusId,CONCAT("COG",ld.subject) as domainId,qBegin as seqBegin,qEnd as seqEnd,sBegin as domainBegin,sEnd as domainEnd,score,evalue,"COG",di.description,funCode,cf.description from idmapping.idmapping_kbaseid k join idmapping.idmapping_kbaseid_externalids ke on (k.id=ke.kbaseid_id) join idmapping.idmapping_externalid e on (e.id=ke.externalid_id) join genomics_dev.COGrpsblast ld on (e.identifier=ld.locusId) join genomics_dev.COGInfo di on (subject=cogInfoId) join genomics_dev.COGFun cf USING (funCode) where e.externaldb_id=5 limit 5'
 
 # need to combine and sort the HMM and COG files on the first column
