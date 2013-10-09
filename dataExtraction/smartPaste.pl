@@ -78,7 +78,10 @@ foreach my $filename (@ARGV)
 	    my ($id) = split (/\t/, $_);
 
     if ($new_field{$id}) {
-        print OUTPUT join ("\t", $_, $new_field{$id})."\n";
+        my $newfield=$new_field{$id};
+        $newfield=~s/^ +//;
+        $newfield=~s/ +$//;
+        print OUTPUT join ("\t", $_, $newfield)."\n";
     } else {
         print OUTPUT join ("\t", $_, $mt_vals_str)."\n";
     }

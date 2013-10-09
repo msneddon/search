@@ -5,18 +5,32 @@
 #use all_entities_Genome, all_entities_Feature, genomes_to_taxonomy
 #to get tables
 #run Flatten script to combine to one
-# Split script on combined feature file for easier solr loading
-#(may need to generate scientific_name_sort field)
 
 #for genomes core, need to combine Genome and Taxonomy files, and
 #generate scientific_name_sorted column (tr/ /_/;tr /[A-Z]/[a-z]/;)
+perl -F\\t -ane '$sortName=$F[3];$sortName=~tr/ /_/;$sortName=~tr/[A-Z]/[a-z]/;print join "\t",$F[0],$sortName;print "\n"' Genome.txt > genomes2scientificsortname.tab
+# use smartPaste to paste to Genome.txt?
+perl ~/kbase/git/dev_container/modules/search.workspace/dataExtraction/smartPaste.pl 1 taxonomies Genome.txt < GenomeTaxonomies.txt
+perl ~/kbase/git/dev_container/modules/search.workspace/dataExtraction/smartPaste.pl 1 scinamesort Genome.txt.taxonomies < genomes2scientificsortname.tab
+
+# loading into solr
+
+# delete old records (this is destructive!)
+curl "http://localhost:7077/search/genomes/update?stream.body=<delete><query>*:*</query></delete>"
+curl "http://localhost:7077/search/admin/cores?wt=json&action=RELOAD&core=genomes"
+# add the new genomes
+#cat ./genomeHeaders.tab Genome.txt.taxonomies.scinamesort | curl http://localhost:7077/search/genomes/update?wt=json\&separator=%09 --data-binary @- -H 'Content-type:application/csv; charset=utf-8'
+# no MD5 field currently in the schema
+cut -f1-12,14- ./genomeHeaders.tab Genome.txt.taxonomies.scinamesort | curl http://localhost:7077/search/genomes/update?wt=json\&separator=%09 --data-binary @- -H 'Content-type:application/csv; charset=utf-8'
+curl "http://localhost:7077/search/admin/cores?wt=json&action=RELOAD&core=genomes"
+
 
 #for features core:
 
 # need to strip out " characters
 # should strip ' characters too?
 #generate scientific_name_sorted column (tr/ /_/;tr /[A-Z]/[a-z]/;)
- perl -F\\t -ane '$sortName=$F[9];$sortName=~tr/ /_/;$sortName=~tr/[A-Z]/[a-z]/;print join "\t",$F[0],$sortName;print "\n"' /kb/indexing/IndexFiles/IndexFile_*.txt > fids2scientificsortname.tab
+perl -F\\t -ane '$sortName=$F[9];$sortName=~tr/ /_/;$sortName=~tr/[A-Z]/[a-z]/;print join "\t",$F[0],$sortName;print "\n"' /kb/indexing/IndexFiles/IndexFile_*.txt > fids2scientificsortname.tab
 cat fids2scientificsortname.tab | perl smartPaste.pl 1 alphasort solrSplitFiles/FeatureGenomeTaxonomy.tab.* 2> err.alphasort
 
 #run smartpaste script with external id files to add to split files
@@ -29,7 +43,7 @@ perl ~/kbase/git/dev_container/modules/search.workspace/dataExtraction/collate_f
 #run smartpaste script with collated domain file to add to split files
 # (currently uses ~35GB memory for ~41m rows (but is relatively fast))
 # (could be rewritten to go through both sets of input files simultaneously
-# in order to save lots of memory)
+# in order to save lots of memory; would need to sort FeatureGenomeTaxonomy files)
 cat proteinDomains/fid2allDomains.sorted.collated | perl ~/kbase/git/dev_container/modules/search.workspace/dataExtraction/smartPaste.pl 2 domains solrSplitFiles/FeatureGenomeTaxonomy.tab.*.extids 2> err.domains
 
 #(need better notes on generating these files)
