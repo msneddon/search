@@ -3,6 +3,8 @@ var port = 7077;
 
 var hostURL = "http://localhost:7077/";
 var solrURL = hostURL;
+var solr_user = 'admin';
+var solr_pass = '***REMOVED***';
 
 var currentRequest;
 var currentResponse;
@@ -306,7 +308,14 @@ exports.search = function(req, res) {
 
     console.log(solr_request);
 
-    request(solr_request, function (error, response, body) {
+//    request(solr_request, function (error, response, body) {
+    request({
+	'uri':solr_request,
+	'auth': {
+		'user':solr_user,
+		'pass':solr_pass,
+		},
+	} , function (error, response, body) {
         if (!error && response.statusCode == 200) {
             var allResp = JSON.parse(body);
 
