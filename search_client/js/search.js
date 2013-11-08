@@ -4,7 +4,7 @@ var workspace_url = "https://kbase.us/services/workspace_service/";
 // fba_url = "https://bio-data-1.mcs.anl.gov/services/fbaModelServices"
 var fba_url = "https://kbase.us/services/fba_model_services";
 //var search_api_url = "https://niya.qb3.berkeley.edu/services/search?";
-var search_api_url = "https://niya.qb3.berkeley.edu/services/search?";
+var search_api_url = "https://kbase.us/services/search?";
 
 var genome_landing_page = "http://140.221.84.217/genome_info/showGenome.html?id=";
 var feature_landing_page = "http://140.221.84.217/feature_info/feature.html?id=";
@@ -90,7 +90,7 @@ function loadCategories() {
     var search_api_url = "";
     var queryOptions = {};
 
-    $.getJSON("js/categoryInfo.json", function (data) {
+    $.getJSON("js/categoryInfo_publicOnly.json", function (data) {
         categoryInfo = data;    
         
         for (var p in categoryInfo.structure) {
