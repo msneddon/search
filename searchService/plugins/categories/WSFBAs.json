@@ -1,0 +1,9 @@
+{
+    "category": "WSFBAs",
+    "display": "FBAs",
+    "solr": {
+        "secure": true,
+        "core": "wsModels",
+        "query_string": ""
+    }
+}

@@ -1,0 +1,9 @@
+{
+    "category": "WSCRISPRSpacers",
+    "display": "CRISPR Spacers",
+    "solr": {
+        "secure": true,
+        "core": "wsGenomeFeatures",
+        "query_string": "&fq=object_type:Feature AND (feature_type:crispr OR feature_type:crs)"
+    }
+}

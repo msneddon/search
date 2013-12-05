@@ -1,0 +1,8 @@
+{
+    "category": "WSPseudoGenes",
+    "display": "PseudoGenes",
+    "solr": {
+        "core": "wsGenomeFeatures",
+        "query_string": "&fq=object_type:Feature&fq=pseudo"
+    }
+}

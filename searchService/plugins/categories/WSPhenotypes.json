@@ -1,0 +1,9 @@
+{
+    "category": "WSPhenotypes",
+    "display": "Phenotypes",
+    "solr": {
+        "secure": true,
+        "core": "wsPhenotypeSets",
+        "query_string": "&fq=object_type:Phenotype"
+    }
+}

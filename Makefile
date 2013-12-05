@@ -176,6 +176,12 @@ deploy-scripts:
 # The start server script needs to know the service port and needs
 # to set the $KB_DEPLOYMENT_CONFIG environment variable.
 deploy-service:
+	./setup.sh --install
+
+deploy-solr:
+	./setup.sh --install-solr
+
+deploy-data:
 	./setup.sh --import
 
 # Deploying docs here refers to the deployment of documentation

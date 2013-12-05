@@ -1,0 +1,8 @@
+{
+    "category": "CSFungi",
+    "display": "Fungi",
+    "solr": {
+        "core": "genomes",
+        "query_string": "&fq=taxonomy:Fungi"
+    }
+}

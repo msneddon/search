@@ -1,0 +1,8 @@
+{
+    "category": "CSPublications",
+    "display": "Publications",
+    "solr": {
+        "core": "literature",
+        "query_string": ""
+    }
+}

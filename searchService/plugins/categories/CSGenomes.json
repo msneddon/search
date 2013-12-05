@@ -1,0 +1,8 @@
+{
+    "category": "CSGenomes",
+    "display": "Genomes",
+    "solr": {
+        "core": "genomes",
+        "query_string": "&fl=gid,pegs,rnas,scientific_name,complete,prokaryotic,dna_size,contigs,domain,genetic_code,phenotype,g_source_id,taxonomy"
+    }
+}

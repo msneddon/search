@@ -72,6 +72,7 @@
    <field name="pegs" type="text_general" indexed="true" stored="true"/>
    <field name="rnas" type="text_general" indexed="true" stored="true"/>
    <field name="scientific_name" type="text_general" indexed="true" stored="true"/>
+   <field name="scientific_name_sort" type="string" indexed="true" stored="true"/>
    <field name="complete" type="text_general" indexed="true" stored="true"/>
    <field name="prokaryotic" type="text_general" indexed="true" stored="true"/>
    <field name="dna_size" type="text_general" indexed="true" stored="true"/>

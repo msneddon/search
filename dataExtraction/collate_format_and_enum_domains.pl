@@ -6,17 +6,19 @@
 $merge_str = ': ';
 $join_str = ' !##! ';
 
+# kkeller changed column indices (removed locusId from output files,
+# since the new Fid2* tables don't have it)
 $merge_cols = +[ 
-    +[ 2 ], 
-    +[ 10 ], 
-    +[ 2, 10 ],
+    +[ 1 ], 
+    +[ 9 ], 
+    +[ 1, 9 ],
+    +[ 10 ],
     +[ 11 ],
-    +[ 12 ],
-    +[ 11, 12],
+    +[ 10, 11],
     ];
 
 $enum_prefix = +{
-    '2' => +{
+    '1' => +{
 	'PF' => +['PF', 'PFAM'],
 	'TIGR' => +['TIGR', 'TF', 'TIGRFAM'],
 	'PIRSF' => +['PIRSF', 'PIR'],

@@ -16,7 +16,7 @@ echo
 ## 
 # Globals
 ##
-VERSION="0.0.1"
+VERSION="0.1.0"
 SERVICE="search"
 LOCALBASE=`pwd`
 L_PREFIX=$LOCALBASE/build
@@ -32,6 +32,9 @@ GIT=""
 WGET=""
 CURL=""
 NODE=""
+
+# Deployment
+DEPLOY_BASE=$PREFIX/services/$SERVICE
 
 # Tomcat
 TOMCAT_BASE="$RUNTIME/tomcat"
@@ -54,16 +57,16 @@ API_HOST="localhost"
 API_PORT=7078
 
 # Search Application
-APPN=$LOCALBASE/searchWebapp
-APPN_PREFIX=$PREFIX/services/$SERVICE/searchWebapp
-APPN_HOST="localhost"
-APPN_PORT=7079
+#APPN=$LOCALBASE/searchWebapp
+#APPN_PREFIX=$PREFIX/services/$SERVICE/searchWebapp
+#APPN_HOST="localhost"
+#APPN_PORT=7079
 
 # Search Doc Application
-APPDOC=$LOCALBASE/searchDocapp
-APPDOC_PREFIX=$PREFIX/services/$SERVICE/searchDocapp
-APPDOC_HOST="localhost"
-APPDOC_PORT=7080
+#APPDOC=$LOCALBASE/searchDocapp
+#APPDOC_PREFIX=$PREFIX/services/$SERVICE/searchDocapp
+#APPDOC_HOST="localhost"
+#APPDOC_PORT=7080
 
 
 ##
@@ -81,7 +84,7 @@ displayHelp() {
     -h, --help               Display help information
     -c, --check	             Make dependency checks
     -I, --import             Import the data into Solr
-    -i, --install            Install all - service, app and doc app
+    -i, --install            Install tomcat and service code
     -s, --start              Start all search related services/apps
     -x, --stop               Stop all search related services/apps
     -t, --test               Test all the services and apps
@@ -308,7 +311,12 @@ installTomcat() {
 	cp  -r $LOCALBASE/solr/Catalina  $TOMCAT_ETC
 	sed -i s#SOLR_PREFIX#${SOLR_PREFIX}#g $SOLR_DESCRIPTOR
 
+	log status OK
+	echo;
 
+}
+
+installSolr() {
 	log creating "solr deployment templates"
 	test -d $SOLR_PREFIX || { log creating $SOLR_PREFIX; mkdir -p $SOLR_PREFIX; }
 	log creating cores
@@ -498,6 +506,7 @@ configService() {
 	
 	log adding "KBase Search API configuration"
 	test -d $API_PREFIX && rm -rf $API_PREFIX
+	test -d $DEPLOY_BASE || { log creating $DEPLOY_BASE; mkdir -p $DEPLOY_BASE; }
 	cp  -r $API  $API_PREFIX
 
 	log install "KBase Search API dependencies"
@@ -608,8 +617,8 @@ installAll() {
 	checks
 	installTomcat
 	configService
-	configApp
-	configAppDoc
+#	configApp
+#	configAppDoc
 	
 	cp start_service $PREFIX/services/$SERVICE
 	cp stop_service $PREFIX/services/$SERVICE
@@ -635,7 +644,7 @@ startTomcat() {
 # Import All
 ##
 importAll() {
-	test -d $SOLR_PREFIX || alert "Run --install before importing"
+	test -d $SOLR_PREFIX || alert "Run --install-solr before importing"
 	checks
 	startTomcat
 	importPublications literature publication.txt
@@ -663,6 +672,7 @@ else
       -x|--stop|stopall) stopAll; exit ;;
       -t|--test|test) testAll; exit ;;
 			--install-tomcat) installTomcat; exit;;
+			--install-solr) installSolr; exit;;
 			--install-service) configService; exit;;
 			--install-app) configApp; exit;;
 			--install-doc) configAppDoc; exit;;
