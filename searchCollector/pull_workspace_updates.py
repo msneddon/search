@@ -6,55 +6,33 @@ import bson
 
 import json
 import datetime
-import base64
 import cStringIO
-import urllib2
+import requests
 
-def find_genome_updates_since(timestamp):
-    mongoUpdates = list()
 
-    mongoClient = pymongo.MongoClient(host='198.128.58.84',slaveOk=True)
-    db = mongoClient.workspace_service
-    collection = db.workspaceObjects
-    # can also set read preference here i think
-    #cursor=collection.find({"type":"Genome","moddate":{"$gt":"2013-11-05T18"}},{"id":1,"workspace":1})
-    # want to use a date on the fly (python DateTime object?)
-    cursor = collection.find({"moddate":{"$gt":timestamp}},{"uuid":1,"id":1,"workspace":1,"type":1})
-    # returns a cursor object (can be used as array?)
+def find_genome_updates_since(mongoClient, timestamp):
+    #connect to the Mongo server and find out which objects were saved after a certain datetime
+    cursor = self.mongoClient['workspace']['workspaceObjVersions'].find({"savedate" : {"$gt" : timestamp}})
 
-    #print cursor.count()
-    #print cursor[50]
+    #filter out only Genome objects
+    mongoUpdates = [c for c in cursor if "KBGA.Genome" in c['type']]
 
-    for c in cursor:
-        if c['type'] != "Genome":
-            continue
-        else:
-            mongoUpdates.append(c['_id'])
-
+    #close the mongo cursor
     cursor.close()
-    mongoClient.close()
 
+    #return the objects in chronological order
     return sorted(mongoUpdates)
 
 
-def get_updated_object(id):
-    mongoId = bson.objectid.ObjectId(id)
+def get_updated_object(mongoClient, mongoObject):
+    #use the checksum from this mongo workspace object to find the associated shock node
+    shockNode = mongoClient['workspace']['shock_nodeMap'].find_one({'chsum': mongoObject['chksum']})   
 
-    mongoClient = pymongo.MongoClient('198.128.58.84', slaveOk=True)
-
-    updatedObject = mongoClient.workspace_service.workspaceObjects.find_one({'_id': mongoId})
-
-    dataBlob = mongoClient.workspace_service.fs.files.find_one({'chsum': updatedObject['chsum']})   
-    gridFSClient = gridfs.GridFS(mongoClient.workspace_service)
-    dataString = gridFSClient.get(dataBlob['_id']).read()
-
-    mongoClient.close()
-
-    return updatedObject, json.loads(dataString)
+    return shockNode['node']
 
 
 def flatten_genome_object(meta, data):
-    mongoClient = pymongo.MongoClient('198.128.58.84', slaveOk=True)
+    mongoClient = pymongo.MongoClient(mongoServer, slaveOk=True)
 
     outBuffer = cStringIO.StringIO()
 
@@ -254,9 +232,8 @@ def flatten_genome_object(meta, data):
 
 
 def push_to_solr(data):    
-    solr_url = "http://192.168.1.201:7077/search/wsGenomeFeatures/update?wt=json&separator=%09"
-
-    commit_url = "http://192.168.1.201:7077/search/admin/cores?wt=json&action=RELOAD&core=wsGenomeFeatures"
+    solr_url = "http://localhost:7077/search/wsGenomeFeatures/update?wt=json&separator=%09"
+    commit_url = "http://localhost:7077/search/admin/cores?wt=json&action=RELOAD&core=wsGenomeFeatures"
 
     username = "admin"
     password = "***REMOVED***"
@@ -265,19 +242,13 @@ def push_to_solr(data):
     outFile.write(data)
     outFile.close()
 
-    request = urllib2.Request(solr_url, data)
-    base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-    request.add_header("Authorization", "Basic %s" % base64string)
-    request.add_header("Content-type", "application/csv;charset=utf-8")
+    response = requests.post(solr_url, data=data, auth=(username, password))
 
-    response = urllib2.urlopen(request)
-
-    request = urllib2.Request(commit_url, "")
-    base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
-    request.add_header("Authorization", "Basic %s" % base64string)
-    request.add_header("Content-type", "application/csv;charset=utf-8")
+    #base64string = base64.encodestring('%s:%s' % (username, password)).replace('\n', '')
+    #request.add_header("Authorization", "Basic %s" % base64string)
+    #request.add_header("Content-type", "application/csv;charset=utf-8")
     
-    response = urllib2.urlopen(request)
+    response = requests.post(commit_url, data="", auth=(username, password))
     return response
 
 
@@ -288,11 +259,16 @@ if __name__ == "__main__":
     pr = cProfile.Profile()
     pr.enable()
 
+    mongoServer = 'localhost'
+    #mongoServer = '198.128.58.84'
+    
+    mongoClient = pymongo.MongoClient(host=mongoServer,slaveOk=True)
+
     timestamp = datetime.datetime.now() - datetime.timedelta(days=30)
 
     findUpdatesStartTime = datetime.datetime.now()
 
-    newObjects = find_genome_updates_since(timestamp.isoformat())
+    newObjects = find_genome_updates_since(mongoClient, timestamp.isoformat())
 
     findUpdatesEndTime = datetime.datetime.now()
 
@@ -303,7 +279,7 @@ if __name__ == "__main__":
     for x in newObjects:
         getUpdateStartTime = datetime.datetime.now()
 
-        meta, data = get_updated_object(x)   
+        id = get_updated_object(x)   
 
         getUpdateEndTime = datetime.datetime.now()
 
@@ -314,7 +290,7 @@ if __name__ == "__main__":
 
         flattenStartTime = datetime.datetime.now()
         
-        solrString = flatten_genome_object(meta, data)
+        solrString = flatten_genome_object(id)
 
         flattenEndTime = datetime.datetime.now()
                 
