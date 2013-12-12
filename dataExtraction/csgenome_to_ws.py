@@ -8,7 +8,7 @@ import biokbase.cdmi.client
 cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
 
-genomes = ['kb|g.0']
+genomes = ['kb|g.3562','kb|g.0']
 
 genomeObjects = dict()
 
@@ -104,7 +104,6 @@ for g in genomes:
 #        genomeObjects[g]["features"][x]["protein_families"] = protein_families[x]
         fid = x[1]['from_link']
         family_id = x[1]['to_link']
-# want to do a push-like op instead
         if not genomeObjects[g]["features"][fid].has_key('protein_families'):
             genomeObjects[g]["features"][fid]["protein_families"] = list()
         genomeObjects[g]["features"][fid]["protein_families"].append( families[family_id])
@@ -114,6 +113,7 @@ for g in genomes:
 
     start = datetime.datetime.now()
 
+# literature might have to traverse proteinsequence
     literature = cdmi_api.fids_to_literature(fids)
 
     end = datetime.datetime.now()
@@ -129,22 +129,28 @@ for g in genomes:
 
     start = datetime.datetime.now()
 
-    roles = cdmi_api.fids_to_roles(fids)
-#    roles = cdmi_entity_api.get_entity_Role(fids,['id','annotator','comment','annotation_time'])
+#    roles = cdmi_api.fids_to_roles(fids)
+    roles = cdmi_entity_api.get_relationship_HasFunctional(fids,[],['from_link','to_link'],[])
+#    print >> sys.stderr, roles
 
     end = datetime.datetime.now()
     print  >> sys.stderr, "querying roles " + str(end - start)
 
     start = datetime.datetime.now()
 
-    for x in roles.keys():
-        genomeObjects[g]["features"][x]["roles"] = roles[x]
+    for x in roles:
+        fid = x[1]['from_link']
+        role = x[1]['to_link']
+        if not genomeObjects[g]["features"][fid].has_key('roles'):
+            genomeObjects[g]["features"][fid]["roles"] = list()
+        genomeObjects[g]["features"][fid]["roles"].append( role )
 
     end = datetime.datetime.now()
     print  >> sys.stderr, "copying roles " + str(end - start)
 
     start = datetime.datetime.now()
 
+# subsystems may have to traverse a bunch of entities
     subsystems = cdmi_api.fids_to_subsystems(fids)
 
     end = datetime.datetime.now()
@@ -160,6 +166,7 @@ for g in genomes:
 
     start = datetime.datetime.now()
 
+# co-occurring fids needs to go to pairset for score
     co_occurring_fids = cdmi_api.fids_to_co_occurring_fids(fids)
 
     end = datetime.datetime.now()
@@ -175,15 +182,23 @@ for g in genomes:
 
     start = datetime.datetime.now()
 
-    locations = cdmi_api.fids_to_locations(fids)
+# need IsLocatedIn relationship
+#    locations = cdmi_api.fids_to_locations(fids)
+    locations = cdmi_entity_api.get_relationship_IsLocatedIn(fids,[],['from_link','to_link','ordinal','begin','len','dir'],[])
+#    print >> sys.stderr, locations
 
     end = datetime.datetime.now()
     print  >> sys.stderr, "querying locations " + str(end - start)
 
     start = datetime.datetime.now()
 
-    for x in locations.keys():
-        genomeObjects[g]["features"][x]["location"] = locations[x]
+    for x in locations:
+#        genomeObjects[g]["features"][x]["location"] = locations[x]
+        fid = x[1]['from_link']
+        if not genomeObjects[g]["features"][fid].has_key('locations'):
+            genomeObjects[g]["features"][fid]["locations"] = list()
+        genomeObjects[g]["features"][fid]["locations"].append( x[1] )
+
     
     end = datetime.datetime.now()
     print  >> sys.stderr, "copying locations " + str(end - start)
