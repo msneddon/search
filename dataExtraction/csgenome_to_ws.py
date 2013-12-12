@@ -41,7 +41,7 @@ for g in genomes:
     fids = cdmi_api.genomes_to_fids([g],[])[g]
 
     end = datetime.datetime.now()
-    print  >> sys.stderr, "querying features " + str(end - start)
+    print  >> sys.stderr, "querying genome features " + str(end - start)
 
     start = datetime.datetime.now()
 
@@ -50,7 +50,7 @@ for g in genomes:
         genomeObjects[g]["features"][x] = dict()
 
     end = datetime.datetime.now()
-    print  >> sys.stderr, "copying features " + str(end - start)
+    print  >> sys.stderr, "copying genome features " + str(end - start)
 
     start = datetime.datetime.now()
 
@@ -65,21 +65,23 @@ for g in genomes:
     for x in annotations.keys():
         genomeObjects[g]["features"][x]["annotation"] = annotations[x]
 
-# functions are in feature entity
-#    start = datetime.datetime.now()
+# functions are in feature entity?
+    start = datetime.datetime.now()
 
 #    functions = cdmi_api.fids_to_functions(fids)
+    features = cdmi_entity_api.get_entity_Feature(fids,['id','feature-type','source-id','sequence-length','function','alias'])
 
-#    end = datetime.datetime.now()
-#    print  >> sys.stderr, "querying functions " + str(end - start)
+    end = datetime.datetime.now()
+    print  >> sys.stderr, "querying feature entity for functions " + str(end - start)
 
-#    start = datetime.datetime.now()
+#    print >> sys.stderr, features
+    start = datetime.datetime.now()
 
-#    for x in functions.keys():
-#        genomeObjects[g]["features"][x]["function"] = functions[x]
+    for x in features.keys():
+        genomeObjects[g]["features"][x]
 
-#    end = datetime.datetime.now()
-#    print "copying functions " + str(end - start)
+    end = datetime.datetime.now()
+    print >> sys.stderr, "copying feature entity for functions " + str(end - start)
 
     start = datetime.datetime.now()
 
