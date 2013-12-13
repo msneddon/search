@@ -176,8 +176,8 @@ for g in genomes:
 
 # dna sequences will be slow no matter what
     start = datetime.datetime.now()
-#    dna_seqs = cdmi_api.fids_to_dna_sequences(fids)
     dna_seqs = dict()
+    dna_seqs = cdmi_api.fids_to_dna_sequences(fids)
 
     end = datetime.datetime.now()
     print  >> sys.stderr, "querying dna seqs " + str(end - start)
@@ -314,7 +314,7 @@ for g in genomes:
 #    co_expressed_fids = cdmi_api.fids_to_coexpressed_fids(fids)
 
     end = datetime.datetime.now()
-    print  >> sys.stderr, "querying co-expressed " + str(end - start)
+    print  >> sys.stderr, "not! querying co-expressed " + str(end - start)
 
     start = datetime.datetime.now()
 
