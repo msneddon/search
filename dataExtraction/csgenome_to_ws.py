@@ -236,12 +236,11 @@ for g in genomes:
 #    end = datetime.datetime.now()
 #    print  >> sys.stderr, "copying dna seqs " + str(end - start)
 
-
     # feature publications
     start = datetime.datetime.now()
 
     # literature might have to traverse proteins
-    # (which we may need anyway?)
+    # (which we may need anyway)
     
     publications = cdmi_entity_api.get_relationship_IsATopicOf(proteins.values(),[],['from_link','to_link'],[])
 #    print >> sys.stderr, publications
