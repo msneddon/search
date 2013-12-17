@@ -46,7 +46,7 @@ for g in genomes:
     genomeObjects[g]["gc_content"] = float(genome_data["gc_content"])
     genomeObjects[g]["complete"] = int(genome_data["complete"])
 
-    #genomeObjects[g]["domain"] = genome_data['taxonomy'][0]
+    genomeObjects[g]["domain"] = genome_data['taxonomy'].split(';')[0]
     #genomeObjects[g]["source_id"] = g
 
     genomeObjects[g]["contig_lengths"] = list()
@@ -68,23 +68,21 @@ for g in genomes:
     # the Genome object, insert it first, get its workspace path,
     # then use that to populate contigset_ref in the Genome object
 
-    genomeObjects[g]["ContigSet"] = dict()
+    contigSet = dict()
 
-    # what is this supposed to be?
-    genomeObjects[g]["ContigSet"]["id"] = ""
-    genomeObjects[g]["ContigSet"]["name"] = ""
-    genomeObjects[g]["ContigSet"]["md5"] = ""
-    genomeObjects[g]["ContigSet"]["source_id"] = ""
-    genomeObjects[g]["ContigSet"]["source"] = "KBase Central Store"
-    genomeObjects[g]["ContigSet"]["type"] = "Organism"
-    genomeObjects[g]["ContigSet"]["reads_ref"] = None
-    genomeObjects[g]["ContigSet"]["fasta_ref"] = None
-    genomeObjects[g]["ContigSet"]["contigs"] = list()
+    contigSet["id"] = ""
+    contigSet["name"] = ""
+    contigSet["md5"] = genomeObjects[g]["md5"]
+    contigSet["source_id"] = ""
+    contigSet["source"] = "KBase Central Store"
+    contigSet["type"] = "Organism"
+    contigSet["reads_ref"] = None
+    contigSet["fasta_ref"] = None
+    contigSet["contigs"] = list()
 
     start = time.time()
 
     contig_ids = cdmi_api.genomes_to_contigs([g])[g]
-    #genomeObjects[g]["contig_ids"] = contig_ids[g]
 
     end = time.time()
     print  >> sys.stderr, "querying contig ids " + str(end - start)
@@ -116,10 +114,9 @@ for g in genomes:
         contig["length"] = int(contig_lengths[x])
         contig["md5"] = contig_md5s[x]
         contig["sequence"] = contig_sequences[x]
-        # if we don't have this information, let's not add a key for them
-#        contig["name"] = ""
-#        contig["description"] = ""        
-        genomeObjects[g]["ContigSet"]["contigs"].append(contig)
+        
+        contigSet["contigs"].append(contig)
+        
         # should this be a dict?
         genomeObjects[g]["contig_lengths"].append(int(contig_lengths[x]))
 
@@ -131,21 +128,10 @@ for g in genomes:
     # collect all data needed for building Feature objects
 
     # feature ids
-    start = time.time()
-    
     fids = cdmi_api.genomes_to_fids([g],[])[g]
 
-    end = time.time()
-    print  >> sys.stderr, "querying genome features " + str(end - start)
-
     # locations need IsLocatedIn relationship
-    start = time.time()
-
     isLocatedIn = cdmi_entity_api.get_relationship_IsLocatedIn(fids,[],['from_link','to_link','ordinal','begin','len','dir'],[])
-
-    end = time.time()
-    print  >> sys.stderr, "querying locations " + str(end - start)
-
 
     # feature annotations
     start = time.time()
@@ -159,12 +145,7 @@ for g in genomes:
 
 
     # feature function, type, alias, source_id
-    start = time.time()
-
     features = cdmi_entity_api.get_entity_Feature(fids,['id','feature-type','source-id','sequence-length','function','alias'])
-
-    end = time.time()
-    print  >> sys.stderr, "querying feature entity for functions " + str(end - start)
 
     # feature protein families
     start = time.time()
@@ -195,15 +176,15 @@ for g in genomes:
     print  >> sys.stderr, "querying protein seqs " + str(end - start)
 
     # feature dna sequences
-    dna_seqs = dict()
+    #dna_seqs = dict()
 
-    start = time.time()    
+    #start = time.time()    
     # this is horribly slow
-    for x in xrange(len(fids)):
-        dna_seqs[fids[x]] = cdmi_api.fids_to_dna_sequences([fids[x]])
-
-        end = time.time()
-        print  >> sys.stderr, "feature #" + str(x) + " querying dna seqs, elapsed time " + str(end - start)
+    #for x in xrange(len(fids)):
+    #    dna_seqs[fids[x]] = cdmi_api.fids_to_dna_sequences([fids[x]])
+    #
+    #    end = time.time()
+    #    print  >> sys.stderr, "feature #" + str(x) + " querying dna seqs, elapsed time " + str(end - start)
 
     # feature publications
     start = time.time()
@@ -219,12 +200,7 @@ for g in genomes:
     print  >> sys.stderr, "querying literature " + str(end - start)
 
     # feature roles
-    start = time.time()
-
     hasFunctional = cdmi_entity_api.get_relationship_HasFunctional(fids,[],['from_link','to_link'],[])
-
-    end = time.time()
-    print  >> sys.stderr, "querying roles " + str(end - start)
 
     # subsystems may have to traverse a bunch of entities
     start = time.time()
@@ -264,24 +240,24 @@ for g in genomes:
     # want IsCoregulatedWith?  still horribly slow for e.coli, times out
     # probably need a better way to do this
 
-    start = time.time()
+    #start = time.time()
 
-    coexpressed = dict()
-    for x in fids:
-        coe = cdmi_api.fids_to_coexpressed_fids([x])
-
-        if coe.has_key(x):
-            if not coexpressed.has_key(x):
-                coexpressed[x] = list()
-            
-            coexfids=dict()
-            for coexfid in coe[x]:
-                coexfids['scored_fid'] = coexfid[0]
-                coexfids['score'] = coexfid[1]
-            coexpressed[x].append(coexfids)
-
-        end = time.time()
-        print  >> sys.stderr, "querying co-expressed, elapsed time " + str(end - start)
+    #coexpressed = dict()
+    #for x in fids:
+    #    coe = cdmi_api.fids_to_coexpressed_fids([x])
+    #
+    #    if coe.has_key(x):
+    #        if not coexpressed.has_key(x):
+    #            coexpressed[x] = list()
+    #        
+    #        coexfids=dict()
+    #        for coexfid in coe[x]:
+    #            coexfids['scored_fid'] = coexfid[0]
+    #            coexfids['score'] = coexfid[1]
+    #        coexpressed[x].append(coexfids)
+    #
+    #    end = time.time()
+    #    print  >> sys.stderr, "querying co-expressed, elapsed time " + str(end - start)
 
     # co-occurring fids needs to go to pairset for score
     start = time.time()
@@ -314,7 +290,7 @@ for g in genomes:
         location['ordinal'] = x[1]['ordinal']
         locations[fid].append(location)
 
-
+    #copy annotation info
     annotations = dict()
     for x in isAnnotatedBy:
         fid = x[1]['from_link']
@@ -393,60 +369,59 @@ for g in genomes:
         featureObject = dict()
         featureObject["id"] = x
         featureObject["genome_id"] = g
+        
         if locations.has_key(x):
             featureObject["location"] = locations[x]
+        
         if features.has_key(x):
             featureObject["type"] = features[x]['feature_type']
             featureObject["function"] = features[x]['function']
+            
             if features[x].has_key('alias'):
                 featureObject["aliases"] = features[x]['alias']
+        
         if proteins.has_key(x):
-	        featureObject["md5"] = proteins[x]
-		if protein_translations.has_key(proteins[x]):
-                    featureObject["protein_translation"] = protein_translations[proteins[x]]['sequence']
-                    featureObject["protein_translation_length"] = len(protein_translations[proteins[x]]['sequence'])
-        if dna_seqs.has_key(x):
-            featureObject["dna_sequence"] = dna_seqs[x]
-            featureObject["dna_sequence_length"] = len(dna_seqs[x])
+            featureObject["md5"] = proteins[x]
+
+            if protein_translations.has_key(proteins[x]):
+                featureObject["protein_translation"] = protein_translations[proteins[x]]['sequence']
+                featureObject["protein_translation_length"] = len(featureObject["protein_translation"])
+
+        featureObject["dna_sequence"] = cdmi_api.fids_to_dna_sequences([x])
+        featureObject["dna_sequence_length"] = len(featureObject["dna_sequence"])
+
         if protein_families.has_key(x):
             featureObject["protein_families"] = protein_families[x]
+        
         if annotations.has_key(x):
             featureObject["annotations"] = annotations[x]
+        
         if publications.has_key(x):
             featureObject["publications"] = publications[x]
+        
         if roles.has_key(x):
             featureObject["roles"] = roles[x]
+        
         if subsystems.has_key(x):
             featureObject["subsystems"] = subsystems[x]
+        
         if subsystem_data.has_key(x):
-            featureObject["subsystem_data"] = list()
-            for ss in subsystem_data[x]:
-                this_ss = dict()
-                this_ss['subsystem'] = ss[0]
-                this_ss['variant'] = ss[1]
-                this_ss['role'] = ss[2]
-                featureObject['subsystem_data'].append(this_ss)
+            featureObject["subsystem_data"] = [{'subsystem': s[0], 'variant': s[1], 'role': s[2]} for s in subsystem_data[x]]
+        
         if regulon_data.has_key(x):
-#            featureObject["regulon_data"] = list()
             featureObject["regulon_data"] = regulon_data[x]
+        
         if atomic_regulons.has_key(x):
-            featureObject["atomic_regulons"] = list()
-            for ar in atomic_regulons[x]:
-                this_ar = dict()
-                this_ar['atomic_regulon'] = ar[0]
-                this_ar['atomic_regulon_size'] = ar[1]
-                featureObject["atomic_regulons"].append(this_ar)
+            featureObject["atomic_regulons"] = [{'atomic_regulon': ar[0], 'atomic_regulon_size': ar[1]} for ar in atomic_regulons[x]]
+        
         if co_occurring.has_key(x):
-            featureObject["co_occurring"] = list()
-            for coo in co_occurring[x]:
-                this_coo = dict()
-                this_coo['scored_fid'] = coo[0]
-                this_coo['score'] = coo[1]
-                featureObject["co_occurring"].append(this_coo)
-# these are not populated yet
-# not sure of the types of these at the moment
+            featureObject["co_occurring"] = [{'scored_fid': c[0], 'score': c[1]} for c in co_occurring[x]]
+
+        # these are not populated yet
+        # not sure of the types of these at the moment
+        coexpressed = cdmi_api.fids_to_coexpressed_fids([x])
+
         if coexpressed.has_key(x):
-#            featureObject["coexpressed"] = list()
             featureObject["coexpressed"] = coexpressed[x]
 
 # ultimately will insert these into workspace
@@ -457,7 +432,12 @@ for g in genomes:
         # (or can batch a list of featureObjects, but don't want to batch
         # too many or it'll bork)
 
-        #print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
+        print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
+
+        
+
+        import sys
+        sys.exit(0)
 
 
     #start = time.time()
