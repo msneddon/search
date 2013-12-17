@@ -261,10 +261,10 @@ for g in genomes:
     # want IsCoregulatedWith?  still horribly slow for e.coli, times out
     # probably need a better way to do this
 
+    start = time.time()
+
     coexpressed = dict()
     for x in fids:
-        start = time.time()
-
         coe = cdmi_api.fids_to_coexpressed_fids([x])
 
         if coe.has_key(x):
@@ -278,7 +278,7 @@ for g in genomes:
             coexpressed[x].append(coexfids)
 
         end = time.time()
-        print  >> sys.stderr, "querying co-expressed " + str(end - start)
+        print  >> sys.stderr, "querying co-expressed, elapsed time " + str(end - start)
 
     # co-occurring fids needs to go to pairset for score
     start = time.time()
