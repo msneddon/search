@@ -14,6 +14,7 @@ cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032
 # takes 5min (total) with retrieving everything
 genomes = ['kb|g.3562','kb|g.0']
 # arabidopsis--takes 50m with individual dna_seq calls (coexpressed_fids untested)
+# takes much less time when cached
 #genomes = ['kb|g.3899']
 # two random genomes
 #genomes = ['kb|g.9','kb|g.222']
