@@ -70,12 +70,13 @@ for g in genomes:
 
     genomeObjects[g]["ContigSet"] = dict()
 
+    # what is this supposed to be?
     genomeObjects[g]["ContigSet"]["id"] = ""
     genomeObjects[g]["ContigSet"]["name"] = ""
     genomeObjects[g]["ContigSet"]["md5"] = ""
     genomeObjects[g]["ContigSet"]["source_id"] = ""
-    genomeObjects[g]["ContigSet"]["source"] = ""
-    genomeObjects[g]["ContigSet"]["type"] = ""
+    genomeObjects[g]["ContigSet"]["source"] = "KBase Central Store"
+    genomeObjects[g]["ContigSet"]["type"] = "Organism"
     genomeObjects[g]["ContigSet"]["reads_ref"] = None
     genomeObjects[g]["ContigSet"]["fasta_ref"] = None
     genomeObjects[g]["ContigSet"]["contigs"] = list()
@@ -115,9 +116,11 @@ for g in genomes:
         contig["length"] = int(contig_lengths[x])
         contig["md5"] = contig_md5s[x]
         contig["sequence"] = contig_sequences[x]
-        contig["name"] = ""
-        contig["description"] = ""        
+        # if we don't have this information, let's not add a key for them
+#        contig["name"] = ""
+#        contig["description"] = ""        
         genomeObjects[g]["ContigSet"]["contigs"].append(contig)
+        # should this be a dict?
         genomeObjects[g]["contig_lengths"].append(int(contig_lengths[x]))
 
 
