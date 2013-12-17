@@ -451,9 +451,15 @@ for g in genomes:
 
 # ultimately will insert these into workspace
 # need to get workspace ref back to put into the Genome object
+        # e.g.
+        # featureObject = simplejson.dumps(featureObject)
+        # ws.save_objects({'workspace': 'search_workspace',objects=[featureObject]})
+        # (or can batch a list of featureObjects, but don't want to batch
+        # too many or it'll bork)
+
         #print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
 
-# print out json
+
     #start = time.time()
 
     #print simplejson.dumps(genomeObjects[g],sort_keys=True,indent=4 * ' ')
