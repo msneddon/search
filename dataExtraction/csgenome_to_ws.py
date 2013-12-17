@@ -9,7 +9,13 @@ import biokbase.cdmi.client
 cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
 
+# DvH, E.coli
+# takes 4min (total) without dna_seqs, with coexpressed_fids
+# takes 5min (total) with retrieving everything
 genomes = ['kb|g.3562','kb|g.0']
+# arabidopsis--takes 50m with individual dna_seq calls (coexpressed_fids untested)
+#genomes = ['kb|g.3899']
+# two random genomes
 #genomes = ['kb|g.9','kb|g.222']
 
 genomeObjects = dict()
@@ -19,6 +25,7 @@ for g in genomes:
 
     start = datetime.datetime.now()
 
+    # maybe use get_entity_Genome to get additional fields, like source_id and domain?
     genome_data = cdmi_api.genomes_to_genome_data([g])[g]
 
     end = datetime.datetime.now()
@@ -37,8 +44,8 @@ for g in genomes:
     genomeObjects[g]["gc_content"] = float(genome_data["gc_content"])
     genomeObjects[g]["complete"] = int(genome_data["complete"])
 
-    #genomeObjects[g]["domain"] = 
-    #genomeObjects[g]["source_id"] = 
+    #genomeObjects[g]["domain"] = genome_data['taxonomy'][0]
+    #genomeObjects[g]["source_id"] = g
 
     genomeObjects[g]["contig_lengths"] = list()
 
@@ -126,6 +133,31 @@ for g in genomes:
     end = datetime.datetime.now()
     print  >> sys.stderr, "querying genome features " + str(end - start)
 
+    # locations need IsLocatedIn relationship
+    start = datetime.datetime.now()
+
+#    locations = cdmi_api.fids_to_locations(fids)
+    isLocatedIn = cdmi_entity_api.get_relationship_IsLocatedIn(fids,[],['from_link','to_link','ordinal','begin','len','dir'],[])
+
+    locations = dict()
+    for x in isLocatedIn:
+        fid = x[1]['from_link']
+        if not locations.has_key(fid):
+            locations[fid] = list()
+# it would be good to have these locations sorted by ordinal
+# (if they're not already)
+# need to convert locations to spec; do now or later?
+        location = dict()
+        location['contig_id'] = x[1]['to_link']
+        location['begin'] = x[1]['begin']
+        location['strand'] = x[1]['dir']
+        location['length'] = x[1]['len']
+        location['ordinal'] = x[1]['ordinal']
+        locations[fid].append(location)
+
+    end = datetime.datetime.now()
+    print  >> sys.stderr, "querying locations " + str(end - start)
+
 
     # feature annotations
     start = datetime.datetime.now()
@@ -172,6 +204,9 @@ for g in genomes:
 #    print >> sys.stderr, family_ids
     families = cdmi_entity_api.get_entity_Family(family_ids,['id','type','release','family_function'])
 
+    end = datetime.datetime.now()
+    print  >> sys.stderr, "querying protein_families " + str(end - start)
+
     protein_families = dict()
     for x in isMemberOf:
         fid = x[1]['from_link']
@@ -183,13 +218,11 @@ for g in genomes:
         family = dict()
         family['id'] = this_family['id']
         family['subject_db'] = this_family['type']
+        family['release_version'] = this_family['release']
 # why is family_function list? take just first for now
         if this_family.has_key('family_function'):
             family['subject_description'] = this_family['family_function'][0]
         protein_families[fid].append(family)
-
-    end = datetime.datetime.now()
-    print  >> sys.stderr, "querying protein_families " + str(end - start)
 
     # feature proteins
     start = datetime.datetime.now()
@@ -200,10 +233,10 @@ for g in genomes:
     print  >> sys.stderr, "querying proteins " + str(end - start)
 
 #    start = datetime.datetime.now()
-#    protein_ids = dict()
-#    for x in proteins.keys():
+    protein_ids = dict()
+    for x in proteins.keys():
 #        genomeObjects[g]["features"][x]["protein"] = proteins[x]
-#        protein_ids[proteins[x]] = x	
+        protein_ids[proteins[x]] = x	
 #    end = datetime.datetime.now()
 #    print  >> sys.stderr, "copying proteins " + str(end - start)
 
@@ -223,18 +256,17 @@ for g in genomes:
 #    print >> sys.stderr, "copying feature entity for functions " + str(end - start)
 
     # feature dna sequences
-    start = datetime.datetime.now()
 
-    dna_seqs = cdmi_api.fids_to_dna_sequences(fids)
+    dna_seqs = dict()
+# this is horribly slow
+    for fid in fids:
+        start = datetime.datetime.now()
+        dna_seqs[fid] = cdmi_api.fids_to_dna_sequences([fid])
 
-    end = datetime.datetime.now()
-    print  >> sys.stderr, "querying dna seqs " + str(end - start)
+        end = datetime.datetime.now()
+        print  >> sys.stderr, "querying dna seqs " + str(end - start)
 
-#    start = datetime.datetime.now()
-#    for x in dna_seqs.keys():
-#        genomeObjects[g]["features"][x]["dna_seqs"] = dna_seqs[x]
-#    end = datetime.datetime.now()
-#    print  >> sys.stderr, "copying dna seqs " + str(end - start)
+#    print  >> sys.stderr, "not querying dna seqs " + str(end - start)
 
     # feature publications
     start = datetime.datetime.now()
@@ -242,47 +274,49 @@ for g in genomes:
     # literature might have to traverse proteins
     # (which we may need anyway)
     
-    publications = cdmi_entity_api.get_relationship_IsATopicOf(proteins.values(),[],['from_link','to_link'],[])
-#    print >> sys.stderr, publications
+    isATopicOf = cdmi_entity_api.get_relationship_IsATopicOf(proteins.values(),[],['from_link','to_link'],[])
 
-    publication_ids = [ x[1]['to_link'] for x in publications ]
+    publication_ids = [ x[1]['to_link'] for x in isATopicOf ]
     publication_data = cdmi_entity_api.get_entity_Publication(publication_ids,['id','title','link','pubdate'])
 
     end = datetime.datetime.now()
     print  >> sys.stderr, "querying literature " + str(end - start)
 
-#    start = datetime.datetime.now()
-#    for x in literature.keys():
-#        genomeObjects[g]["features"][x]["literature"] = literature[x]
-#    for x in publications:
-#        protein = x[1]['from_link']
-#        fid = protein_ids[protein]
-#        publication = x[1]['to_link']
-#        if not genomeObjects[g]["features"][fid].has_key('publications'):
-#            genomeObjects[g]["features"][fid]["publications"] = list()
-#        genomeObjects[g]["features"][fid]["publications"].append( publication_data[publication] )
-#    end = datetime.datetime.now()
-#    print  >> sys.stderr, "copying literature " + str(end - start)
+    publications = dict()
+    for x in isATopicOf:
+        protein_id = x[1]['from_link']
+        fid = protein_ids[protein_id]
+        if not publications.has_key(fid):
+            publications[fid] = list()
+# need to convert this structure to Feature spec
+# do here, or later?
+        this_pub = publication_data[x[1]['to_link']]
+        pub = dict()
+        pub['id'] = this_pub['id']
+        pub['title'] = this_pub['title']
+        pub['link'] = this_pub['link']
+        pub['pubdate'] = this_pub['pubdate']
+        publications[fid].append(pub)
 
     # feature roles
     start = datetime.datetime.now()
 
 #    roles = cdmi_api.fids_to_roles(fids)
-    roles = cdmi_entity_api.get_relationship_HasFunctional(fids,[],['from_link','to_link'],[])
+    hasFunctional = cdmi_entity_api.get_relationship_HasFunctional(fids,[],['from_link','to_link'],[])
 #    print >> sys.stderr, roles
+
+#    role_ids = [ x[1]['to_link'] for x in hasFunctional ]
+#    role_data = cdmi_entity_api.get_entity_Roles(publication_ids,['id','title','link','pubdate'])
 
     end = datetime.datetime.now()
     print  >> sys.stderr, "querying roles " + str(end - start)
 
-#    start = datetime.datetime.now()
-#    for x in roles:
-#        fid = x[1]['from_link']
-#        role = x[1]['to_link']
-#        if not genomeObjects[g]["features"][fid].has_key('roles'):
-#            genomeObjects[g]["features"][fid]["roles"] = list()
-#        genomeObjects[g]["features"][fid]["roles"].append( role )
-#    end = datetime.datetime.now()
-#    print  >> sys.stderr, "copying roles " + str(end - start)
+    roles = dict()
+    for x in hasFunctional:
+        fid = x[1]['from_link']
+        if not roles.has_key(fid):
+            roles[fid] = list()
+        roles[fid].append( x[1]['to_link'] )
 
     # subsystems may have to traverse a bunch of entities
     start = datetime.datetime.now()
@@ -313,50 +347,38 @@ for g in genomes:
     start = datetime.datetime.now()
 
     atomic_regulons = cdmi_api.fids_to_atomic_regulons(fids)
+# do we want to chase down the members of each regulon?
 
     end = datetime.datetime.now()
     print  >> sys.stderr, "querying atomic regulons " + str(end - start)
 
     # co-expressed fids, really slow for e.coli
-    start = datetime.datetime.now()
+# want IsCoregulatedWith?  still horribly slow for e.coli, times out
+# probably need a better way to do this
 
-    co_expressed_fids = dict()
-#    co_expressed_fids = cdmi_api.fids_to_coexpressed_fids(fids)
+    coexpressed = dict()
+    for x in fids:
+        start = datetime.datetime.now()
+        coe = cdmi_api.fids_to_coexpressed_fids([x])
+        if coe.has_key(x):
+            if not coexpressed.has_key(x):
+                coexpressed[x] = list()
+            coexfids=dict()
+            for coexfid in coe[x]:
+                coexfids['scored_fid'] = coexfid[0]
+                coexfids['score'] = coexfid[1]
+            coexpressed[x].append(coexfids)
 
-    end = datetime.datetime.now()
-    print  >> sys.stderr, "not! querying co-expressed " + str(end - start)
+        end = datetime.datetime.now()
+        print  >> sys.stderr, "querying co-expressed " + str(end - start)
 
     # co-occurring fids needs to go to pairset for score
     start = datetime.datetime.now()
 
-    co_occurring_fids = cdmi_api.fids_to_co_occurring_fids(fids)
+    co_occurring = cdmi_api.fids_to_co_occurring_fids(fids)
 
     end = datetime.datetime.now()
     print  >> sys.stderr, "querying co-occurring " + str(end - start)
-
-    # locations need IsLocatedIn relationship
-    start = datetime.datetime.now()
-
-#    locations = cdmi_api.fids_to_locations(fids)
-    isLocatedIn = cdmi_entity_api.get_relationship_IsLocatedIn(fids,[],['from_link','to_link','ordinal','begin','len','dir'],[])
-
-    locations = dict()
-    for x in isLocatedIn:
-        fid = x[1]['from_link']
-        if not locations.has_key(fid):
-            locations[fid] = list()
-# it would be good to have these locations sorted by ordinal
-# (if they're not already)
-# need to convert locations to spec; do now or later?
-        location = dict()
-        location['contig_id'] = x[1]['to_link']
-        location['begin'] = x[1]['begin']
-        location['strand'] = x[1]['dir']
-        location['length'] = x[1]['len']
-        locations[fid].append(location)
-
-    end = datetime.datetime.now()
-    print  >> sys.stderr, "querying locations " + str(end - start)
 
     genomeObjects[g]["feature_ids"] = fids[:]
 # this will be a list of workspace paths that reference
@@ -379,7 +401,6 @@ for g in genomes:
 		if protein_translations.has_key(proteins[x]):
                     featureObject["protein_translation"] = protein_translations[proteins[x]]['sequence']
                     featureObject["protein_translation_length"] = len(protein_translations[proteins[x]]['sequence'])
-# why do non-CDS/pegs have no dna sequence?!?
         if dna_seqs.has_key(x):
             featureObject["dna_sequence"] = dna_seqs[x]
             featureObject["dna_sequence_length"] = len(dna_seqs[x])
@@ -387,17 +408,42 @@ for g in genomes:
             featureObject["protein_families"] = protein_families[x]
         if annotations.has_key(x):
             featureObject["annotations"] = annotations[x]
+        if publications.has_key(x):
+            featureObject["publications"] = publications[x]
+        if roles.has_key(x):
+            featureObject["roles"] = roles[x]
+        if subsystems.has_key(x):
+            featureObject["subsystems"] = subsystems[x]
+        if subsystem_data.has_key(x):
+            featureObject["subsystem_data"] = list()
+            for ss in subsystem_data[x]:
+                this_ss = dict()
+                this_ss['subsystem'] = ss[0]
+                this_ss['variant'] = ss[1]
+                this_ss['role'] = ss[2]
+                featureObject['subsystem_data'].append(this_ss)
+        if regulon_data.has_key(x):
+#            featureObject["regulon_data"] = list()
+            featureObject["regulon_data"] = regulon_data[x]
+        if atomic_regulons.has_key(x):
+            featureObject["atomic_regulons"] = list()
+            for ar in atomic_regulons[x]:
+                this_ar = dict()
+                this_ar['atomic_regulon'] = ar[0]
+                this_ar['atomic_regulon_size'] = ar[1]
+                featureObject["atomic_regulons"].append(this_ar)
+        if co_occurring.has_key(x):
+            featureObject["co_occurring"] = list()
+            for coo in co_occurring[x]:
+                this_coo = dict()
+                this_coo['scored_fid'] = coo[0]
+                this_coo['score'] = coo[1]
+                featureObject["co_occurring"].append(this_coo)
 # these are not populated yet
-        featureObject["publications"] = list()
-# is role a list?
-        featureObject["roles"] = list()
-        featureObject["subsystems"] = list()
-        featureObject["subsystem_data"] = list()
-# not sure of the types of these four at the moment
-        featureObject["regulon_data"] = list()
-        featureObject["atomic_regulons"] = list()
-        featureObject["coexpressed"] = list()
-        featureObject["co_occurring"] = list()
+# not sure of the types of these at the moment
+        if coexpressed.has_key(x):
+#            featureObject["coexpressed"] = list()
+            featureObject["coexpressed"] = coexpressed[x]
 
 # ultimately will insert these into workspace
 # need to get workspace ref back to put into the Genome object
