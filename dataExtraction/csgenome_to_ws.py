@@ -24,16 +24,17 @@ kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwW
 # two random genomes
 #genomes = ['kb|g.9','kb|g.222']
 #genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
-genome_entities = cdmi_entity_api.all_entities_Genome(1,15000,['id','scientific_name'])
+genome_entities = cdmi_entity_api.all_entities_Genome(1,15000,['id','scientific_name','source_id'])
 
 genomes = random.sample(genome_entities,5)
-genomes = ['kb|g.19762']
+genomes = ['kb|g.19762','kb|g.1976']
 
 genomeObjects = dict()
 
 for g in genomes:
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
     genomeObjects[g] = dict()
+    featureSet = dict()
 
     start = time.time()
 
@@ -58,7 +59,7 @@ for g in genomes:
     genomeObjects[g]["gc_content"] = float(genome_data["gc_content"])
     genomeObjects[g]["complete"] = int(genome_data["complete"])
 
-    #genomeObjects[g]["source_id"] = g
+    genomeObjects[g]["source_id"] = genome_entities[g]['source_id']
 
     genomeObjects[g]["contig_lengths"] = list()
 
@@ -81,14 +82,14 @@ for g in genomes:
 
     contigSet = dict()
 
-    contigSet["id"] = ""
-    contigSet["name"] = ""
+    contigSet["id"] = g+".contigset.0"
+    contigSet["name"] = "contigset for " + g
     contigSet["md5"] = genomeObjects[g]["md5"]
-    contigSet["source_id"] = ""
+#    contigSet["source_id"] = ""
     contigSet["source"] = "KBase Central Store"
     contigSet["type"] = "Organism"
-    contigSet["reads_ref"] = None
-    contigSet["fasta_ref"] = None
+#    contigSet["reads_ref"] = None
+#    contigSet["fasta_ref"] = None
     contigSet["contigs"] = list()
 
     start = time.time()
@@ -388,17 +389,12 @@ for g in genomes:
             roles[fid] = list()
         roles[fid].append( x[1]['to_link'] )
 
-
-
-    # this will be a list of workspace paths that reference
-    # the loaded Feature objects
-    genomeObjects[g]["feature_refs"] = list()
-
     start = time.time()
     for x in fids:
         featureObject = dict()
         featureObject["id"] = x
         featureObject["genome_id"] = g
+        featureObject["source"] = 'KBase Central Store'
         
         if locations.has_key(x):
             featureObject["location"] = locations[x]
@@ -466,15 +462,22 @@ for g in genomes:
         # (or can batch a list of featureObjects, but don't want to batch
         # too many or it'll bork)
 
-        print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
-
-        
+#        print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
+        featureSet[x]=featureObject
 
 #        import sys
 #        sys.exit(0)
 
     end = time.time()
     print  >> sys.stderr, " processing features, queried coexpressed, elapsed time " + str(end - start)
+    # insert into workspace, get path
+    print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
+    # insert into workspace, get path
+    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
+
+    # these will reference a ContigSet and FeatureSet object
+    genomeObjects[g]["featureset_ref"] = 'featuresetRef'
+    genomeObjects[g]["contigset_ref"] = 'contigsetRef'
 
     #start = time.time()
 
