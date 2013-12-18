@@ -4,25 +4,35 @@ import datetime
 import sys
 import simplejson
 import time
+import random
+import MySQLdb
 
 import biokbase.cdmi.client
 
 cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
 
+kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
+
 # DvH, E.coli
 # takes 4min (total) without dna_seqs, with coexpressed_fids
 # takes 5min (total) with retrieving everything
-genomes = ['kb|g.3562','kb|g.0','kb|g.3899']
+#genomes = ['kb|g.3562','kb|g.0','kb|g.3899']
 # arabidopsis--takes 50m with individual dna_seq calls (coexpressed_fids untested)
 # takes much less time when cached
 #genomes = ['kb|g.3899']
 # two random genomes
 #genomes = ['kb|g.9','kb|g.222']
+#genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
+genome_entities = cdmi_entity_api.all_entities_Genome(1,15000,['id','scientific_name'])
+
+genomes = random.sample(genome_entities,5)
+genomes = ['kb|g.19762']
 
 genomeObjects = dict()
 
 for g in genomes:
+    print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
     genomeObjects[g] = dict()
 
     start = time.time()
@@ -42,11 +52,12 @@ for g in genomes:
     genomeObjects[g]["num_contigs"] = int(genome_data["contigs"])
     genomeObjects[g]["source"] = 'KBase Central Store'
     genomeObjects[g]["md5"] = genome_data["genome_md5"]
-    genomeObjects[g]["taxonomy"] = genome_data["taxonomy"]
+    if genomeObjects[g].has_key('taxonomy'):
+        genomeObjects[g]["taxonomy"] = genome_data["taxonomy"]
+        genomeObjects[g]["domain"] = genome_data['taxonomy'].split(';')[0]
     genomeObjects[g]["gc_content"] = float(genome_data["gc_content"])
     genomeObjects[g]["complete"] = int(genome_data["complete"])
 
-    genomeObjects[g]["domain"] = genome_data['taxonomy'].split(';')[0]
     #genomeObjects[g]["source_id"] = g
 
     genomeObjects[g]["contig_lengths"] = list()
@@ -162,7 +173,9 @@ for g in genomes:
     # feature proteins
     start = time.time()
 
-    proteins = cdmi_api.fids_to_proteins(fids)
+#    proteins = cdmi_api.fids_to_proteins(fids)
+    produces = cdmi_entity_api.get_relationship_Produces(fids,[],['from_link','to_link'],[])
+    protein_list = [ x[1]['to_link'] for x in produces ]
 
     end = time.time()
     print  >> sys.stderr, "querying proteins " + str(end - start)
@@ -170,7 +183,22 @@ for g in genomes:
     # feature protein sequences
     start = time.time()
 
-    protein_translations = cdmi_entity_api.get_entity_ProteinSequence(proteins.values(),['id','sequence'])
+    protein_translations = cdmi_entity_api.get_entity_ProteinSequence(protein_list,['id','sequence'])
+#    protein_translations = dict()
+#    cursor = kbase_sapling_db.cursor()
+#    placeholders = '%s,' * (len(protein_list)-1)
+#    placeholders = placeholders + '%s'
+#    cursor.execute ("EXPLAIN SELECT id,sequence FROM ProteinSequence WHERE id IN (" + placeholders + ")",protein_list)
+#    out = cursor.fetchone()
+#    print out
+#    sys.exit(0)
+#    result_set = cursor.fetchall()
+#    for row in result_set:
+        # let's make this structure exactly the same as what's returned by get_entity_ProteinSequence
+#        protein_translations[row[0]] = dict()
+#        protein_translations[row[0]]['sequence'] = row[1]
+#        protein_translations[row[0]]['id'] = row[0]
+#    print protein_translations
 
     end = time.time()
     print  >> sys.stderr, "querying protein seqs " + str(end - start)
@@ -192,7 +220,7 @@ for g in genomes:
     # literature might have to traverse proteins
     # (which we may need anyway)
     
-    isATopicOf = cdmi_entity_api.get_relationship_IsATopicOf(proteins.values(),[],['from_link','to_link'],[])
+    isATopicOf = cdmi_entity_api.get_relationship_IsATopicOf(protein_list,[],['from_link','to_link'],[])
     publication_ids = [ x[1]['to_link'] for x in isATopicOf ]
     publication_data = cdmi_entity_api.get_entity_Publication(publication_ids,['id','title','link','pubdate'])
 
@@ -329,9 +357,10 @@ for g in genomes:
 
 
     protein_ids = dict()
-    for x in proteins.keys():
-        #genomeObjects[g]["features"][x]["protein"] = proteins[x]
-        protein_ids[proteins[x]] = x	
+    proteins = dict()
+    for x in produces:
+        proteins[x[1]['from_link']] = x[1]['to_link']
+        protein_ids[x[1]['to_link']] = x[1]['from_link']
 
     publications = dict()
     for x in isATopicOf:
@@ -365,6 +394,7 @@ for g in genomes:
     # the loaded Feature objects
     genomeObjects[g]["feature_refs"] = list()
 
+    start = time.time()
     for x in fids:
         featureObject = dict()
         featureObject["id"] = x
@@ -387,8 +417,9 @@ for g in genomes:
                 featureObject["protein_translation"] = protein_translations[proteins[x]]['sequence']
                 featureObject["protein_translation_length"] = len(featureObject["protein_translation"])
 
-        featureObject["dna_sequence"] = cdmi_api.fids_to_dna_sequences([x])
-        featureObject["dna_sequence_length"] = len(featureObject["dna_sequence"])
+        # we are not going to retrieve dna sequence, see if it saves time
+#        featureObject["dna_sequence"] = cdmi_api.fids_to_dna_sequences([x])
+#        featureObject["dna_sequence_length"] = len(featureObject["dna_sequence"])
 
         if protein_families.has_key(x):
             featureObject["protein_families"] = protein_families[x]
@@ -424,6 +455,9 @@ for g in genomes:
         if coexpressed.has_key(x):
             featureObject["coexpressed"] = coexpressed[x]
 
+#        end = time.time()
+#        print  >> sys.stderr, "feature #" + str(x) + " processing, querying dna seqs, coexpressed, elapsed time " + str(end - start)
+
 # ultimately will insert these into workspace
 # need to get workspace ref back to put into the Genome object
         # e.g.
@@ -436,13 +470,15 @@ for g in genomes:
 
         
 
-        import sys
-        sys.exit(0)
+#        import sys
+#        sys.exit(0)
 
+    end = time.time()
+    print  >> sys.stderr, " processing features, queried coexpressed, elapsed time " + str(end - start)
 
     #start = time.time()
 
-    #print simplejson.dumps(genomeObjects[g],sort_keys=True,indent=4 * ' ')
+    print simplejson.dumps(genomeObjects[g],sort_keys=True,indent=4 * ' ')
 
     #end = time.time()
     #print  >> sys.stderr, "printing json " + str(end - start)
