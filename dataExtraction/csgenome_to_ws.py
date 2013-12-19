@@ -5,14 +5,26 @@ import sys
 import simplejson
 import time
 import random
-import MySQLdb
 
 import biokbase.cdmi.client
+import biokbase.workspace.client
 
 cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
+ws = biokbase.workspace.client.Workspace("http://localhost:7058", user_id='***REMOVED***', password='***REMOVED***')
 
-kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
+wsname = 'searchCS'
+
+# set up a try block here?
+try:
+    retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
+# want this to catch only workspace exists errors
+except biokbase.workspace.client.ServerError:
+    print >> sys.stderr, dir(biokbase.workspace.client.ServerError)
+finally:
+    print >> sys.stderr, 'in finally block'
+
+#kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
 
 # DvH, E.coli
 # takes 4min (total) without dna_seqs, with coexpressed_fids
@@ -27,13 +39,14 @@ kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwW
 genome_entities = cdmi_entity_api.all_entities_Genome(1,15000,['id','scientific_name','source_id'])
 
 genomes = random.sample(genome_entities,5)
-genomes = ['kb|g.19762','kb|g.1976']
+#genomes = ['kb|g.19762','kb|g.1976']
+#genomes = ['kb|g.19762', 'kb|g.882']
 
-genomeObjects = dict()
+#genomeObjects = dict()
 
 for g in genomes:
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
-    genomeObjects[g] = dict()
+    genomeObject = dict()
     featureSet = dict()
 
     start = time.time()
@@ -46,26 +59,26 @@ for g in genomes:
 
 ###############################################
     #fill in top level genome object properties
-    genomeObjects[g]["id"] = g
-    genomeObjects[g]["scientific_name"] = genome_data["scientific_name"]
-    genomeObjects[g]["genetic_code"] = int(genome_data["genetic_code"])
-    genomeObjects[g]["dna_size"] = int(genome_data["dna_size"])
-    genomeObjects[g]["num_contigs"] = int(genome_data["contigs"])
-    genomeObjects[g]["source"] = 'KBase Central Store'
-    genomeObjects[g]["md5"] = genome_data["genome_md5"]
-    if genomeObjects[g].has_key('taxonomy'):
-        genomeObjects[g]["taxonomy"] = genome_data["taxonomy"]
-        genomeObjects[g]["domain"] = genome_data['taxonomy'].split(';')[0]
-    genomeObjects[g]["gc_content"] = float(genome_data["gc_content"])
-    genomeObjects[g]["complete"] = int(genome_data["complete"])
+    genomeObject["id"] = g
+    genomeObject["scientific_name"] = genome_data["scientific_name"]
+    genomeObject["genetic_code"] = int(genome_data["genetic_code"])
+    genomeObject["dna_size"] = int(genome_data["dna_size"])
+    genomeObject["num_contigs"] = int(genome_data["contigs"])
+    genomeObject["source"] = 'KBase Central Store'
+    genomeObject["md5"] = genome_data["genome_md5"]
+    if genomeObject.has_key('taxonomy'):
+        genomeObject["taxonomy"] = genome_data["taxonomy"]
+        genomeObject["domain"] = genome_data['taxonomy'].split(';')[0]
+    genomeObject["gc_content"] = float(genome_data["gc_content"])
+    genomeObject["complete"] = int(genome_data["complete"])
 
-    genomeObjects[g]["source_id"] = genome_entities[g]['source_id']
+    genomeObject["source_id"] = genome_entities[g]['source_id']
 
-    genomeObjects[g]["contig_lengths"] = list()
+    genomeObject["contig_lengths"] = list()
 
-    #genomeObjects[g]["contigset_ref"] = 
-    #genomeObjects[g]["proteinset_ref"] = 
-    #genomeObjects[g]["transcriptset_ref"] = 
+    #genomeObject["contigset_ref"] = 
+    #genomeObject["proteinset_ref"] = 
+    #genomeObject["transcriptset_ref"] = 
 
     #start = time.time()
 
@@ -84,7 +97,7 @@ for g in genomes:
 
     contigSet["id"] = g+".contigset.0"
     contigSet["name"] = "contigset for " + g
-    contigSet["md5"] = genomeObjects[g]["md5"]
+    contigSet["md5"] = genomeObject["md5"]
 #    contigSet["source_id"] = ""
     contigSet["source"] = "KBase Central Store"
     contigSet["type"] = "Organism"
@@ -95,6 +108,8 @@ for g in genomes:
     start = time.time()
 
     contig_ids = cdmi_api.genomes_to_contigs([g])[g]
+
+    genomeObject['contig_ids'] = contig_ids
 
     end = time.time()
     print  >> sys.stderr, "querying contig ids " + str(end - start)
@@ -130,8 +145,24 @@ for g in genomes:
         contigSet["contigs"].append(contig)
         
         # should this be a dict?
-        genomeObjects[g]["contig_lengths"].append(int(contig_lengths[x]))
+        genomeObject["contig_lengths"].append(int(contig_lengths[x]))
 
+    # will need to insert the ContigSet object here, in order to
+    # be able to use the ref in Feature.location
+    # will also need to build a mapping of contig_ids to contigrefs
+    # put in existing contigSet?  might get confusing
+
+    # this will reference a ContigSet object
+    print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
+    contigSetJson = simplejson.dumps(contigSet)
+    # another try block here?
+    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseGenome.ContigSet","data":contigSet,"name":contigSet['id']}]})
+    print >> sys.stderr, contigset_info
+
+    genomeObject["contigset_ref"] = wsname + '/' + contigSet['id']
+
+    # this will reference a FeatureSet object
+    genomeObject["features"] = list()
 
 ###########################
     # build Feature objects
@@ -297,7 +328,7 @@ for g in genomes:
     print  >> sys.stderr, "querying co-occurring " + str(end - start)
 
     #copy the list of feature ids
-    genomeObjects[g]["feature_ids"] = fids[:]
+    #genomeObject["feature_ids"] = fids[:]
 
 
     #copy location info
@@ -308,15 +339,15 @@ for g in genomes:
         if not locations.has_key(fid):
             locations[fid] = list()
         
-        # it would be good to have these locations sorted by ordinal
+        # need to have these locations sorted by ordinal
         # (if they're not already)
-        # need to convert locations to spec; do now or later?
-        location = dict()
-        location['contig_id'] = x[1]['to_link']
-        location['begin'] = x[1]['begin']
-        location['strand'] = x[1]['dir']
-        location['length'] = x[1]['len']
-        location['ordinal'] = x[1]['ordinal']
+        location = list()
+        location.append(x[1]['to_link'])
+        location.append(x[1]['to_link'])
+        location.append(int(x[1]['begin']))
+        location.append(x[1]['dir'])
+        location.append(int(x[1]['len']))
+#        location['ordinal'] = x[1]['ordinal']
         locations[fid].append(location)
 
     #copy annotation info
@@ -329,10 +360,10 @@ for g in genomes:
         
         current_cds_annotation = cds_annotations[x[1]['to_link']]
         
-        object_annotation = dict()
-        object_annotation['annotation_time'] = current_cds_annotation['annotation_time']
-        object_annotation['annotator'] = current_cds_annotation['annotator']
-        object_annotation['comment'] = current_cds_annotation['comment']
+        object_annotation = list()
+        object_annotation.append(current_cds_annotation['comment'])
+        object_annotation.append(current_cds_annotation['annotator'])
+        object_annotation.append(int(current_cds_annotation['annotation_time']))
         annotations[fid].append(object_annotation)
 
 
@@ -374,11 +405,16 @@ for g in genomes:
         # need to convert this structure to Feature spec
         # do here, or later?
         this_pub = publication_data[x[1]['to_link']]
-        pub = dict()
-        pub['id'] = this_pub['id']
-        pub['title'] = this_pub['title']
-        pub['link'] = this_pub['link']
-        pub['pubdate'] = this_pub['pubdate']
+        pub = list()
+        pub.append(int(this_pub['id']))
+        # we don't have a source_db in the CS
+        pub.append('')
+        pub.append(this_pub['title'])
+        pub.append(this_pub['link'])
+        pub.append(this_pub['pubdate'])
+        # we don't have authors or journal name in CS either
+        pub.append('')
+        pub.append('')
         publications[fid].append(pub)
 
 
@@ -433,16 +469,16 @@ for g in genomes:
             featureObject["subsystems"] = subsystems[x]
         
         if subsystem_data.has_key(x):
-            featureObject["subsystem_data"] = [{'subsystem': s[0], 'variant': s[1], 'role': s[2]} for s in subsystem_data[x]]
+            featureObject["subsystem_data"] = subsystem_data[x]
         
         if regulon_data.has_key(x):
             featureObject["regulon_data"] = regulon_data[x]
         
         if atomic_regulons.has_key(x):
-            featureObject["atomic_regulons"] = [{'atomic_regulon': ar[0], 'atomic_regulon_size': ar[1]} for ar in atomic_regulons[x]]
+            featureObject["atomic_regulons"] = atomic_regulons[x]
         
         if co_occurring.has_key(x):
-            featureObject["co_occurring"] = [{'scored_fid': c[0], 'score': c[1]} for c in co_occurring[x]]
+            featureObject["co_occurring"] = co_occurring[x]
 
         # these are not populated yet
         # not sure of the types of these at the moment
@@ -463,25 +499,24 @@ for g in genomes:
         # too many or it'll bork)
 
 #        print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
-        featureSet[x]=featureObject
+#        featureSet[x]=featureObject
+
+        genomeObject['features'].append(featureObject)
 
 #        import sys
 #        sys.exit(0)
 
     end = time.time()
     print  >> sys.stderr, " processing features, queried coexpressed, elapsed time " + str(end - start)
-    # insert into workspace, get path
-    print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
-    # insert into workspace, get path
-    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
 
-    # these will reference a ContigSet and FeatureSet object
-    genomeObjects[g]["featureset_ref"] = 'featuresetRef'
-    genomeObjects[g]["contigset_ref"] = 'contigsetRef'
+    # insert into workspace, get path
+#    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
 
     #start = time.time()
 
-    print simplejson.dumps(genomeObjects[g],sort_keys=True,indent=4 * ' ')
+    print simplejson.dumps(genomeObject,sort_keys=True,indent=4 * ' ')
+    genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseGenome.Genome","data":genomeObject,"name":genomeObject['id']}]})
+    print >> sys.stderr, genome_info
 
     #end = time.time()
     #print  >> sys.stderr, "printing json " + str(end - start)
