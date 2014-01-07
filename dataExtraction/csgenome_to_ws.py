@@ -40,7 +40,7 @@ genomes = random.sample(genome_entities,100)
 #genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
 #genomes = ['kb|g.19762','kb|g.1976']
 #genomes = ['kb|g.0']
-genomes = ['kb|g.3562','kb|g.0']
+#genomes = ['kb|g.3562','kb|g.0']
 
 #genomeObjects = dict()
 
@@ -49,9 +49,9 @@ for g in genomes:
 
     try:
         ws.get_object_info([{"workspace":wsname,"name":g}],0)
-#        print >> sys.stderr, 'genome '  + g + ' found, skipping'
-        print >> sys.stderr, 'genome '  + g + ' found, updating'
-#        continue
+#        print >> sys.stderr, 'genome '  + g + ' found, updating'
+        print >> sys.stderr, 'genome '  + g + ' found, skipping'
+        continue
     except biokbase.workspace.client.ServerError:
         print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
 
