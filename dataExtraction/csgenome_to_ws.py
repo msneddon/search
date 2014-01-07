@@ -76,7 +76,7 @@ for g in genomes:
     genomeObject["num_contigs"] = int(genome_data["contigs"])
     genomeObject["genome_source"] = 'KBase Central Store'
     genomeObject["md5"] = genome_data["genome_md5"]
-    if genomeObject.has_key('taxonomy'):
+    if genome_data.has_key('taxonomy'):
         genomeObject["taxonomy"] = genome_data["taxonomy"]
         genomeObject["domain"] = genome_data['taxonomy'].split(';')[0]
     genomeObject["gc_content"] = float(genome_data["gc_content"])

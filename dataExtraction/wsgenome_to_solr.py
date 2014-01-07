@@ -22,7 +22,7 @@ outFile = open('genomesToSolr.tab', 'w')
 
 outFile.write(unicode("object_id\tworkspace_id\tobject_type\tgenome_id\tfeature_id\tgenome_source_id\tfeature_sequence_length\t" + \
                  "feature_type\tfunction\talias\tscientific_name\t" + \
-                 "genome_dna_size\tcontigs\tdomain\ttaxonomy\tgenetic_code\tgc_content\n").encode('utf8'))
+                 "genome_dna_size\tnum_contigs\tdomain\ttaxonomy\tgenetic_code\tgc_content\n").encode('utf8'))
 
 workspace_counter = 0
 for n in all_workspaces:
@@ -55,12 +55,11 @@ for n in all_workspaces:
                 
 		# want this undefined unless there actually are contigs
                 num_contigs = ""
-                if genome['data'].has_key('contigs'):
-                    if len(genome['data']['contigs']) == 0:
-                        num_contigs = "1"
-                    else:
-                        print genome['metadata']
-                        print genome['data']['contigs']
+                if genome['data'].has_key('num_contigs'):
+                    num_contigs = genome['data']['num_contigs']
+#                    else:
+#                        print genome['metadata']
+#                        print genome['data']['contigs']
                 elif genome['data'].has_key('contigs_uuid'):
                     done = False
                     skip = False
@@ -81,26 +80,11 @@ for n in all_workspaces:
                     pass
 
                 taxonomy = ""
-                if genome['data'].has_key("annotation_uuid"):
-                    done = False
-                    skip = False
-                    while not done:
-                        try:
-                            annotation = ws_client.get_object_by_ref({"reference": genome['data']['annotation_uuid'], "asHash": True})
-                            done = True
-                        except:
-                            print "Having trouble getting annotation_uuid " + genome['data']['annotation_uuid'] + " from workspace " + workspace_id
-                            done = True
-                            skip = True
-                            
-                    if not skip and annotation['data'].has_key('genomes') and annotation['data']['genomes'] is not None:
-                        #print json.dumps(annotation, sort_keys=True, indent=4, separators=(',',': '))
-                        taxonomy = annotation['data']['genomes'][0]['taxonomy']
-                else:
-                    print genome['data'].keys()
+                if genome['data'].has_key("taxonomy"):
+                    taxonomy = genome['data']['taxonomy']
 
                 try:
-                    print genome['data']
+#                    print genome['data']
                     domain = genome['data']['domain']
                 except:
                     domain = ""
@@ -125,14 +109,14 @@ for n in all_workspaces:
                 except:
                     genome_id = ""
                 
-#                feature_list = genome['data']['features']
-                feature_list = dict()
+                featureset_info = ws_client.get_objects([{"ref": genome['data']['featureset_ref']}])
+                features = featureset_info[0]['data']['features']
 
                 try:
-                    gc_content = str(float(genome['data']['gc'])/int(dna_size) * 100.0)
+                    gc_content = str(genome['data']['gc_content'])
                 except:
                     try:
-                        gc_content = str(genome['data']['gc'])
+                        gc_content = str(float(genome['data']['gc'])/int(dna_size) * 100.0)
                     except:
                         gc_content = ""
 
@@ -190,11 +174,11 @@ for n in all_workspaces:
                     print "feature_type:" + feature_type
                     print "feature_function:" + feature_function
                     print "feature_alias:" + feature_alias
-                    print "pegs:" + pegs
-                    print "rnas:" + rnas
+#                    print "pegs:" + pegs
+#                    print "rnas:" + rnas
                     print "genome_scientific_name:" + genome_scientific_name
                     print "dna_size:" + dna_size
-                    print "num_contigs:" + num_contigs
+                    print "num_contigs:" + str(num_contigs)
                     print "domain:" + domain
                     print "taxonomy:" + taxonomy
                     print "genetic_code:" + genetic_code
@@ -203,8 +187,10 @@ for n in all_workspaces:
                 #outBuffer.write(genomeSolrText.encode('utf8'))
 
                 # dump out each feature in tab delimited format
-                for f in feature_list:
-                    #print f
+                for fid in features:
+#                    print fid
+                    f = features[fid]
+#                    print f
 
                     try:
                         feature_function = unicode(f["function"])
@@ -222,11 +208,12 @@ for n in all_workspaces:
                         feature_alias = ""
 
 #                    object_id = str(workspace_id) + "." + str(feature_id)
-                    object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(genome['info'][0]) + '.feature.' + str(feature_id)
-                    object_type = "Feature"
+# not sure how to generate a solr id for these documents
+                    object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(genome['info'][0]) + '.feature.' + str(fid)
+                    object_type = "KBase.Feature-1.0"
                     
-                    if f.has_key('type'):
-                        feature_type = f['type']
+                    if f.has_key('feature_type'):
+                        feature_type = f['feature_type']
                     else:
                         try:
                             feature_type = f['id'].split('.')[-2]
@@ -244,9 +231,10 @@ for n in all_workspaces:
                                             str(source_id) + '\t' + sequence_length + '\t' +
                                             feature_type + '\t' + feature_function + '\t' + 
                                             feature_alias + '\t' +
-                                            pegs + '\t' + rnas + '\t' + genome_scientific_name + '\t' + 
+#                                            pegs + '\t' + rnas + '\t' + genome_scientific_name + '\t' + 
+                                            genome_scientific_name + '\t' + 
                                             dna_size + '\t' +
-                                            num_contigs + '\t' + domain + '\t' + taxonomy + '\t' + 
+                                            str(num_contigs) + '\t' + domain + '\t' + taxonomy + '\t' + 
                                             genetic_code + '\t' + gc_content + "\n"))
                     except Exception, e:
                         print "Failed trying to write to string buffer."
@@ -260,11 +248,11 @@ for n in all_workspaces:
                         print "feature_type:" + feature_type
                         print "feature_function:" + feature_function
                         print "feature_alias:" + feature_alias
-                        print "pegs:" + pegs
-                        print "rnas:" + rnas
+#                        print "pegs:" + pegs
+#                        print "rnas:" + rnas
                         print "genome_scientific_name:" + genome_scientific_name
                         print "dna_size:" + dna_size
-                        print "num_contigs:" + num_contigs
+                        print "num_contigs:" + str(num_contigs)
                         print "domain:" + domain
                         print "taxonomy:" + taxonomy
                         print "genetic_code:" + genetic_code
