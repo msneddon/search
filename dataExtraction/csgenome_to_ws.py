@@ -19,35 +19,45 @@ wsname = 'searchCS'
 try:
     retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
 # want this to catch only workspace exists errors
-except biokbase.workspace.client.ServerError:
-    print >> sys.stderr, dir(biokbase.workspace.client.ServerError)
-finally:
-    print >> sys.stderr, 'in finally block'
+except biokbase.workspace.client.ServerError, e:
+    pass
+#    print >> sys.stderr, e
 
 #kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
 
+genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
+
+genomes = random.sample(genome_entities,100)
 # DvH, E.coli
 # takes 4min (total) without dna_seqs, with coexpressed_fids
 # takes 5min (total) with retrieving everything
-#genomes = ['kb|g.3562','kb|g.0','kb|g.3899']
+#genomes = ['kb|g.3562','kb|g.0']
 # arabidopsis--takes 50m with individual dna_seq calls (coexpressed_fids untested)
 # takes much less time when cached
 #genomes = ['kb|g.3899']
-# two random genomes
+# more static sets
 #genomes = ['kb|g.9','kb|g.222']
 #genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
-genome_entities = cdmi_entity_api.all_entities_Genome(1,15000,['id','scientific_name','source_id'])
-
-genomes = random.sample(genome_entities,5)
 #genomes = ['kb|g.19762','kb|g.1976']
-#genomes = ['kb|g.19762', 'kb|g.882']
+#genomes = ['kb|g.0']
+genomes = ['kb|g.3562','kb|g.0']
 
 #genomeObjects = dict()
 
 for g in genomes:
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
+
+    try:
+        ws.get_object_info([{"workspace":wsname,"name":g}],0)
+#        print >> sys.stderr, 'genome '  + g + ' found, skipping'
+        print >> sys.stderr, 'genome '  + g + ' found, updating'
+#        continue
+    except biokbase.workspace.client.ServerError:
+        print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
+
     genomeObject = dict()
     featureSet = dict()
+    featureSet['features'] = dict()
 
     start = time.time()
 
@@ -59,12 +69,12 @@ for g in genomes:
 
 ###############################################
     #fill in top level genome object properties
-    genomeObject["id"] = g
+    genomeObject["genome_id"] = g
     genomeObject["scientific_name"] = genome_data["scientific_name"]
     genomeObject["genetic_code"] = int(genome_data["genetic_code"])
     genomeObject["dna_size"] = int(genome_data["dna_size"])
     genomeObject["num_contigs"] = int(genome_data["contigs"])
-    genomeObject["source"] = 'KBase Central Store'
+    genomeObject["genome_source"] = 'KBase Central Store'
     genomeObject["md5"] = genome_data["genome_md5"]
     if genomeObject.has_key('taxonomy'):
         genomeObject["taxonomy"] = genome_data["taxonomy"]
@@ -72,9 +82,9 @@ for g in genomes:
     genomeObject["gc_content"] = float(genome_data["gc_content"])
     genomeObject["complete"] = int(genome_data["complete"])
 
-    genomeObject["source_id"] = genome_entities[g]['source_id']
+    genomeObject["genome_source_id"] = genome_entities[g]['source_id']
 
-    genomeObject["contig_lengths"] = list()
+    genomeObject["contig_lengths"] = dict()
 
     #genomeObject["contigset_ref"] = 
     #genomeObject["proteinset_ref"] = 
@@ -103,7 +113,7 @@ for g in genomes:
     contigSet["type"] = "Organism"
 #    contigSet["reads_ref"] = None
 #    contigSet["fasta_ref"] = None
-    contigSet["contigs"] = list()
+    contigSet["contigs"] = dict()
 
     start = time.time()
 
@@ -142,27 +152,28 @@ for g in genomes:
         contig["md5"] = contig_md5s[x]
         contig["sequence"] = contig_sequences[x]
         
-        contigSet["contigs"].append(contig)
+        contigSet["contigs"][x]=contig
         
-        # should this be a dict?
-        genomeObject["contig_lengths"].append(int(contig_lengths[x]))
+        genomeObject["contig_lengths"][x]=int(contig_lengths[x])
 
     # will need to insert the ContigSet object here, in order to
     # be able to use the ref in Feature.location
     # will also need to build a mapping of contig_ids to contigrefs
     # put in existing contigSet?  might get confusing
 
+    start = time.time()
+
     # this will reference a ContigSet object
-    print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
-    contigSetJson = simplejson.dumps(contigSet)
+    #print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
     # another try block here?
-    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseGenome.ContigSet","data":contigSet,"name":contigSet['id']}]})
+    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBase.ContigSet","data":contigSet,"name":contigSet['id']}]})
+
+    end = time.time()
+    print >> sys.stderr, "inserting contigset into ws " + str(end - start)
     print >> sys.stderr, contigset_info
 
-    genomeObject["contigset_ref"] = wsname + '/' + contigSet['id']
-
-    # this will reference a FeatureSet object
-    genomeObject["features"] = list()
+    contigset_ref = wsname + '/' + contigSet['id']
+    genomeObject["contigset_ref"] = contigset_ref
 
 ###########################
     # build Feature objects
@@ -330,7 +341,6 @@ for g in genomes:
     #copy the list of feature ids
     #genomeObject["feature_ids"] = fids[:]
 
-
     #copy location info
     locations = dict()
     for x in isLocatedIn:
@@ -343,10 +353,12 @@ for g in genomes:
         # (if they're not already)
         location = list()
         location.append(x[1]['to_link'])
-        location.append(x[1]['to_link'])
+        # this is supposed to be a contig_ref, but ws doesn't support that yet
+#        location.append(contigset_ref + '/' + x[1]['to_link'])
         location.append(int(x[1]['begin']))
         location.append(x[1]['dir'])
         location.append(int(x[1]['len']))
+        location.append(int(x[1]['ordinal']))
 #        location['ordinal'] = x[1]['ordinal']
         locations[fid].append(location)
 
@@ -428,7 +440,7 @@ for g in genomes:
     start = time.time()
     for x in fids:
         featureObject = dict()
-        featureObject["id"] = x
+        featureObject["feature_id"] = x
         featureObject["genome_id"] = g
         featureObject["source"] = 'KBase Central Store'
         
@@ -436,7 +448,7 @@ for g in genomes:
             featureObject["location"] = locations[x]
         
         if features.has_key(x):
-            featureObject["type"] = features[x]['feature_type']
+            featureObject["feature_type"] = features[x]['feature_type']
             featureObject["function"] = features[x]['function']
             
             if features[x].has_key('alias'):
@@ -472,7 +484,14 @@ for g in genomes:
             featureObject["subsystem_data"] = subsystem_data[x]
         
         if regulon_data.has_key(x):
-            featureObject["regulon_data"] = regulon_data[x]
+            x_reg=list()
+            for reg in regulon_data[x]:
+                this_reg=list()
+                this_reg.append(reg['regulon_id'])
+                this_reg.append(reg['regulon_set'])
+                this_reg.append(reg['tfs'])
+                x_reg.append(this_reg)
+            featureObject["regulon_data"] = x_reg
         
         if atomic_regulons.has_key(x):
             featureObject["atomic_regulons"] = atomic_regulons[x]
@@ -499,9 +518,9 @@ for g in genomes:
         # too many or it'll bork)
 
 #        print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
-#        featureSet[x]=featureObject
+        featureSet['features'][featureObject['feature_id']]=featureObject
 
-        genomeObject['features'].append(featureObject)
+#        genomeObject['features'].append(featureObject)
 
 #        import sys
 #        sys.exit(0)
@@ -510,13 +529,18 @@ for g in genomes:
     print  >> sys.stderr, " processing features, queried coexpressed, elapsed time " + str(end - start)
 
     # insert into workspace, get path
-#    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
+    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
+    # another try block here?
+    featureset_id = genomeObject['genome_id'] + '.featureset'
+    featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBase.FeatureSet","data":featureSet,"name":featureset_id}]})
 
-    #start = time.time()
+    featureset_ref = wsname + '/' + featureset_id
+    genomeObject['featureset_ref'] = featureset_ref
+    start = time.time()
 
-    print simplejson.dumps(genomeObject,sort_keys=True,indent=4 * ' ')
-    genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseGenome.Genome","data":genomeObject,"name":genomeObject['id']}]})
+#    print simplejson.dumps(genomeObject,sort_keys=True,indent=4 * ' ')
+    genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBase.Genome","data":genomeObject,"name":genomeObject['genome_id']}]})
     print >> sys.stderr, genome_info
 
-    #end = time.time()
-    #print  >> sys.stderr, "printing json " + str(end - start)
+    end = time.time()
+    print  >> sys.stderr, "insert genome into ws " + str(end - start)
