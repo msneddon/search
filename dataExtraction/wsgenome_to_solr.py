@@ -4,6 +4,10 @@ import StringIO
 import json
 import sys
 
+# found at https://pythonadventures.wordpress.com/tag/unicodeencodeerror/
+reload(sys)
+sys.setdefaultencoding("utf-8")
+
 import biokbase.workspace.client
 
 #auth_token = biokbase.auth.Token(user_id='***REMOVED***', password='***REMOVED***')
@@ -16,19 +20,31 @@ all_workspaces = ws_client.list_workspace_info({})
 
 print "There are %d visible workspaces." % len(all_workspaces)
 
-print all_workspaces
+#print all_workspaces
 
 outFile = open('genomesToSolr.tab', 'w')
 
-outFile.write(unicode("object_id\tworkspace_id\tobject_type\tgenome_id\tfeature_id\tgenome_source_id\tfeature_sequence_length\t" + \
-                 "feature_type\tfunction\talias\tscientific_name\t" + \
-                 "genome_dna_size\tnum_contigs\tdomain\ttaxonomy\tgenetic_code\tgc_content\n").encode('utf8'))
+# to add
+# genome_source, feature_source_id,genome_publications,feature_publications,
+# subsystems and/or subsystem_data, annotations, regulon_data
+# to fix
+# workspace_id should be name of workspace
+outFile.write(unicode("object_id\tworkspace_name\tobject_type\tgenome_id\tfeature_id\tgenome_source_id\tprotein_translation_length\t" + \
+                 "roles\tprotein_families\tcoexpressed_fids\tco_occurring_fids\t" + \
+                 "feature_publications\tannotations\t" + \
+                 "feature_type\tfunction\taliases\tscientific_name\t" + \
+                 "genome_dna_size\tnum_contigs\tdomain\ttaxonomy\tgc_content\n").encode('utf8'))
 
 workspace_counter = 0
+#for n in all_workspaces:
 for n in all_workspaces:
     print "Finished checking %s of all visible workspaces" % (str(100.0 * float(workspace_counter)/len(all_workspaces)) + " %")
 
     workspace_id = n[0]
+    workspace_name = n[1]
+    if (workspace_name != 'searchCS'):
+        print "Skipping workspace %s" % workspace_name
+        continue
 
     objects_list = ws_client.list_objects({"ids": [workspace_id]})
     if len(objects_list) > 0:
@@ -133,6 +149,12 @@ for n in all_workspaces:
                 feature_type = ""
                 feature_function = ""
                 feature_alias = ""                
+                roles = ''
+                protein_families = ''
+                coexpressed_fids = ''
+                co_occurring_fids = ''
+                feature_publications = ''
+                annotations = ''
 
                 try:
                     genetic_code = str(genome['data']['genetic_code'])
@@ -150,22 +172,24 @@ for n in all_workspaces:
                 outBuffer = StringIO.StringIO()
 
                 try:
-                    outBuffer.write(unicode(str(object_id) + '\t' + str(workspace_id) + '\t' +
+                    outBuffer.write(unicode(str(object_id) + '\t' + str(workspace_name) + '\t' +
                                         str(object_type) + '\t' + str(genome_id) + '\t' + str(feature_id) + '\t' +
                                         str(source_id) + '\t' + str(sequence_length) + '\t' +
+                                        str(roles) + '\t' + str(protein_families) + '\t' + str(coexpressed_fids) + '\t' + str(co_occurring_fids) + '\t' +
+                                        str(feature_publications) + '\t' + str(annotations) + '\t' +
                                         str(feature_type) + '\t' + str(feature_function) + '\t' + 
                                         str(feature_alias) + '\t' +
 #                                        str(pegs) + '\t' + str(rnas) + '\t' + str(genome_scientific_name) + '\t' + 
                                         str(genome_scientific_name) + '\t' + 
                                         str(dna_size) + '\t' +
                                         str(num_contigs) + '\t' + str(domain) + '\t' + str(taxonomy) + '\t' + 
-                                        str(genetic_code) + '\t' + str(gc_content) + "\n"))
+                                        str(gc_content) + "\n"))
                 except Exception, e:
                     print str(e)
 
                     print "Failed trying to write to string buffer."
                     print "object_id:" + str(object_id)
-                    print "workspace_id:" + str(workspace_id)
+                    print "workspace_name:" + str(workspace_name)
                     print "object_type:" + object_type
                     print "genome_id:" + str(genome_id)
                     print "feature_id:" + str(feature_id)
@@ -181,7 +205,7 @@ for n in all_workspaces:
                     print "num_contigs:" + str(num_contigs)
                     print "domain:" + domain
                     print "taxonomy:" + taxonomy
-                    print "genetic_code:" + genetic_code
+#                    print "genetic_code:" + genetic_code
                     print "gc_content:" + gc_content
 
                 #outBuffer.write(genomeSolrText.encode('utf8'))
@@ -193,16 +217,67 @@ for n in all_workspaces:
 #                    print f
 
                     try:
+                        for role in f['roles']:
+                            roles += unicode(role) + ' '
+                    except:
+                        roles = ""
+
+                    try:
+                        for anno in f['annotations']:
+                            annotations += anno[0] + ' ' + anno[1] + ' '
+                            re.sub('\n',' ',annotations)
+#                            annotations = ''
+                    except:
+                        annotations = ""
+
+                    try:
+                        for pub in f['feature_publications']:
+#                            print pub
+                            feature_publications += str(pub[0]) + ' ' + pub[2] + ' ' + pub[3] + ' ' + pub[5] + ' ' + pub[6] + ' '
+#                            print 'feature_publications is ' + feature_publications
+                    except Exception, e:
+#                        print e
+                        feature_publications = ""
+
+                    try:
+                        for coo in f['co_occurring_fids']:
+                            co_occurring_fids += coo[0] + ' '
+                    except:
+                        co_occurring_fids = ""
+
+                    try:
+                        for coe in f['coexpressed_fids']:
+                            coexpressed_fids += coe[0] + ' '
+#                            coexpressed_fids = ""
+                    except:
+                        coexpressed_fids = ""
+
+                    try:
+                        for ss in f['subsystems']:
+                            subsystems += unicode(ss) + ' '
+                    except:
+                        subsystems = ""
+
+                    try:
+#                        protein_families = unicode(f["protein_families"][0]['id'] + f['protein_families'][0]['subject_description'])
+                        for pf in f['protein_families']:
+                            protein_families += unicode(pf['id']) + ' : ' + unicode(pf['subject_description']) + ' :: '
+#                        protein_families = unicode(f["protein_families"])
+                    except:
+                        protein_families = ""
+
+                    try:
                         feature_function = unicode(f["function"])
                     except:
                         feature_function = ""
 
                     try:
-                        feature_id = unicode(f["id"])
+                        feature_id = fid
                     except:
                         feature_id = ""
 
                     try:
+                        # want something like this for roles, subsystems
                         feature_alias = ','.join([str(k) for k in f["aliases"]])
                     except:
                         feature_alias = ""
@@ -210,7 +285,8 @@ for n in all_workspaces:
 #                    object_id = str(workspace_id) + "." + str(feature_id)
 # not sure how to generate a solr id for these documents
                     object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(genome['info'][0]) + '.feature.' + str(fid)
-                    object_type = "KBase.Feature-1.0"
+                    # want to examine object for type
+                    object_type = "KBase.Feature"
                     
                     if f.has_key('feature_type'):
                         feature_type = f['feature_type']
@@ -226,20 +302,23 @@ for n in all_workspaces:
                         sequence_length = "0"
 
                     try:
-                        outBuffer.write(unicode(str(object_id) + '\t' + str(workspace_id) + '\t' +
+                        outBuffer.write(unicode(str(object_id) + '\t' + str(workspace_name) + '\t' +
                                             object_type + '\t' + str(genome_id) + '\t' + str(feature_id) + '\t' +
                                             str(source_id) + '\t' + sequence_length + '\t' +
+                                            str(roles) + '\t' + str(protein_families) + '\t' + str(coexpressed_fids) + '\t' + str(co_occurring_fids) + '\t' +
+                                            str(feature_publications) + '\t' + str(annotations) + '\t' +
                                             feature_type + '\t' + feature_function + '\t' + 
                                             feature_alias + '\t' +
 #                                            pegs + '\t' + rnas + '\t' + genome_scientific_name + '\t' + 
                                             genome_scientific_name + '\t' + 
                                             dna_size + '\t' +
                                             str(num_contigs) + '\t' + domain + '\t' + taxonomy + '\t' + 
-                                            genetic_code + '\t' + gc_content + "\n"))
+                                            gc_content + "\n"))
                     except Exception, e:
                         print "Failed trying to write to string buffer."
+                        print e
                         print "object_id:" + object_id
-                        print "workspace_id:" + str(workspace_id)
+                        print "workspace_name:" + str(workspace_name)
                         print "object_type:" + object_type
                         print "genome_id:" + genome_id
                         print "feature_id:" + feature_id
@@ -248,6 +327,9 @@ for n in all_workspaces:
                         print "feature_type:" + feature_type
                         print "feature_function:" + feature_function
                         print "feature_alias:" + feature_alias
+                        print "roles:" + roles
+                        print "subsystems:" + subsystems
+                        print "protein_families:" + protein_families
 #                        print "pegs:" + pegs
 #                        print "rnas:" + rnas
                         print "genome_scientific_name:" + genome_scientific_name
@@ -255,11 +337,13 @@ for n in all_workspaces:
                         print "num_contigs:" + str(num_contigs)
                         print "domain:" + domain
                         print "taxonomy:" + taxonomy
-                        print "genetic_code:" + genetic_code
+#                        print "genetic_code:" + genetic_code
                         print "gc_content:" + gc_content
 
                 outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
                 outBuffer.close()
+            else:
+                print '            skipping %s, is a %s' % (x[0], x[2])
             object_counter += 1
     workspace_counter += 1
 outFile.close()

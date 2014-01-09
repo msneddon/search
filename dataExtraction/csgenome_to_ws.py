@@ -28,6 +28,7 @@ except biokbase.workspace.client.ServerError, e:
 genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
 
 genomes = random.sample(genome_entities,100)
+#genomes = sys.argv[1:]
 # DvH, E.coli
 # takes 4min (total) without dna_seqs, with coexpressed_fids
 # takes 5min (total) with retrieving everything
@@ -472,7 +473,7 @@ for g in genomes:
             featureObject["annotations"] = annotations[x]
         
         if publications.has_key(x):
-            featureObject["publications"] = publications[x]
+            featureObject["feature_publications"] = publications[x]
         
         if roles.has_key(x):
             featureObject["roles"] = roles[x]
@@ -497,14 +498,20 @@ for g in genomes:
             featureObject["atomic_regulons"] = atomic_regulons[x]
         
         if co_occurring.has_key(x):
-            featureObject["co_occurring"] = co_occurring[x]
+            featureObject["co_occurring_fids"] = list()
+            for co_occur in co_occurring[x]:
+                this_co_occur = [ co_occur[0], float(co_occur[1]) ]
+                featureObject["co_occurring_fids"].append(this_co_occur)
 
         # these are not populated yet
         # not sure of the types of these at the moment
         coexpressed = cdmi_api.fids_to_coexpressed_fids([x])
 
         if coexpressed.has_key(x):
-            featureObject["coexpressed"] = coexpressed[x]
+            featureObject["coexpressed_fids"] = list()
+            for coexpress in coexpressed[x]:
+                this_coexpressed = [ coexpress[0], float(coexpress[1]) ]
+                featureObject["coexpressed_fids"].append(this_coexpressed)
 
 #        end = time.time()
 #        print  >> sys.stderr, "feature #" + str(x) + " processing, querying dna seqs, coexpressed, elapsed time " + str(end - start)
