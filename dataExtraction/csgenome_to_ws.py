@@ -27,7 +27,7 @@ except biokbase.workspace.client.ServerError, e:
 
 genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
 
-genomes = random.sample(genome_entities,100)
+genomes = random.sample(genome_entities,50)
 #genomes = sys.argv[1:]
 # DvH, E.coli
 # takes 4min (total) without dna_seqs, with coexpressed_fids
@@ -41,6 +41,7 @@ genomes = random.sample(genome_entities,100)
 #genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
 #genomes = ['kb|g.19762','kb|g.1976']
 #genomes = ['kb|g.0']
+#genomes = ['kb|g.3562']
 #genomes = ['kb|g.3562','kb|g.0']
 
 #genomeObjects = dict()
@@ -127,6 +128,7 @@ for g in genomes:
 
     start = time.time()
 
+    # this died on kb|g.3907, kb|g.3643 Gallus gallus
     contig_sequences = cdmi_api.contigs_to_sequences(contig_ids)
 
     end = time.time()
@@ -523,9 +525,16 @@ for g in genomes:
         # ws.save_objects({'workspace': 'search_workspace',objects=[featureObject]})
         # (or can batch a list of featureObjects, but don't want to batch
         # too many or it'll bork)
+        feature_id = featureObject['feature_id']
+        feature_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBase.Feature","data":featureObject,"name":feature_id}]})
 
+        print >> sys.stderr, feature_info
+
+        feature_ref = wsname + '/' + feature_id
 #        print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
-        featureSet['features'][featureObject['feature_id']]=featureObject
+        if not featureSet['features'].has_key(featureObject['feature_id']):
+            featureSet['features'][featureObject['feature_id']] = dict()
+        featureSet['features'][featureObject['feature_id']] = feature_ref
 
 #        genomeObject['features'].append(featureObject)
 
@@ -536,7 +545,7 @@ for g in genomes:
     print  >> sys.stderr, " processing features, queried coexpressed, elapsed time " + str(end - start)
 
     # insert into workspace, get path
-    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
+#    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
     # another try block here?
     featureset_id = genomeObject['genome_id'] + '.featureset'
     featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBase.FeatureSet","data":featureSet,"name":featureset_id}]})

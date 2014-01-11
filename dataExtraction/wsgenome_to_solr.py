@@ -25,15 +25,14 @@ print "There are %d visible workspaces." % len(all_workspaces)
 outFile = open('genomesToSolr.tab', 'w')
 
 # to add
-# genome_source, feature_source_id,genome_publications,feature_publications,
+# genome_source, feature_source_id,genome_publications,
 # subsystems and/or subsystem_data, annotations, regulon_data
-# to fix
-# workspace_id should be name of workspace
-outFile.write(unicode("object_id\tworkspace_name\tobject_type\tgenome_id\tfeature_id\tgenome_source_id\tprotein_translation_length\t" + \
-                 "roles\tprotein_families\tcoexpressed_fids\tco_occurring_fids\t" + \
-                 "feature_publications\tannotations\t" + \
-                 "feature_type\tfunction\taliases\tscientific_name\t" + \
-                 "genome_dna_size\tnum_contigs\tdomain\ttaxonomy\tgc_content\n").encode('utf8'))
+# don't print header, use header file (so can split output)
+#outFile.write(unicode("object_id\tworkspace_name\tobject_type\tgenome_id\tfeature_id\tgenome_source_id\tprotein_translation_length\t" + \
+#                 "roles\tprotein_families\tcoexpressed_fids\tco_occurring_fids\t" + \
+#                 "feature_publications\tannotations\t" + \
+#                 "feature_type\tfunction\taliases\tscientific_name\t" + \
+#                 "genome_dna_size\tnum_contigs\tdomain\ttaxonomy\tgc_content\n").encode('utf8'))
 
 workspace_counter = 0
 #for n in all_workspaces:
@@ -46,7 +45,8 @@ for n in all_workspaces:
         print "Skipping workspace %s" % workspace_name
         continue
 
-    objects_list = ws_client.list_objects({"ids": [workspace_id]})
+    # would like to retrieve only Genomes with this call if possible
+    objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBase.Genome"})
     if len(objects_list) > 0:
         print "\tWorkspace %s has %d objects" % (workspace_id, len(objects_list))
         object_counter = 0
@@ -212,9 +212,9 @@ for n in all_workspaces:
 
                 # dump out each feature in tab delimited format
                 for fid in features:
-#                    print fid
-                    f = features[fid]
-#                    print f
+                    feature_info = ws_client.get_objects([{"ref": features[fid]}])
+                    # we should only get one object back
+                    f = feature_info[0]['data']
 
                     try:
                         for role in f['roles']:
