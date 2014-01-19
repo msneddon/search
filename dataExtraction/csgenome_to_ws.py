@@ -27,7 +27,7 @@ except biokbase.workspace.client.ServerError, e:
 
 genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
 
-genomes = random.sample(genome_entities,50)
+genomes = random.sample(genome_entities,500)
 #genomes = sys.argv[1:]
 # DvH, E.coli
 # takes 4min (total) without dna_seqs, with coexpressed_fids
@@ -128,7 +128,7 @@ for g in genomes:
 
     start = time.time()
 
-    # this died on kb|g.3907, kb|g.3643 Gallus gallus
+    # this died on kb|g.3907, kb|g.3643 Gallus gallus, kb|g.41 Mouse
     contig_sequences = cdmi_api.contigs_to_sequences(contig_ids)
 
     end = time.time()
