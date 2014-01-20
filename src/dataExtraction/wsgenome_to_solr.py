@@ -340,6 +340,12 @@ for n in all_workspaces:
 #                        print "genetic_code:" + genetic_code
                         print "gc_content:" + gc_content
 
+                    # this died:
+#Traceback (most recent call last):
+#  File "/homes/chicago/kkeller/dev_container/modules/search/dataExtraction/wsgenome_to_solr.py", line 343, in <module>
+#    outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
+#MemoryError
+
                 outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
                 outBuffer.close()
             else:

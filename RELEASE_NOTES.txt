@@ -1,29 +1,54 @@
 OVERVIEW
 -----------------------------------------
-This KBase application provides search capabilities for KBase Central Store and few other data stores.
+The KBase Search module is responsible for providing a search capability that guides users to KBase data of interest.
+A public facing web service provides core search capabilities on KBase data types, and a search web client provides a
+rich client interface to guide users toward KBase data that best meet their criteria.
+
+
+VERSION: 0.2.0 (Released 1/15/2014)
+-----------------------------------------
+- Refactored Makefile to use standard KBase deployment process
+- Indexing of Workspace v2 objects
+- Indexing of Shock data
+- New decoupled service architecture
+- Plugin system for indexing new data types
+- Configurable search categories
+- Plugins for new Communities, Plants, Microbes, Networks data types
+- Secondary service for near real-time updates and full indexing automation
+- Updated web client interface with Workspace v2 imports
+- Updated RESTful API
+
+
+VERSION: 0.1.0 (Released 10/15/2013)
+-----------------------------------------
+- Indexing of workspace v1 objects
+- New web client interface
+- New RESTful API
+- Defined new search categories
+- Added KBase Authentication for private data
+- Indexed Communities data from MG-RAST
+- Enhanced publications information
+- Import of Central Store genomes to Workspace Objects
+
 
 VERSION: 0.0.3 (Released 8/05/2013)
 -----------------------------------------
-NEW UPDATES:
--Finetuned API meaningful and graceful REST returns.
--Numerous front-end updates to finetune look and feel and browser compatibilities.
+- Finetuned API meaningful and graceful REST returns.
+- Numerous front-end updates to finetune look and feel and browser compatibilities.
+
 
 VERSION: 0.0.2 (Released 5/17/2013)
 -----------------------------------------
-NEW FEATURES:
--Automatic orchestration and update machanism built into the system.
--Added inline documentation and test framework to the system.
-
-NEW UPDATES:
--Search made compatible to KBase release engineering process.
+- Automatic orchestration and update machanism built into the system.
+- Added inline documentation and test framework to the system.
+- Search made compatible to KBase release engineering process.
 
 
 VERSION: 0.0.1 (Released 3/16/2013)
 -----------------------------------------
-NEW FEATURES:
--Initial release of the search application.
--Most of the central store data is available as index.
--New search specific categorized REST service available for applications to call and get access directly.
--New documentation service that shows complete API documentation along with ability to make sample queries.
--New low level Solr service is available along with the KBase application level API.
+- Initial release of the search application.
+- Most of the central store data is available as index.
+- New search specific categorized REST service available for applications to call and get access directly.
+- New documentation service that shows complete API documentation along with ability to make sample queries.
+- New low level Solr service is available along with the KBase application level API.
 
