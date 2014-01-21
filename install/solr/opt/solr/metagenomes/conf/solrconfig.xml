@@ -101,7 +101,7 @@
        replication is in use, this should match the replication
        configuration.
     -->
-  <dataDir>/kb/deployment/services/search/solr/data/wsGenomeFeatures</dataDir>
+  <dataDir>/kb/deployment/services/search/solr/data/metagenomes</dataDir>
 
 
   <!-- The DirectoryFactory to use for indexes.
