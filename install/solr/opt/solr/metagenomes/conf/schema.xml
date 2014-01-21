@@ -65,269 +65,103 @@
 
  <fields>
         
+<!-- can't use date type yet, metagenome objects don't precisely
+     conform to solr date type
+     (will need to massage their date to what solr expects)
+-->
 
-    <field name="mixs_project_and_mg_name_sort" type="string" indexed="true" stored="true"/>
-    <field name="mg_id" type="string" indexed="true" stored="true" multiValued="false"/>
-    <field name="mg_name" type="text_general" indexed="true" stored="true"/>
-    <field name="project_id" type="text_general" indexed="true" stored="true"/>
-    <field name="sample_id" type="text_general" indexed="true" stored="true"/>
-    <field name="library_id" type="text_general" indexed="true" stored="true"/>
-    <field name="sequence_type" type="text_general" indexed="true" stored="true"/>
-    <field name="created_date" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_country" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_longitude" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_location" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_project" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_sequence_type" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_collection_date" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_seq_method" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_package" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_feature" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_latitude" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_biome" type="text_general" indexed="true" stored="true"/>
-    <field name="mixs_material" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_env_package_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_env_package_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_env_package_type" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_env_package_data" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_public" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_type" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_barcode" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_barcode_uc" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_file_checksum" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_file_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_forward_barcodes" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_forward_primers" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_gold_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_investigation_type" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_metagenome_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_metagenome_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_mgrast_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_primer" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_primer_uc" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_pubmed_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_reverse_barcodes" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_reverse_primers" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_sample_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_seq_meth" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_library_data_target_gene" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_email" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_firstname" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_greengenes_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_investigation_type" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_lastname" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_metadata_complete" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_mgrast_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_miens_compliant" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_ncbi_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_organization_address" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_organization_country" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_organization" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_organization_url" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_pi_email" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_pi_firstname" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_pi_lastname" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_pi_organization_address" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_pi_organization_country" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_pi_organization" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_pi_organization_url" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_pmid" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_project_description" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_project_description_project_description" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_project_description_project_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_project_funding" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_project_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_qiime_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_sample_collection_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_sample_count" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_sff_complete" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_study_abstract" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_study_alias" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_study_description" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_study_title" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_project_data_submit_to_insdc" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_altitude" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_anonymized_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_assigned_from_geo" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_biome" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_collection_date" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_collection_time" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_collection_timezone" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_continent" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_country" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_depth" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_description" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_description_uc" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_elevation" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_env_package" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_feature" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_key_seq" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_latitude" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_location" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_longitude" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_material" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_mgrast_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_platform" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_public" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_sample_center" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_sample_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_sample_name" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_samp_size" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_taxon_id" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_taxon_id_uc" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_temperature" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_title" type="text_general" indexed="true" stored="true"/>
-    <field name="metadata_sample_data_title_uc" type="text_general" indexed="true" stored="true"/>
+   <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
+   <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
+
+   <field name="metagenome_id" boost="2.0" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="metagenome_name" type="text_general" indexed="true" stored="true"/>
+   <field name="library_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="metagenome_metadata" type="text_general" indexed="true" stored="true"/>
+   <field name="sequence_type" type="text_general" indexed="true" stored="true"/>
+   <field name="seq_method" type="text_general" indexed="true" stored="true"/>
+   <field name="metagenome_created" type="date" indexed="true" stored="true"/>
+
+   <field name="project_id" boost="2.0" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="project_name" type="text_general" indexed="true" stored="true"/>
+   <field name="project_description" type="text_general" indexed="true" stored="true"/>
+   <field name="project_created" type="date" indexed="true" stored="true"/>
+   <field name="PI_info" type="text_general" indexed="true" stored="true"/>
+   <field name="tech_contact" type="text_general" indexed="true" stored="true"/>
+   <field name="funding_source" type="text_general" indexed="true" stored="true"/>
+   <field name="ncbi_id" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="qiime_id" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="vamps_id" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="greengenes_id" type="text_ws_general" indexed="true" stored="true"/>
+
+   <field name="sample_id" boost="2.0" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="sample_name" type="text_general" indexed="true" stored="true"/>
+   <field name="sample_created" type="date" indexed="true" stored="true"/>
+   <field name="collection_date" type="text_general" indexed="true" stored="true"/>
+   <field name="env_package_type" type="text_general" indexed="true" stored="true"/>
+   <field name="feature" type="text_general" indexed="true" stored="true"/>
+   <field name="biome" type="text_general" indexed="true" stored="true"/>
+   <field name="material" type="text_general" indexed="true" stored="true"/>
+   <field name="location" type="text_general" indexed="true" stored="true"/>
+   <field name="country" type="text_general" indexed="true" stored="true"/>
+   <field name="latitude" type="float" indexed="true" stored="true"/>
+   <field name="longitude" type="float" indexed="true" stored="true"/>
+<!--   sample metadata is already in metagenome metadata, don't bother indexing twice
+-->
+
+   <field name="text_boost" boost="5.0" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
+
+   <field name="_version_" type="long" indexed="true" stored="true"/>
 
 
-  <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
+ </fields>
 
-  <field name="_version_" type="long" indexed="true" stored="true"/>
-
-  </fields>
-
-  <uniqueKey>mg_id</uniqueKey>
-
-
-    <copyField source="mg_id" dest="text"/>
-    <copyField source="mg_name" dest="text"/>
-    <copyField source="project_id" dest="text"/>
-    <copyField source="sample_id" dest="text"/>
-    <copyField source="library_id" dest="text"/>
-    <copyField source="sequence_type" dest="text"/>
-    <copyField source="created_date" dest="text"/>
-    <copyField source="mixs" dest="text"/>
-    <copyField source="mixs_country" dest="text"/>
-    <copyField source="mixs_longitude" dest="text"/>
-    <copyField source="mixs_location" dest="text"/>
-    <copyField source="mixs_project" dest="text"/>
-    <copyField source="mixs_sequence_type" dest="text"/>
-    <copyField source="mixs_collection_date" dest="text"/>
-    <copyField source="mixs_seq_method" dest="text"/>
-    <copyField source="mixs_package" dest="text"/>
-    <copyField source="mixs_feature" dest="text"/>
-    <copyField source="mixs_latitude" dest="text"/>
-    <copyField source="mixs_biome" dest="text"/>
-    <copyField source="mixs_material" dest="text"/>
-    <copyField source="metadata_env_package_name" dest="text"/>
-    <copyField source="metadata_env_package_id" dest="text"/>
-    <copyField source="metadata_env_package_type" dest="text"/>
-    <copyField source="metadata_env_package_data" dest="text"/>
-    <copyField source="metadata_project_name" dest="text"/>
-    <copyField source="metadata_project_public" dest="text"/>
-    <copyField source="metadata_project_id" dest="text"/>
-    <copyField source="metadata_project_data" dest="text"/>
-    <copyField source="metadata_sample_name" dest="text"/>
-    <copyField source="metadata_sample_id" dest="text"/>
-    <copyField source="metadata_sample_data" dest="text"/>
-    <copyField source="metadata_library_name" dest="text"/>
-    <copyField source="metadata_library_id" dest="text"/>
-    <copyField source="metadata_library_type" dest="text"/>
-    <copyField source="metadata_library_data" dest="text"/>
-    <copyField source="metadata_library_data_barcode" dest="text"/>
-    <copyField source="metadata_library_data_barcode_uc" dest="text"/>
-    <copyField source="metadata_library_data_file_checksum" dest="text"/>
-    <copyField source="metadata_library_data_file_name" dest="text"/>
-    <copyField source="metadata_library_data_forward_barcodes" dest="text"/>
-    <copyField source="metadata_library_data_forward_primers" dest="text"/>
-    <copyField source="metadata_library_data_gold_id" dest="text"/>
-    <copyField source="metadata_library_data_investigation_type" dest="text"/>
-    <copyField source="metadata_library_data_metagenome_id" dest="text"/>
-    <copyField source="metadata_library_data_metagenome_name" dest="text"/>
-    <copyField source="metadata_library_data_mgrast_id" dest="text"/>
-    <copyField source="metadata_library_data_primer" dest="text"/>
-    <copyField source="metadata_library_data_primer_uc" dest="text"/>
-    <copyField source="metadata_library_data_pubmed_id" dest="text"/>
-    <copyField source="metadata_library_data_reverse_barcodes" dest="text"/>
-    <copyField source="metadata_library_data_reverse_primers" dest="text"/>
-    <copyField source="metadata_library_data_sample_name" dest="text"/>
-    <copyField source="metadata_library_data_seq_meth" dest="text"/>
-    <copyField source="metadata_library_data_target_gene" dest="text"/>
-    <copyField source="metadata_project_data_email" dest="text"/>
-    <copyField source="metadata_project_data_firstname" dest="text"/>
-    <copyField source="metadata_project_data_greengenes_id" dest="text"/>
-    <copyField source="metadata_project_data_investigation_type" dest="text"/>
-    <copyField source="metadata_project_data_lastname" dest="text"/>
-    <copyField source="metadata_project_data_metadata_complete" dest="text"/>
-    <copyField source="metadata_project_data_mgrast_id" dest="text"/>
-    <copyField source="metadata_project_data_miens_compliant" dest="text"/>
-    <copyField source="metadata_project_data_ncbi_id" dest="text"/>
-    <copyField source="metadata_project_data_organization_address" dest="text"/>
-    <copyField source="metadata_project_data_organization_country" dest="text"/>
-    <copyField source="metadata_project_data_organization" dest="text"/>
-    <copyField source="metadata_project_data_organization_url" dest="text"/>
-    <copyField source="metadata_project_data_pi_email" dest="text"/>
-    <copyField source="metadata_project_data_pi_firstname" dest="text"/>
-    <copyField source="metadata_project_data_pi_lastname" dest="text"/>
-    <copyField source="metadata_project_data_pi_organization_address" dest="text"/>
-    <copyField source="metadata_project_data_pi_organization_country" dest="text"/>
-    <copyField source="metadata_project_data_pi_organization" dest="text"/>
-    <copyField source="metadata_project_data_pi_organization_url" dest="text"/>
-    <copyField source="metadata_project_data_pmid" dest="text"/>
-    <copyField source="metadata_project_data_project_description" dest="text"/>
-    <copyField source="metadata_project_data_project_description_project_description" dest="text"/>
-    <copyField source="metadata_project_data_project_description_project_name" dest="text"/>
-    <copyField source="metadata_project_data_project_funding" dest="text"/>
-    <copyField source="metadata_project_data_project_name" dest="text"/>
-    <copyField source="metadata_project_data_qiime_id" dest="text"/>
-    <copyField source="metadata_project_data_sample_collection_id" dest="text"/>
-    <copyField source="metadata_project_data_sample_count" dest="text"/>
-    <copyField source="metadata_project_data_sff_complete" dest="text"/>
-    <copyField source="metadata_project_data_study_abstract" dest="text"/>
-    <copyField source="metadata_project_data_study_alias" dest="text"/>
-    <copyField source="metadata_project_data_study_description" dest="text"/>
-    <copyField source="metadata_project_data_study_title" dest="text"/>
-    <copyField source="metadata_project_data_submit_to_insdc" dest="text"/>
-    <copyField source="metadata_sample_data_altitude" dest="text"/>
-    <copyField source="metadata_sample_data_anonymized_name" dest="text"/>
-    <copyField source="metadata_sample_data_assigned_from_geo" dest="text"/>
-    <copyField source="metadata_sample_data_biome" dest="text"/>
-    <copyField source="metadata_sample_data_collection_date" dest="text"/>
-    <copyField source="metadata_sample_data_collection_time" dest="text"/>
-    <copyField source="metadata_sample_data_collection_timezone" dest="text"/>
-    <copyField source="metadata_sample_data_continent" dest="text"/>
-    <copyField source="metadata_sample_data_country" dest="text"/>
-    <copyField source="metadata_sample_data_depth" dest="text"/>
-    <copyField source="metadata_sample_data_description" dest="text"/>
-    <copyField source="metadata_sample_data_description_uc" dest="text"/>
-    <copyField source="metadata_sample_data_elevation" dest="text"/>
-    <copyField source="metadata_sample_data_env_package" dest="text"/>
-    <copyField source="metadata_sample_data_feature" dest="text"/>
-    <copyField source="metadata_sample_data_key_seq" dest="text"/>
-    <copyField source="metadata_sample_data_latitude" dest="text"/>
-    <copyField source="metadata_sample_data_location" dest="text"/>
-    <copyField source="metadata_sample_data_longitude" dest="text"/>
-    <copyField source="metadata_sample_data_material" dest="text"/>
-    <copyField source="metadata_sample_data_mgrast_id" dest="text"/>
-    <copyField source="metadata_sample_data_platform" dest="text"/>
-    <copyField source="metadata_sample_data_public" dest="text"/>
-    <copyField source="metadata_sample_data_sample_center" dest="text"/>
-    <copyField source="metadata_sample_data_sample_id" dest="text"/>
-    <copyField source="metadata_sample_data_sample_name" dest="text"/>
-    <copyField source="metadata_sample_data_samp_size" dest="text"/>
-    <copyField source="metadata_sample_data_taxon_id" dest="text"/>
-    <copyField source="metadata_sample_data_taxon_id_uc" dest="text"/>
-    <copyField source="metadata_sample_data_temperature" dest="text"/>
-    <copyField source="metadata_sample_data_title" dest="text"/>
-    <copyField source="metadata_sample_data_title_uc" dest="text"/>
-
+ <uniqueKey>object_id</uniqueKey>
 
   <!-- copyField commands copy one field to another at the time a document
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
 
+   <copyField source="object_id" dest="text"/>
+   <copyField source="workspace_name" dest="text"/>
+   <copyField source="object_type" dest="text"/>
 
+   <copyField source="object_id" dest="text_boost"/>
+   <copyField source="metagenome_id" dest="text_boost"/>
+   <copyField source="project_id" dest="text_boost"/>
+   <copyField source="sample_id" dest="text_boost"/>
 
+   <copyField source="metagenome_id" dest="text"/>
+   <copyField source="metagenome_name" dest="text"/>
+   <copyField source="library_id" dest="text"/>
+   <copyField source="metagenome_metadata" dest="text"/>
+   <copyField source="sequence_type" dest="text"/>
+   <copyField source="seq_method" dest="text"/>
+   <copyField source="metagenome_created" dest="text"/>
+   <copyField source="project_id" dest="text"/>
+   <copyField source="project_name" dest="text"/>
+   <copyField source="project_description" dest="text"/>
+   <copyField source="project_created" dest="text"/>
+   <copyField source="PI_info" dest="text"/>
+   <copyField source="tech_contact" dest="text"/>
+   <copyField source="funding_source" dest="text"/>
+   <copyField source="ncbi_id" dest="text"/>
+   <copyField source="qiime_id" dest="text"/>
+   <copyField source="vamps_id" dest="text"/>
+   <copyField source="greengenes_id" dest="text"/>
+   <copyField source="sample_id" dest="text"/>
+   <copyField source="sample_name" dest="text"/>
+   <copyField source="sample_created" dest="text"/>
+   <copyField source="collection_date" dest="text"/>
+   <copyField source="env_package_type" dest="text"/>
+   <copyField source="feature" dest="text"/>
+   <copyField source="biome" dest="text"/>
+   <copyField source="material" dest="text"/>
+   <copyField source="location" dest="text"/>
+   <copyField source="country" dest="text"/>
+   <copyField source="latitude" dest="text"/>
+   <copyField source="longitude" dest="text"/>
  
   <types>
     <!-- field type definitions. The "name" attribute is
@@ -466,6 +300,26 @@
     <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
       <analyzer>
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- A text field that tries to combine text_general with whitespace
+         tokenization, to preserve punctuation in identifiers
+    -->
+    <fieldType name="text_ws_general" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <!-- in this example, we will only use synonyms at query time
+        <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+        -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
 

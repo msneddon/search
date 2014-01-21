@@ -13,6 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+KBase search
+
+Creating a new core:
+==edit solrconfig.xml to point to correct dataDir
+==edit schema.xml with appropriate schema
+==edit top-level solr.xml to add core
+
+
 
 Example SolrCore Instance Directory
 =============================

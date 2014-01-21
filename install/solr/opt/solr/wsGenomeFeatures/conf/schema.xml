@@ -66,26 +66,36 @@
  <fields>
         
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
-   <field name="workspace_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="gid" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
-   <field name="fid" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="genome_id" boost="2.0" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="feature_id" boost="2.0" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="genome_source" type="text_general" indexed="true" stored="true"/>
    <field name="genome_source_id" type="text_general" indexed="true" stored="true"/>
-   <field name="feature_sequence_length" type="text_general" indexed="true" stored="true"/>
+   <field name="feature_source_id" type="text_general" indexed="true" stored="true"/>
+   <field name="protein_translation_length" type="int" indexed="true" stored="true"/>
    <field name="feature_type" type="text_general" indexed="true" stored="true"/>
    <field name="function" type="text_general" indexed="true" stored="true"/>
-   <field name="alias" type="text_general" indexed="true" stored="true" omitNorms="true"/>
-   <field name="pegs" type="text_general" indexed="true" stored="true"/>
-   <field name="rnas" type="text_general" indexed="true" stored="true"/>
+   <field name="aliases" type="text_ws_general" indexed="true" stored="true" omitNorms="true"/>
    <field name="scientific_name" type="text_general" indexed="true" stored="true"/>
-   <field name="genome_dna_size" type="text_general" indexed="true" stored="true"/>
-   <field name="contigs" type="text_general" indexed="true" stored="true"/>
+   <field name="genome_dna_size" type="int" indexed="true" stored="true"/>
+   <field name="num_contigs" type="int" indexed="true" stored="true"/>
    <field name="domain" type="text_general" indexed="true" stored="true"/>
    <field name="taxonomy" type="text_general" indexed="true" stored="true"/>
-   <field name="genetic_code" type="text_general" indexed="true" stored="true"/>
    <field name="gc_content" type="text_general" indexed="true" stored="true"/>
+   <field name="genome_publications" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="feature_publications" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="roles" type="text_general" indexed="true" stored="true"/>
+   <field name="subsystems" type="text_general" indexed="true" stored="true"/>
+   <field name="subsystem_data" type="text_general" indexed="true" stored="true"/>
+   <field name="protein_families" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="annotations" type="text_general" indexed="true" stored="true"/>
+   <field name="regulon_data" type="text_general" indexed="true" stored="true"/>
+   <field name="coexpressed_fids" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="co_occurring_fids" type="text_ws_general" indexed="true" stored="true"/>
 
-   <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="text_boost" boost="5.0" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
 
    <field name="_version_" type="long" indexed="true" stored="true"/>
 
@@ -99,24 +109,34 @@
         or to add multiple fields to the same field for easier/faster searching.  -->
 
    <copyField source="object_id" dest="text"/>
-   <copyField source="workspace_id" dest="text"/>
+   <copyField source="workspace_name" dest="text"/>
    <copyField source="object_type" dest="text"/>
-   <copyField source="gid" dest="text"/>
-   <copyField source="fid" dest="text"/>
+   <copyField source="genome_id" dest="text"/>
+   <copyField source="genome_id" dest="text_boost"/>
+   <copyField source="feature_id" dest="text"/>
+   <copyField source="feature_id" dest="text_boost"/>
+   <copyField source="genome_source" dest="text"/>
    <copyField source="genome_source_id" dest="text"/>
-   <copyField source="feature_sequence_length" dest="text"/>
+   <copyField source="feature_source_id" dest="text"/>
+   <copyField source="protein_translation_length" dest="text"/>
    <copyField source="feature_type" dest="text"/>
    <copyField source="function" dest="text"/>
-   <copyField source="alias" dest="text"/>
-   <copyField source="pegs" dest="text"/>
-   <copyField source="rnas" dest="text"/>
+   <copyField source="aliases" dest="text"/>
    <copyField source="scientific_name" dest="text"/>
    <copyField source="genome_dna_size" dest="text"/>
-   <copyField source="contigs" dest="text"/>
+   <copyField source="num_contigs" dest="text"/>
    <copyField source="domain" dest="text"/>
    <copyField source="taxonomy" dest="text"/>
-   <copyField source="genetic_code" dest="text"/>
    <copyField source="gc_content" dest="text"/>
+   <copyField source="roles" dest="text"/>
+   <copyField source="subsystems" dest="text"/>
+   <copyField source="subsystem_data" dest="text"/>
+   <copyField source="genome_publications" dest="text"/>
+   <copyField source="feature_publications" dest="text"/>
+   <copyField source="annotations" dest="text"/>
+   <copyField source="regulon_data" dest="text"/>
+   <copyField source="coexpressed_fids" dest="text"/>
+   <copyField source="co_occurring_fids" dest="text"/>
 
  
   <types>
@@ -256,6 +276,26 @@
     <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
       <analyzer>
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- A text field that tries to combine text_general with whitespace
+         tokenization, to preserve punctuation in identifiers
+    -->
+    <fieldType name="text_ws_general" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <!-- in this example, we will only use synonyms at query time
+        <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+        -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
 
