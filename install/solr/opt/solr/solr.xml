@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<solr persistent="true">
+  <cores defaultCoreName="features" adminPath="/admin/cores" zkClientTimeout="${zkClientTimeout:15000}" hostPort="8983" hostContext="solr">
+    <core instanceDir="genomes/" name="genomes"/>
+    <core instanceDir="ontology/" name="ontology"/>
+    <core instanceDir="metagenomes/" name="metagenomes"/>
+    <core instanceDir="gwas/" name="gwas"/>
+  </cores>
+</solr>
