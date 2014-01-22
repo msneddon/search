@@ -1,5 +1,9 @@
 #!/usr/bin/env python
 
+# use this script to take genomes and features from CS and create WS objects
+# use the ws-url command-line tool to set the active workspace service URL
+# use kbase-login to set the appropriate auth token
+
 import datetime
 import sys
 import simplejson
