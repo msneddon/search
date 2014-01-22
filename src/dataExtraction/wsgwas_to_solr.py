@@ -1,0 +1,117 @@
+#!/usr/bin/env python
+
+# this script takes Gwas WS objects and creates a tab-delimited import file for solr
+import StringIO
+import json
+import sys
+
+# found at https://pythonadventures.wordpress.com/tag/unicodeencodeerror/
+reload(sys)
+sys.setdefaultencoding("utf-8")
+
+import biokbase.workspace.client
+
+#auth_token = biokbase.auth.Token(user_id='***REMOVED***', password='***REMOVED***')
+#ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
+# ranjan's Gwas objects are currently in Gavin's dev workspace
+ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
+
+progress = 0.0
+
+all_workspaces = ws_client.list_workspace_info({})
+
+print "There are %d visible workspaces." % len(all_workspaces)
+
+#print all_workspaces
+
+outFile = open('gwasToSolr.tab', 'w')
+
+workspace_counter = 0
+#for n in all_workspaces:
+for n in all_workspaces:
+    print "Finished checking %s of all visible workspaces" % (str(100.0 * float(workspace_counter)/len(all_workspaces)) + " %")
+
+    workspace_id = n[0]
+    workspace_name = n[1]
+    if (workspace_name != 'gwas_datasets'):
+        print "Skipping workspace %s" % workspace_name
+        continue
+
+    objects_list = ws_client.list_objects({"ids": [workspace_id]})
+    if len(objects_list) > 0:
+        print "\tWorkspace %s has %d objects" % (workspace_name, len(objects_list))
+        object_counter = 0
+
+        for x in objects_list:
+            print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[0], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
+
+            if "Gwas" in x[2]:
+
+                done = False
+
+                object_type = x[2]
+
+#                sys.stderr.write(str(x)+"\n")
+                while not done:
+                    try:
+                        gwas = ws_client.get_objects([{"wsid": str(workspace_id), "objid": x[0]}])
+                        done = True
+                    except Exception, e:
+                        print str(e)
+                        print "Having trouble getting " + str(x[0]) + " from workspace " + str(workspace_id)
+
+                #print json.dumps(gwas['data'], sort_keys=True, indent=4, separators=(',',': '))
+                gwas = gwas[0]
+                #print gwas['data'].keys()
+                
+# [u'originator', u'comment', u'assay', u'GwasPopulation_obj_id', u'variation_file', u'filetype', u'genome', u'GwasPopulationVariation_obj_id']
+
+                # these are the keys in the ws object
+                all_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'source', 'GwasPopulation_description', 'ecotype_details', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_obj_id']
+                search_values=dict()
+                for key in all_keys:
+                    search_values[key] = ''
+
+                scalar_keys = [ 'GwasPopulation_description', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_obj_id']
+
+                for key in scalar_keys:
+                    if gwas['data'].has_key(key):
+                        search_values[key] = gwas['data'][key]
+                    else:
+                        search_values[key]=''
+
+                if gwas['data'].has_key('genome'):
+                    search_values['kbase_genome_name'] = gwas['data']['genome']['kbase_genome_name']
+                    search_values['kbase_genome_id'] = gwas['data']['genome']['kbase_genome_id']
+                    search_values['source_genome_name'] = gwas['data']['genome']['source_genome_name']
+                    search_values['source'] = gwas['data']['genome']['source']
+                if gwas['data'].has_key('ecotype_details'):
+                    for ed in gwas['data']['ecotype_details']:
+                        search_values['ecotype_details']  += ' '.join(ed.values())
+#                        search_values['ecotype_details'] = search_values['ecotype_details'] + ecotype_details
+
+                object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(gwas['info'][0])
+
+                outBuffer = StringIO.StringIO()
+
+                try:
+                    outBuffer.write(unicode(str(object_id) + '\t' + str(workspace_name) + '\t' +
+                                        str(object_type) + '\t' + str(search_values['kbase_genome_name']) + '\t' + str(search_values['kbase_genome_id']) + '\t' +
+                                        str(search_values['source_genome_name']) + '\t' + str(search_values['source']) + '\t' +
+                                        str(search_values['GwasPopulation_description']) + '\t' + str(search_values['ecotype_details']) + '\t' + str(search_values['GwasPopulation_obj_id']) + '\t' + str(search_values['filetype']) + '\t' +
+                                        str(search_values['comment']) + '\t' + str(search_values['assay']) + '\t' +
+                                        str(search_values['originator']) + '\t' + str(search_values['GwasPopulationVariation_obj_id']) + "\n"))
+                except Exception, e:
+                    print str(e)
+#                    print search_values
+                    print "Failed trying to write to string buffer."
+
+
+                outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
+                outBuffer.close()
+            else:
+                print '            skipping %s, is a %s' % (x[0], x[2])
+            object_counter += 1
+    workspace_counter += 1
+outFile.close()
+
