@@ -9,11 +9,16 @@ import random
 import biokbase.cdmi.client
 import biokbase.workspace.client
 
-cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
-cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
-ws = biokbase.workspace.client.Workspace("http://localhost:7058", user_id='***REMOVED***', password='***REMOVED***')
+# production instance
+cdmi_api = biokbase.cdmi.client.CDMI_API()
+cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
+ws = biokbase.workspace.client.Workspace()
+# private instance
+#cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
+#cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
+#ws = biokbase.workspace.client.Workspace("http://localhost:7058", user_id='***REMOVED***', password='***REMOVED***')
 
-wsname = 'searchCS'
+wsname = 'KBasePublicRichGenomes'
 
 # set up a try block here?
 try:
@@ -43,6 +48,11 @@ genomes = random.sample(genome_entities,500)
 #genomes = ['kb|g.0']
 #genomes = ['kb|g.3562']
 #genomes = ['kb|g.3562','kb|g.0']
+# DvH, e.coli, multiple versions of arabidopsis
+# what other genomes are essential?
+#genomes = ['kb|g.3562','kb|g.0','kb|g.1105','kb|g.1103','kb|g.26509','kb|g.1104']
+# kb|g.1103 has at least one feature with a bad location
+#genomes = ['kb|g.3562','kb|g.0','kb|g.3899','kb|g.1105','kb|g.26509','kb|g.1104']
 
 #genomeObjects = dict()
 
@@ -169,7 +179,7 @@ for g in genomes:
     # this will reference a ContigSet object
     #print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
     # another try block here?
-    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBase.ContigSet","data":contigSet,"name":contigSet['id']}]})
+    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
 
     end = time.time()
     print >> sys.stderr, "inserting contigset into ws " + str(end - start)
@@ -195,7 +205,10 @@ for g in genomes:
 
     isAnnotatedBy = cdmi_entity_api.get_relationship_IsAnnotatedBy(fids,[],['from_link','to_link'],[])
     annotation_ids = [ x[1]['to_link'] for x in isAnnotatedBy ]
-    cds_annotations = cdmi_entity_api.get_entity_Annotation(annotation_ids,['annotator','comment','annotation_time'])
+    print >> sys.stderr, annotation_ids
+    cds_annotations = dict()
+    if len(annotation_ids) > 0:
+        cds_annotations = cdmi_entity_api.get_entity_Annotation(annotation_ids,['annotator','comment','annotation_time'])
 
     end = time.time()
     print  >> sys.stderr, "querying annotations " + str(end - start)
@@ -211,7 +224,9 @@ for g in genomes:
     # want protein_families[*][1]['from_link']
     isMemberOf = cdmi_entity_api.get_relationship_IsMemberOf(fids,[],['from_link','to_link'],[])
     family_ids = [ x[1]['to_link'] for x in isMemberOf ]
-    families = cdmi_entity_api.get_entity_Family(family_ids,['id','type','release','family_function'])
+    families = dict()
+    if len(family_ids) > 0:
+        families = cdmi_entity_api.get_entity_Family(family_ids,['id','type','release','family_function'])
 
     end = time.time()
     print  >> sys.stderr, "querying protein_families " + str(end - start)
@@ -268,7 +283,9 @@ for g in genomes:
     
     isATopicOf = cdmi_entity_api.get_relationship_IsATopicOf(protein_list,[],['from_link','to_link'],[])
     publication_ids = [ x[1]['to_link'] for x in isATopicOf ]
-    publication_data = cdmi_entity_api.get_entity_Publication(publication_ids,['id','title','link','pubdate'])
+    publication_data = dict()
+    if len(publication_ids) > 0:
+        publication_data = cdmi_entity_api.get_entity_Publication(publication_ids,['id','title','link','pubdate'])
 
     end = time.time()
     print  >> sys.stderr, "querying literature " + str(end - start)
@@ -441,6 +458,7 @@ for g in genomes:
         roles[fid].append( x[1]['to_link'] )
 
     start = time.time()
+    fids_to_insert = list()
     for x in fids:
         featureObject = dict()
         featureObject["feature_id"] = x
@@ -507,7 +525,13 @@ for g in genomes:
 
         # these are not populated yet
         # not sure of the types of these at the moment
-        coexpressed = cdmi_api.fids_to_coexpressed_fids([x])
+        # this times out even with one fid?!?
+        coexpressed = dict()
+        try:
+            coexpressed = cdmi_api.fids_to_coexpressed_fids([x])
+        except Exception, e:
+            print >> sys.stderr, 'failed coexpressed_fids on ' + x
+            print >> sys.stderr, e
 
         if coexpressed.has_key(x):
             featureObject["coexpressed_fids"] = list()
@@ -526,9 +550,19 @@ for g in genomes:
         # (or can batch a list of featureObjects, but don't want to batch
         # too many or it'll bork)
         feature_id = featureObject['feature_id']
-        feature_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBase.Feature","data":featureObject,"name":feature_id}]})
 
-        print >> sys.stderr, feature_info
+        # test batching saves
+        fids_to_insert.append( { "type":"KBaseSearch.Feature","data":featureObject,"name":feature_id } )
+        if len(fids_to_insert) > 100:
+            feature_info = ws.save_objects({"workspace":wsname,"objects": fids_to_insert })
+            print >> sys.stderr, feature_info
+            fids_to_insert = list()
+            
+
+        # original code, one save at a time
+#        feature_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.Feature","data":featureObject,"name":feature_id}]})
+
+#        print >> sys.stderr, feature_info
 
         feature_ref = wsname + '/' + feature_id
 #        print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
@@ -541,6 +575,12 @@ for g in genomes:
 #        import sys
 #        sys.exit(0)
 
+    # final fids to insert (batching code)
+    if len(fids_to_insert) > 0:
+        feature_info = ws.save_objects({"workspace":wsname,"objects": fids_to_insert })
+        print >> sys.stderr, feature_info
+            
+
     end = time.time()
     print  >> sys.stderr, " processing features, queried coexpressed, elapsed time " + str(end - start)
 
@@ -548,14 +588,15 @@ for g in genomes:
 #    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
     # another try block here?
     featureset_id = genomeObject['genome_id'] + '.featureset'
-    featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBase.FeatureSet","data":featureSet,"name":featureset_id}]})
+    featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.FeatureSet","data":featureSet,"name":featureset_id}]})
+    print >> sys.stderr, featureset_info
 
     featureset_ref = wsname + '/' + featureset_id
     genomeObject['featureset_ref'] = featureset_ref
     start = time.time()
 
 #    print simplejson.dumps(genomeObject,sort_keys=True,indent=4 * ' ')
-    genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBase.Genome","data":genomeObject,"name":genomeObject['genome_id']}]})
+    genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.Genome","data":genomeObject,"name":genomeObject['genome_id']}]})
     print >> sys.stderr, genome_info
 
     end = time.time()
