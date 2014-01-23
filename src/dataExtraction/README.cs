@@ -1,3 +1,5 @@
+# these notes are mostly deprecated, use workspace objects instead
+
 #Very brief notes on extracting data
 
 #CDM:

@@ -12,15 +12,16 @@ sys.setdefaultencoding("utf-8")
 import biokbase.workspace.client
 
 #auth_token = biokbase.auth.Token(user_id='***REMOVED***', password='***REMOVED***')
-ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
+#ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
+ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 
 progress = 0.0
 
-all_workspaces = ws_client.list_workspace_info({})
+wsname = 'KBasePublicMetagenomes'
 
-print "There are %d visible workspaces." % len(all_workspaces)
+workspace_object = ws_client.get_workspace_info({'workspace':wsname})
 
-#print all_workspaces
+all_workspaces = [ workspace_object ]
 
 outFile = open('mgToSolr.tab', 'w')
 
@@ -41,13 +42,9 @@ def extractValues(d):
 workspace_counter = 0
 #for n in all_workspaces:
 for n in all_workspaces:
-    print "Finished checking %s of all visible workspaces" % (str(100.0 * float(workspace_counter)/len(all_workspaces)) + " %")
 
     workspace_id = n[0]
     workspace_name = n[1]
-    if (workspace_name != 'searchCommunities'):
-        print "Skipping workspace %s" % workspace_name
-        continue
 
     objects_list = ws_client.list_objects({"ids": [workspace_id]})
     if len(objects_list) > 0:

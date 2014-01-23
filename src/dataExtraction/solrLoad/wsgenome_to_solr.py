@@ -11,16 +11,14 @@ sys.setdefaultencoding("utf-8")
 import biokbase.workspace.client
 
 #auth_token = biokbase.auth.Token(user_id='***REMOVED***', password='***REMOVED***')
-ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
+#ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
+ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 
+wsname = 'KBasePublicRichGenomes'
 
-progress = 0.0
+workspace_object = ws_client.get_workspace_info({'workspace':wsname})
 
-all_workspaces = ws_client.list_workspace_info({})
-
-print "There are %d visible workspaces." % len(all_workspaces)
-
-#print all_workspaces
+all_workspaces = [ workspace_object ]
 
 outFile = open('genomesToSolr.tab', 'w')
 
@@ -37,15 +35,10 @@ outFile = open('genomesToSolr.tab', 'w')
 workspace_counter = 0
 #for n in all_workspaces:
 for n in all_workspaces:
-    print "Finished checking %s of all visible workspaces" % (str(100.0 * float(workspace_counter)/len(all_workspaces)) + " %")
 
     workspace_id = n[0]
     workspace_name = n[1]
-    if (workspace_name != 'searchCS'):
-        print "Skipping workspace %s" % workspace_name
-        continue
 
-    # would like to retrieve only Genomes with this call if possible
     objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBase.Genome"})
     if len(objects_list) > 0:
         print "\tWorkspace %s has %d objects" % (workspace_id, len(objects_list))
