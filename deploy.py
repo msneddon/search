@@ -9,7 +9,7 @@ if __name__ == "__main__":
     import shutil
     
     # command-line options?
-    parser = argparse.ArgumentParser(description='Install parts of KBase Search.")
+    parser = argparse.ArgumentParser(description='Install parts of KBase Search.')
     parser.add_argument('--install-tomcat-config', help='copy tomcat config file for solr')
     parser.add_argument('--install-solr-config', help='copy solr files to the service deployment area')
     args = parser.parse_args() 
