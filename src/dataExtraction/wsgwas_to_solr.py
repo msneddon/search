@@ -25,7 +25,17 @@ workspace_object = ws_client.get_workspace_info({'workspace':wsname})
 
 all_workspaces = [ workspace_object ]
 
-print all_workspaces
+#print all_workspaces
+
+# the keys in the solr schema
+# print out a header file
+# data fields must be printed in same order
+solr_ws_keys = ['object_id','workspace_id','object_type']
+solr_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'source', 'GwasPopulation_description', 'ecotype_details', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_parent_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id','distance_cutoff','genes_list','genes_snp_list']
+headerOutFile = open('gwasToSolr.tab.headers', 'w')
+print >> headerOutFile, "\t".join(solr_ws_keys + solr_keys)
+#print >> headerOutFile, "\n"
+headerOutFile.close()
 
 outFile = open('gwasToSolr.tab', 'w')
 
@@ -60,45 +70,61 @@ for n in all_workspaces:
 
                 #print json.dumps(gwas['data'], sort_keys=True, indent=4, separators=(',',': '))
                 gwas = gwas[0]
-                #print gwas['data'].keys()
+                #print gwas['info']
                 
 # [u'originator', u'comment', u'assay', u'GwasPopulation_obj_id', u'variation_file', u'filetype', u'genome', u'GwasPopulationVariation_obj_id']
 
-                # these are the keys in the ws object
-                all_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'source', 'GwasPopulation_description', 'ecotype_details', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_obj_id']
+                object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(gwas['info'][0])
+
                 search_values=dict()
-                for key in all_keys:
+                for key in solr_keys:
                     search_values[key] = ''
 
-                scalar_keys = [ 'GwasPopulation_description', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_obj_id']
+                #scalar_keys = [ 'GwasPopulation_description', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol']
+                scalar_keys = [ 'GwasPopulation_description', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_parent_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id','distance_cutoff']
 
+                # handle generic scalar keys
                 for key in scalar_keys:
                     if gwas['data'].has_key(key):
                         search_values[key] = gwas['data'][key]
                     else:
                         search_values[key]=''
 
+                # handle special keys
+                if gwas['data'].has_key('GwasPopulationVariation_obj_id'):
+                    search_values['GwasPopulationVariation_parent_obj_id'] = gwas['data']['GwasPopulationVariation_obj_id']
+
                 if gwas['data'].has_key('genome'):
                     search_values['kbase_genome_name'] = gwas['data']['genome']['kbase_genome_name']
                     search_values['kbase_genome_id'] = gwas['data']['genome']['kbase_genome_id']
                     search_values['source_genome_name'] = gwas['data']['genome']['source_genome_name']
                     search_values['source'] = gwas['data']['genome']['source']
+
                 if gwas['data'].has_key('ecotype_details'):
                     for ed in gwas['data']['ecotype_details']:
+# there are some issues with character encoding here, not sure how to resolve
+# (not a showstopper)
                         search_values['ecotype_details']  += ' '.join(ed.values())
 #                        search_values['ecotype_details'] = search_values['ecotype_details'] + ecotype_details
 
-                object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(gwas['info'][0])
+                if gwas['data'].has_key('genes_list'):
+                    search_values['genes_list'] = ' '.join( [ gene[1] + ' ' + gene[2] + ' ' + gene[4] + ' '  for gene in gwas['data']['genes_list'] ] )
+                if gwas['data'].has_key('genes_snp_list'):
+                    search_values['genes_snp_list'] = ' '.join([ gene[1] + ' ' + gene[2] + ' ' + gene[4] + ' '  for gene in gwas['data']['genes_snp_list'] ])
 
                 outBuffer = StringIO.StringIO()
 
                 try:
-                    outBuffer.write(unicode(str(object_id) + '\t' + str(workspace_name) + '\t' +
-                                        str(object_type) + '\t' + str(search_values['kbase_genome_name']) + '\t' + str(search_values['kbase_genome_id']) + '\t' +
-                                        str(search_values['source_genome_name']) + '\t' + str(search_values['source']) + '\t' +
-                                        str(search_values['GwasPopulation_description']) + '\t' + str(search_values['ecotype_details']) + '\t' + str(search_values['GwasPopulation_obj_id']) + '\t' + str(search_values['filetype']) + '\t' +
-                                        str(search_values['comment']) + '\t' + str(search_values['assay']) + '\t' +
-                                        str(search_values['originator']) + '\t' + str(search_values['GwasPopulationVariation_obj_id']) + "\n"))
+                    solr_strings = [object_id,workspace_name,object_type]
+                    solr_strings += [ unicode(str(search_values[x])) for x in solr_keys ]
+                    solr_line = "\t".join(solr_strings)
+                    outBuffer.write(solr_line + "\n")
+#                    outBuffer.write(unicode(str(object_id) + '\t' + str(workspace_name) + '\t' +
+#                                        str(object_type) + '\t' + str(search_values['kbase_genome_name']) + '\t' + str(search_values['kbase_genome_id']) + '\t' +
+#                                        str(search_values['source_genome_name']) + '\t' + str(search_values['source']) + '\t' +
+#                                        str(search_values['GwasPopulation_description']) + '\t' + str(search_values['ecotype_details']) + '\t' + str(search_values['GwasPopulation_obj_id']) + '\t' + str(search_values['filetype']) + '\t' +
+#                                        str(search_values['comment']) + '\t' + str(search_values['assay']) + '\t' +
+#                                        str(search_values['originator']) + '\t' + str(search_values['GwasPopulationVariation_obj_id']) + "\n"))
                 except Exception, e:
                     print str(e)
 #                    print search_values
