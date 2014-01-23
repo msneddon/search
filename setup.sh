@@ -84,7 +84,7 @@ displayHelp() {
     -h, --help               Display help information
     -c, --check	             Make dependency checks
     -I, --import             Import the data into Solr
-    -i, --install            Install tomcat and service code
+    -i, --install            Configure tomcat, solr, and install service code
     -s, --start              Start all search related services/apps
     -x, --stop               Stop all search related services/apps
     -t, --test               Test all the services and apps
