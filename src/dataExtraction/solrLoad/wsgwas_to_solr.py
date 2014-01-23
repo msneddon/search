@@ -17,8 +17,6 @@ import biokbase.workspace.client
 
 ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
 
-progress = 0.0
-
 wsname = 'gwas_datasets'
 
 workspace_object = ws_client.get_workspace_info({'workspace':wsname})

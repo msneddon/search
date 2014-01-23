@@ -39,7 +39,7 @@ for n in all_workspaces:
     workspace_id = n[0]
     workspace_name = n[1]
 
-    objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBase.Genome"})
+    objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"})
     if len(objects_list) > 0:
         print "\tWorkspace %s has %d objects" % (workspace_id, len(objects_list))
         object_counter = 0
@@ -47,7 +47,7 @@ for n in all_workspaces:
         for x in objects_list:
             print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[0], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_id)
 
-            if "KBase.Genome" in x[2]:
+            if "Genome" in x[2]:
                 done = False
 #                sys.stderr.write(str(x)+"\n")
                 while not done:
@@ -204,9 +204,10 @@ for n in all_workspaces:
                 #outBuffer.write(genomeSolrText.encode('utf8'))
 
                 # dump out each feature in tab delimited format
+                # should probably batch these calls, super slow one at a time
                 for fid in features:
                     feature_info = ws_client.get_objects([{"ref": features[fid]}])
-                    # we should only get one object back
+                    # we currently should only get one object back
                     f = feature_info[0]['data']
 
                     try:

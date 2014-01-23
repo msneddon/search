@@ -16,13 +16,11 @@ import biokbase.workspace.client
 #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
 ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 
-progress = 0.0
+wsname = 'KBasePublicOntologies'
 
-all_workspaces = ws_client.list_workspace_info({})
+workspace_object = ws_client.get_workspace_info({'workspace':wsname})
 
-print "There are %d visible workspaces." % len(all_workspaces)
-
-#print all_workspaces
+all_workspaces = [ workspace_object ]
 
 outFile = open('ontologyToSolr.tab', 'w')
 
@@ -43,14 +41,9 @@ def extractValues(d):
 workspace_counter = 0
 #for n in all_workspaces:
 for n in all_workspaces:
-    print "Finished checking %s of all visible workspaces" % (str(100.0 * float(workspace_counter)/len(all_workspaces)) + " %")
 
     workspace_id = n[0]
     workspace_name = n[1]
-# should just get pointer to workspace directly
-    if (workspace_name != 'KBasePublicOntologies'):
-        print "Skipping workspace %s" % workspace_name
-        continue
 
     objects_list = ws_client.list_objects({"ids": [workspace_id]})
     if len(objects_list) > 0:
