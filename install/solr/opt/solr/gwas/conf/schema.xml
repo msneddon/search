@@ -69,6 +69,7 @@
    <field name="workspace_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
 
+<!-- GwasPopulation -->
    <field name="kbase_genome_name" type="text_general" indexed="true" stored="true" /> 
    <field name="kbase_genome_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="source_genome_name" type="text_general" indexed="true" stored="true" /> 
@@ -76,14 +77,45 @@
    <field name="GwasPopulation_description" type="text_general" indexed="true" stored="true" /> 
    <field name="ecotype_details" type="text_general" indexed="true" stored="true" /> 
 
+<!-- GwasPopulationVariation -->
    <field name="GwasPopulation_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="filetype" type="text_general" indexed="true" stored="true" /> 
    <field name="comment" type="text_general" indexed="true" stored="true" /> 
    <field name="assay" type="text_general" indexed="true" stored="true" /> 
    <field name="originator" type="text_general" indexed="true" stored="true" /> 
+<!-- genome uses above fields -->
    <field name="GwasPopulationVariation_parent_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
 
-   <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
+<!-- GwasPopulationTrait -->
+<!-- genome,GwasPopulation_obj_id,originator,comment use above fields -->
+   <field name="trait_ontology_id" type="string" indexed="true" stored="true" /> 
+   <field name="trait_name" type="text_general" indexed="true" stored="true" /> 
+   <field name="unit_of_measure" type="text_general" indexed="true" stored="true" /> 
+   <field name="protocol" type="text_general" indexed="true" stored="true" /> 
+
+<!-- GwasPopulationKinship -->
+<!-- genome,GwasPopulationVariation_obj_id use above fields -->
+<!-- no other fields to be indexed -->
+
+<!-- GwasTopVariations -->
+<!-- source, protocol, genome, unit_of_measure, assay, trait_ontology_id,
+     trait_name, originator, GwasPopulationVariation_obj_id,
+     GwasPopulation_obj_id, comment use above fields -->
+   <field name="num_population" type="string" indexed="true" stored="true" /> 
+   <field name="GwasPopulationStructure_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="GwasPopulationKinship_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="pvaluecutoff" type="float" indexed="true" stored="true" /> 
+
+<!-- GwasGeneList -->
+<!-- need more info from ranjan on this type -->
+   <field name="GwasTopVariations_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="distance_cutoff" type="int" indexed="true" stored="true" /> 
+   <field name="genes_list" type="text_ws_general" indexed="true" stored="true" /> 
+   <field name="genes_snp_list" type="text_ws_general" indexed="true" stored="true" /> 
+
+
+   <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="text_boost" type="text_ws_general" boost="5.0" indexed="true" stored="false" multiValued="true"/>
 
    <field name="_version_" type="long" indexed="true" stored="true"/>
 
@@ -99,10 +131,12 @@
    <copyField source="object_id" dest="text"/>
    <copyField source="workspace_id" dest="text"/>
    <copyField source="object_type" dest="text"/>
+
    <copyField source="kbase_genome_name" dest="text"/>
    <copyField source="kbase_genome_id" dest="text"/>
    <copyField source="source_genome_name" dest="text"/>
    <copyField source="source" dest="text"/>
+   <copyField source="GwasPopulation_description" dest="text"/>
    <copyField source="ecotype_details" dest="text"/>
    <copyField source="GwasPopulation_obj_id" dest="text"/>
    <copyField source="filetype" dest="text"/>
@@ -110,6 +144,18 @@
    <copyField source="assay" dest="text"/>
    <copyField source="originator" dest="text"/>
    <copyField source="GwasPopulationVariation_parent_obj_id" dest="text"/>
+   <copyField source="trait_ontology_id" dest="text"/>
+   <copyField source="trait_name" dest="text"/>
+   <copyField source="unit_of_measure" dest="text"/>
+   <copyField source="protocol" dest="text"/>
+   <copyField source="num_population" dest="text"/>
+   <copyField source="GwasPopulationStructure_obj_id" dest="text"/>
+   <copyField source="GwasPopulationKinship_obj_id" dest="text"/>
+   <copyField source="pvaluecutoff" dest="text"/>
+   <copyField source="GwasTopVariations_obj_id" dest="text"/>
+   <copyField source="distance_cutoff" dest="text"/>
+   <copyField source="genes_list" dest="text"/>
+   <copyField source="genes_snp_list" dest="text"/>
 
  
   <types>
@@ -249,6 +295,26 @@
     <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
       <analyzer>
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- A text field that tries to combine text_general with whitespace
+         tokenization, to preserve punctuation in identifiers
+    -->
+    <fieldType name="text_ws_general" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <!-- in this example, we will only use synonyms at query time
+        <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+        -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
 
