@@ -43,6 +43,9 @@ if __name__ == "__main__":
         core_top_dir = os.path.join(solr_config_source_dir, "cores")
         core_files = os.listdir(core_top_dir)
         
+        print core_top_dir
+        print core_files
+        
         for x in core_files:
             if os.path.isdir(x):
                 print "Copying directory structure : " + os.path.join(core_top_dir, x) + " to " + os.path.join(solr_config_target_dir, x)
