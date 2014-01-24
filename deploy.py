@@ -35,7 +35,7 @@ if __name__ == "__main__":
         search_config_file = open(os.path.join(tomcat_config_target_dir, "Catalina/localhost/search.xml"), 'r+')
         contents = search_config_file.read()
         contents.replace('SOLR_PREFIX', os.path.join(os.environ["TARGET"], "services/search/solr"))
-        search_config_file.write()
+        search_config_file.write(contents)
         search_config_file.close()
     
     # copy solr cores, solr war, solr core config to deployment area
