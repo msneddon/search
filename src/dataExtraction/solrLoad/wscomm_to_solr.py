@@ -4,6 +4,8 @@ import StringIO
 import json
 import sys
 import re
+import random
+import argparse
 
 # found at https://pythonadventures.wordpress.com/tag/unicodeencodeerror/
 reload(sys)
@@ -11,13 +13,19 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
+parser = argparse.ArgumentParser(description='Create import files from workspace objects')
+parser.add_argument('--count', action="store", dest="maxNumObjects", type=int)
+args = parser.parse_args()
+
+
 #auth_token = biokbase.auth.Token(user_id='***REMOVED***', password='***REMOVED***')
 #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
 ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 
-progress = 0.0
-
 wsname = 'KBasePublicMetagenomes'
+maxNumObjects = sys.maxint
+if args.maxNumObjects:
+    maxNumObjects = args.maxNumObjects
 
 workspace_object = ws_client.get_workspace_info({'workspace':wsname})
 
@@ -50,6 +58,9 @@ for n in all_workspaces:
     if len(objects_list) > 0:
         print "\tWorkspace %s has %d objects" % (workspace_name, len(objects_list))
         object_counter = 0
+
+        if maxNumObjects < 1000 :
+            objects_list = random.sample(objects_list,maxNumObjects)
 
         for x in objects_list:
             print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[0], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)

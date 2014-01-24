@@ -3,6 +3,8 @@
 import StringIO
 import json
 import sys
+import random
+import argparse
 
 # found at https://pythonadventures.wordpress.com/tag/unicodeencodeerror/
 reload(sys)
@@ -10,11 +12,18 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
+parser = argparse.ArgumentParser(description='Create import files from workspace objects')
+parser.add_argument('--count', action="store", dest="maxNumObjects", type=int)
+args = parser.parse_args()
+
 #auth_token = biokbase.auth.Token(user_id='***REMOVED***', password='***REMOVED***')
 #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
 ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 
 wsname = 'KBasePublicRichGenomes'
+maxNumObjects = sys.maxint
+if args.maxNumObjects:
+    maxNumObjects = args.maxNumObjects
 
 workspace_object = ws_client.get_workspace_info({'workspace':wsname})
 
@@ -40,12 +49,16 @@ for n in all_workspaces:
     workspace_name = n[1]
 
     objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"})
+
     if len(objects_list) > 0:
-        print "\tWorkspace %s has %d objects" % (workspace_id, len(objects_list))
+        print "\tWorkspace %s has %d objects" % (workspace_name, len(objects_list))
         object_counter = 0
 
+        if maxNumObjects < 1000:
+            objects_list = random.sample(objects_list,maxNumObjects)
+
         for x in objects_list:
-            print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[0], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_id)
+            print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[0], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
 
             if "Genome" in x[2]:
                 done = False
@@ -206,9 +219,12 @@ for n in all_workspaces:
                 # dump out each feature in tab delimited format
                 # should probably batch these calls, super slow one at a time
                 for fid in features:
+                    print >> sys.stderr, 'tell keith to fix this'
+                    continue
                     feature_info = ws_client.get_objects([{"ref": features[fid]}])
                     # we currently should only get one object back
                     f = feature_info[0]['data']
+                    print >> sys.stderr, f
 
                     try:
                         for role in f['roles']:
