@@ -7,6 +7,8 @@ SERVICE_PORT = 7078
 
 include $(TOP_DIR)/tools/Makefile.common
 
+export TARGET
+
 # to wrap scripts and deploy them to $(TARGET)/bin using tools in
 # the dev_container. right now, these vars are defined in
 # Makefile.common, so it's redundant here.
