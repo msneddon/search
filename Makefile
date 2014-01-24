@@ -3,7 +3,7 @@ DEPLOY_RUNTIME ?= /kb/runtime
 TARGET ?= /kb/deployment
 SERVICE_SPEC = 
 SERVICE_NAME = search
-SERVICE_PORT = 7070
+SERVICE_PORT = 7078
 
 include $(TOP_DIR)/tools/Makefile.common
 
@@ -119,12 +119,12 @@ test-service:
 # even if there is no server side code to deploy.
 #
 
-deploy: deploy-client deploy-service
+deploy: deploy-config deploy-client deploy-service
 
 # deploy-all deploys client *and* server is depricated and should
 # be replaced by the deploy target.
 
-deploy-all: deploy-client deploy-service
+deploy-all: deploy-config deploy-client deploy-service
 
 # Deploy client should deploy the client artifacts, mainly
 # the application programming interface libraries, command
@@ -132,6 +132,11 @@ deploy-all: deploy-client deploy-service
 
 deploy-client: deploy-libs deploy-scripts deploy-docs
 	echo "nothing to do for deploy-client"
+
+deploy-config: deploy-config-tomcat deploy-config-solr
+
+deploy-config-tomcat:
+	./deploy.py --install-tomcat-config
 
 # The deploy-libs and deploy-scripts targets are used to recognize
 # and delineate the client types, mainly a set of libraries that
