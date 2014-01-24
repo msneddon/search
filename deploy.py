@@ -27,6 +27,13 @@ if __name__ == "__main__":
         
         os.chdir(tomcat_config_source_dir)
         shutil.copytree(os.path.join(tomcat_config_source_dir,"Catalina"), os.path.join(tomcat_config_target_dir,"Catalina"))
+        
+        # edit the copied file and set the correct path to where the solr files are located
+        search_config_file = open(os.path.join(tomcat_config_target_dir,"Catalina/localhost/search.xml"), 'w')
+        contents = search_config_file.read()
+        contents.replace('SOLR_PREFIX', os.path.join(os.environ["TARGET"], "services/search/solr"))
+        search_config_file.write()
+        search_config_file.close()
     
     # copy solr cores, solr war, solr core config to deployment area
     if args.install_solr_config:
