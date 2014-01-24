@@ -33,10 +33,11 @@ if __name__ == "__main__":
         solr_config_source_dir = os.path.abspath(os.path.join(os.getcwd(),"install/solr/config"))
         solr_config_target_dir = os.path.join(os.environ["TARGET"], "services/search/solr")
 
-        print "Creating directory : " + str(solr_config_target_dir)
+        if os.path.exists(solr_config_target_dir):
+            print "Creating directory : " + str(solr_config_target_dir)
     
-        # create solr directory in deployment area
-        os.mkdir(solr_config_target_dir)
+            # create solr directory in deployment area
+            os.makedirs(solr_config_target_dir)
         
         # copy solr core directories and core config file
         core_top_dir = os.path.join(solr_config_source_dir, "cores")
