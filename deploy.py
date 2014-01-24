@@ -51,7 +51,7 @@ if __name__ == "__main__":
                 shutil.copy(os.path.join(core_top_dir, x), solr_config_target_dir)        
         
         # copy solr war file
-        solr_runtime_source_dir = os.path.abspath(os.path.join(os.getcwd(),"install/solr/config/runtime")
+        solr_runtime_source_dir = os.path.abspath(os.path.join(os.getcwd(),"install/solr/config/runtime"))
         solr_runtime_target_dir = os.path.join(os.environ["TARGET"], "services/search/solr")
         
         print "Copying solr.war file to " + solr_runtime_target_dir
