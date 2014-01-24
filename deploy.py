@@ -10,14 +10,25 @@ if __name__ == "__main__":
     
     # command-line options?
     parser = argparse.ArgumentParser(description='Install parts of KBase Search.')
-    parser.add_argument('--install-tomcat-config', help='copy tomcat config file for solr')
-    parser.add_argument('--install-solr-config', help='copy solr files to the service deployment area')
+    parser.add_argument('--install-tomcat-config', action='store_true', help='copy tomcat config file for solr')
+    parser.add_argument('--install-solr-config', action='store_true', help='copy solr files to the service deployment area')
     args = parser.parse_args() 
+
+    # check for KBase environment variables, if not present use defaults    
+
     
-    # check for KBase environment variables, if not present use defaults
+    if args.install_tomcat_config:    
+        # copy tomcat config files
+        tomcat_config_source_dir = os.path.abspath(os.path.join(os.cwd,"install/solr/tomcat"))
+        
+        print "Installing tomcat config files to " + str(tomcat_config_source_dir)
+        
+        os.chdir(tomcat_config_source_dir)
+        shutil.copytree(os.path.join(tomcat_config_source_dir,"Catalina"), os.path(os.environ["DEPLOY_RUNTIME"], "tomcat/conf"))
     
-    # copy tomcat config files
+    if args.install_solr_config:
+        # create solr directory in deployment area, copy solr config file, copy solr core directories, copy solr war file
+        pass
     
-    # create solr directory in deployment area, copy solr config file, copy solr core directories, copy solr war file
     
-    # 
+    
