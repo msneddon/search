@@ -47,10 +47,10 @@ if __name__ == "__main__":
         print core_files
         
         for x in core_files:
-            if os.path.isdir(x):
+            if os.path.isdir(os.path.join(core_top_dir,x)):
                 print "Copying directory structure : " + os.path.join(core_top_dir, x) + " to " + os.path.join(solr_config_target_dir, x)
                 shutil.copytree(os.path.join(core_top_dir, x), os.path.join(solr_config_target_dir, x))
-            elif os.path.isfile(x):
+            elif os.path.isfile(os.path.join(core_top_dir,x)):
                 print "Copying file : " + os.path.join(core_top_dir, x) + " to " + solr_config_target_dir
                 shutil.copy(os.path.join(core_top_dir, x), solr_config_target_dir)        
         
