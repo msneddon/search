@@ -39,8 +39,8 @@ all_workspaces = [ workspace_object ]
 # the keys in the solr schema
 # print out a header file
 # data fields must be printed in same order
-solr_ws_keys = ['object_id','workspace_id','object_type']
-solr_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'source', 'GwasPopulation_description', 'ecotype_details', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_parent_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id','distance_cutoff','genes_list','genes_snp_list']
+solr_ws_keys = ['object_id','workspace_id','object_type', 'object_name']
+solr_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'source', 'GwasPopulation_description', 'ecotype_details', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_parent_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id','distance_cutoff','genes','genes_snp_list']
 headerOutFile = open('gwasToSolr.tab.headers', 'w')
 print >> headerOutFile, "\t".join(solr_ws_keys + solr_keys)
 #print >> headerOutFile, "\n"
@@ -70,6 +70,7 @@ for n in all_workspaces:
                 done = False
 
                 object_type = x[2]
+                object_name = x[1]
 
 #                sys.stderr.write(str(x)+"\n")
                 while not done:
@@ -119,15 +120,31 @@ for n in all_workspaces:
                         search_values['ecotype_details']  += ' '.join(ed.values())
 #                        search_values['ecotype_details'] = search_values['ecotype_details'] + ecotype_details
 
-                if gwas['data'].has_key('genes_list'):
-                    search_values['genes_list'] = ' '.join( [ gene[1] + ' ' + gene[2] + ' ' + gene[4] + ' '  for gene in gwas['data']['genes_list'] ] )
+                if gwas['data'].has_key('genes'):
+                    search_values['genes'] = ' '.join( [ gene[1] + ' ' + gene[2] + ' ' + gene[3] + ' '  for gene in gwas['data']['genes'] ] )
                 if gwas['data'].has_key('genes_snp_list'):
                     search_values['genes_snp_list'] = ' '.join([ gene[1] + ' ' + gene[2] + ' ' + gene[4] + ' '  for gene in gwas['data']['genes_snp_list'] ])
+
+               # need to embed GwasTopVariations data in the GwasGeneList object
+                if gwas['data'].has_key('GwasTopVariations_obj_id'):
+                    gwasTopVariation = ws_client.get_objects([{"wsid": str(workspace_id), "name": gwas['data']['GwasTopVariations_obj_id']}])
+                    # only retrieving one object
+                    gwasTopVariation = gwasTopVariation[0]
+                    topVariation_scalar_keys = [ 'comment', 'assay', 'originator', 'trait_ontology_id', 'trait_name','protocol']
+                    for key in topVariation_scalar_keys:
+                        if gwasTopVariation['data'].has_key(key):
+                            search_values[key] = gwasTopVariation['data'][key]
+
+                    if gwasTopVariation['data'].has_key('genome'):
+                        search_values['kbase_genome_name'] = gwasTopVariation['data']['genome']['kbase_genome_name']
+                        search_values['kbase_genome_id'] = gwasTopVariation['data']['genome']['kbase_genome_id']
+                        search_values['source_genome_name'] = gwasTopVariation['data']['genome']['source_genome_name']
+                        search_values['source'] = gwasTopVariation['data']['genome']['source']
 
                 outBuffer = StringIO.StringIO()
 
                 try:
-                    solr_strings = [object_id,workspace_name,object_type]
+                    solr_strings = [object_id,workspace_name,object_type,object_name]
                     solr_strings += [ unicode(str(search_values[x])) for x in solr_keys ]
                     solr_line = "\t".join(solr_strings)
                     outBuffer.write(solr_line + "\n")

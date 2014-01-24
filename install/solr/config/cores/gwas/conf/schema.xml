@@ -68,6 +68,7 @@
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
    <field name="workspace_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
 
 <!-- GwasPopulation -->
    <field name="kbase_genome_name" type="text_general" indexed="true" stored="true" /> 
@@ -110,7 +111,7 @@
 <!-- need more info from ranjan on this type -->
    <field name="GwasTopVariations_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="distance_cutoff" type="int" indexed="true" stored="true" /> 
-   <field name="genes_list" type="text_ws_general" indexed="true" stored="true" /> 
+   <field name="genes" type="text_ws_general" indexed="true" stored="true" /> 
    <field name="genes_snp_list" type="text_ws_general" indexed="true" stored="true" /> 
 
 
@@ -131,6 +132,7 @@
    <copyField source="object_id" dest="text"/>
    <copyField source="workspace_id" dest="text"/>
    <copyField source="object_type" dest="text"/>
+   <copyField source="object_name" dest="text"/>
 
    <copyField source="kbase_genome_name" dest="text"/>
    <copyField source="kbase_genome_id" dest="text"/>
@@ -154,7 +156,7 @@
    <copyField source="pvaluecutoff" dest="text"/>
    <copyField source="GwasTopVariations_obj_id" dest="text"/>
    <copyField source="distance_cutoff" dest="text"/>
-   <copyField source="genes_list" dest="text"/>
+   <copyField source="genes" dest="text"/>
    <copyField source="genes_snp_list" dest="text"/>
 
  
