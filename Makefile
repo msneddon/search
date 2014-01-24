@@ -138,6 +138,9 @@ deploy-config: deploy-config-tomcat deploy-config-solr
 deploy-config-tomcat:
 	./deploy.py --install-tomcat-config
 
+deploy-config-solr:
+	./deploy.py --install-solr-config
+
 # The deploy-libs and deploy-scripts targets are used to recognize
 # and delineate the client types, mainly a set of libraries that
 # implement an application programming interface and a set of 
