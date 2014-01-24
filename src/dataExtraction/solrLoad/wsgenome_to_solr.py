@@ -58,7 +58,7 @@ for n in all_workspaces:
             objects_list = random.sample(objects_list,maxNumObjects)
 
         for x in objects_list:
-            print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[0], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
+            print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
 
             if "Genome" in x[2]:
                 done = False
@@ -217,14 +217,27 @@ for n in all_workspaces:
                 #outBuffer.write(genomeSolrText.encode('utf8'))
 
                 # dump out each feature in tab delimited format
-                # should probably batch these calls, super slow one at a time
+                # need to batch these calls, super slow one at a time
+                features_to_retrieve = list()
+                features_to_process = list()
                 for fid in features:
-                    print >> sys.stderr, 'tell keith to fix this'
-                    continue
-                    feature_info = ws_client.get_objects([{"ref": features[fid]}])
-                    # we currently should only get one object back
-                    f = feature_info[0]['data']
-                    print >> sys.stderr, f
+                    features_to_retrieve.append({"ref": workspace_name+'/'+fid})
+                    if len(features_to_retrieve) > 99:
+                        features_to_process.extend(ws_client.get_objects(features_to_retrieve))
+                        features_to_retrieve = list()
+                        print >> sys.stderr, 'retrieved features so far: ' + str(len(features_to_process)) + ' of total features: ' + str(len(features))
+                # final batch
+                if len(features_to_retrieve) > 0:
+                    features_to_process.extend(ws_client.get_objects(features_to_retrieve))
+
+#                print >> sys.stderr, len(features_to_process)
+#                print >> sys.stderr, len(features)
+                for feature in features_to_process:
+
+                    object_type = feature['info'][2]
+                    object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(feature['info'][0])
+
+                    f = feature['data']
 
                     try:
                         for role in f['roles']:
@@ -292,12 +305,6 @@ for n in all_workspaces:
                     except:
                         feature_alias = ""
 
-#                    object_id = str(workspace_id) + "." + str(feature_id)
-# not sure how to generate a solr id for these documents
-                    object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(genome['info'][0]) + '.feature.' + str(fid)
-                    # want to examine object for type
-                    object_type = "KBase.Feature"
-                    
                     if f.has_key('feature_type'):
                         feature_type = f['feature_type']
                     else:
