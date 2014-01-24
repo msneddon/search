@@ -20,11 +20,12 @@ if __name__ == "__main__":
     if args.install_tomcat_config:    
         # copy tomcat config files
         tomcat_config_source_dir = os.path.abspath(os.path.join(os.getcwd(),"install/solr/tomcat"))
+        tomcat_config_target_dir = os.path.join(os.environ["KB_RUNTIME"], "tomcat/conf")
         
-        print "Installing tomcat config files to " + str(tomcat_config_source_dir)
+        print "Installing tomcat config files to " + str(tomcat_config_target_dir)
         
         os.chdir(tomcat_config_source_dir)
-        shutil.copytree(os.path.join(tomcat_config_source_dir,"Catalina"), os.path(os.environ["DEPLOY_RUNTIME"], "tomcat/conf"))
+        shutil.copytree(os.path.join(tomcat_config_source_dir,"Catalina"), os.path.join(tomcat_config_target_dir,"Catalina"))
     
     if args.install_solr_config:
         # create solr directory in deployment area, copy solr config file, copy solr core directories, copy solr war file
