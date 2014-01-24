@@ -19,7 +19,7 @@ if __name__ == "__main__":
     
     if args.install_tomcat_config:    
         # copy tomcat config files
-        tomcat_config_source_dir = os.path.abspath(os.path.join(os.cwd,"install/solr/tomcat"))
+        tomcat_config_source_dir = os.path.abspath(os.path.join(os.getcwd(),"install/solr/tomcat"))
         
         print "Installing tomcat config files to " + str(tomcat_config_source_dir)
         
