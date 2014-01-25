@@ -10,9 +10,10 @@ if __name__ == "__main__":
     
     # command-line options
     parser = argparse.ArgumentParser(description='Install parts of KBase Search.')
+    parser.add_argument('--install', action='store_true', help='install all needed tomcat and solr files')
     parser.add_argument('--install-tomcat-config', action='store_true', help='copy tomcat config file for solr')
     parser.add_argument('--install-solr-config', action='store_true', help='copy solr files to the service deployment area')
-    parser.add_argument('--load-solr-data', nargs=2, help='load solr data; takes two arguments: a header file and a content file')
+    parser.add_argument('--load-solr-data', nargs=3, help='load solr data; takes 3 arguments: the solr core to load data into, a header file, and a content file')
     args = parser.parse_args() 
 
     # check for KBase environment variables, if not present use defaults    
@@ -26,7 +27,7 @@ if __name__ == "__main__":
     
     
     # copy Tomcat config file for solr into the runtime
-    if args.install_tomcat_config:    
+    if args.install_tomcat_config or args.install:    
         # copy tomcat config files
         tomcat_config_source_dir = os.path.abspath(os.path.join(running_dir,"install/solr/tomcat"))
         tomcat_config_target_dir = os.path.join(os.environ["KB_RUNTIME"], "tomcat/conf")
@@ -48,7 +49,7 @@ if __name__ == "__main__":
         search_config_file.close()
     
     # copy solr cores, solr war, solr core config to deployment area
-    if args.install_solr_config:
+    if args.install_solr_config or args.install:
         solr_config_source_dir = os.path.abspath(os.path.join(running_dir,"install/solr/config"))
         solr_config_target_dir = os.path.join(os.environ["TARGET"], "services/search/solr")
 
@@ -79,19 +80,10 @@ if __name__ == "__main__":
     
     # load solr data from tab delimited files to tomcat
     if args.load_solr_data:
-        print "Loading tab delimited files to Solr..."
-        
-        solr_config_source_dir = os.path.abspath(os.path.join(running_dir,"install/solr/config"))
-        core_top_dir = os.path.join(solr_config_source_dir, "cores")
-        
-        cores = os.listdir(core_top_dir)
-        cores = [x for x in cores if os.path.isdir(os.path.join(core_top_dir,x))]
-        
         sys.path.append(os.path.abspath(os.path.join(running_dir,"install/bin/")))
         import loadSolrCore
         
-        for x in cores:
-            print "Loading data for core : " + x
-            loadSolrCore.push_to_solr(args.load_solr_data[0],args.load_solr_data[1],x)
+        print "Loading data for core : " + args.load_solr_data[0]
+        loadSolrCore.push_to_solr(args.load_solr_data[1],args.load_solr_data[2],args.load_solr_data[0])
         
         
