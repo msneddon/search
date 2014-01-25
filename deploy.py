@@ -87,7 +87,7 @@ if __name__ == "__main__":
         cores = os.listdir(core_top_dir)
         cores = [x for x in cores if os.path.isdir(os.path.join(core_top_dir,x))]
         
-        sys.path += os.path.abspath(os.path.join(os.getcwd(),"install/bin/"))
+        sys.path.append(os.path.abspath(os.path.join(running_dir,"install/bin/")))
         import loadSolrCore
         
         for x in cores:
