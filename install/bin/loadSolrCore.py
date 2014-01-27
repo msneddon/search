@@ -6,9 +6,6 @@ def push_to_solr(headerfilepath,filepath,core):
 
     commit_url = "http://localhost:7077/search/admin/cores?wt=json&action=RELOAD&core=" + core
 
-    username = "admin"
-    password = "***REMOVED***"
-
     solrheaderdata = open (headerfilepath, 'r')
     csvdata = open(filepath, "r")
 
