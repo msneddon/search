@@ -63,10 +63,10 @@ install:
 
 test: test-init test-client test-scripts test-service
 
-
 test-init: 
-	./setup.sh --test
-	
+#	./setup.sh --test
+	./install/data/retrieveLoadData.sh
+
 
 # test-all is deprecated. 
 # test-all: test-client test-scripts test-service
