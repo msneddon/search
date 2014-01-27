@@ -25,7 +25,7 @@ controllers.logger = search_wsgi.logger
 
 @search_wsgi.route('/', methods = ['GET'])
 def index():
-    return "testing UWSGI with flask"
+    return "KBase Search Service"
 
 @search_wsgi.route('/getResults', methods = ['GET'])
 def get_results():
