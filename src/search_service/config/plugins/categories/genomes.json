@@ -1,0 +1,9 @@
+{
+    "category": "genomes",
+    "display": "Genomes",
+    "solr": {
+        "core": "genomes",
+        "fields": ["genome_id", "genome_source_id"],
+        "query_string": "&q=object_type:*Genome*&facet=true&facet.limit=10&facet.field=domain"
+    }
+}

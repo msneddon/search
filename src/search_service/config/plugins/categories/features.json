@@ -1,0 +1,9 @@
+{
+    "category": "features",
+    "display": "Features",
+    "solr": {
+        "core": "genomes",
+        "fields": ["feature_id"],
+        "query_string": "&fq=object_type:*Feature*"
+    }
+}

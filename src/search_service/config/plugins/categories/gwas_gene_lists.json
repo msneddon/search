@@ -1,0 +1,8 @@
+{
+    "category": "GWASAll",
+    "display": "Genomes",
+    "solr": {
+        "core": "gwas",
+        "query_string": ""
+    }
+}

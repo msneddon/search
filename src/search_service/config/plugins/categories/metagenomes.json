@@ -1,0 +1,9 @@
+{
+    "category": "metagenomes",
+    "display": "Metagenomes",
+    "solr": {
+        "core": "metagenomes",
+        "fields": ["metagenome_id","metagenome_name","sequence_type","seq_method","project_id","sample_id","env_package_type","feature","biome","material","location","latitude","longitude"],
+        "query_string": "&facet=true&facet.limit=10&facet.field=sequence_type"
+    }
+}

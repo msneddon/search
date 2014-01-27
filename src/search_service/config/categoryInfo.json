@@ -1,0 +1,117 @@
+{
+  "categories": {
+                  "expression": {"description": "", "fields": [""]},
+                  "expression_platforms": {"description": "", "fields": [""]},
+                  "expression_samples": {"description": "", "fields": [""]},
+                  "expression_series": {"description": "", "fields": [""]},
+                  "features": {"description": "", "fields": [""]},
+                  "genomes": {"description": "", "fields": [""]},
+                  "gwas": {"description": "", "fields": [""]},
+                  "gwas_gene_lists": {"description": "", "fields": [""]},
+                  "gwas_population_kinships": {"description": "", "fields": [""]},
+                  "gwas_population_traits": {"description": "", "fields": [""]},
+                  "gwas_population_variations": {"description": "", "fields": [""]},
+                  "gwas_populations": {"description": "", "fields": [""]},
+                  "gwas_top_variations": {"description": "", "fields": [""]},
+                  "metagenomes": {"description": "", "fields": [""]},
+                  "models": {"description": "", "fields": [""]},
+                  "models_fba": {"description": "", "fields": [""]},
+                  "models_media": {"description": "", "fields": [""]},
+                  "narratives": {"description": "", "fields": [""]},
+                  "networks": {"description": "", "fields": [""]},
+                  "networks_coexpression": {"description": "", "fields": [""]},
+                  "networks_regulons": {"description": "", "fields": [""]},
+                  "networks_ppi": {"description": "", "fields": [""]},
+                  "networks_clusters": {"description": "", "fields": [""]},
+                  "networks_clusters_ppi": {"description": "", "fields": [""]},
+                  "networks_clusters_biclusters": {"description": "", "fields": [""]},
+                  "networks_clusters_biclusters_cmonkey": {"description": "", "fields": [""]},
+                  "networks_clusters_biclusters_mak": {"description": "", "fields": [""]},
+                  "trees": {"description": "", "fields": [""]}
+                }, 
+  "displayTree": { "unauthenticated": {
+                     "label": "Public Data",
+                     "children": [
+                         {
+                             "label": "Communities",
+                             "category": "metagenomes",
+                             "children": [
+                                 {"label": "Metagenomes", "category": "metagenomes"}
+                             ]                                                      
+                         },
+                         {
+                             "label": "Expression",
+                             "category": "expression",
+                             "children": [
+                                 {"label": "Series", "category": "expression_series"},
+                                 {"label": "Samples", "category": "expression_samples"},
+                                 {"label": "Platforms", "category": "expression_platforms"}
+                             ]
+                         },
+                         {
+                             "label": "Features",
+                             "category": "features"
+                         },
+                         {
+                             "label": "Genomes",
+                             "category": "genomes"                             
+                         },
+                         {
+                             "label": "Genotype-Phenotype",
+                             "category": "gwas",
+                             "children": [
+                                 {"label": "GWAS Populations", "category": "gwas_populations"},
+                                 {"label": "GWAS Population Variations", "category": "gwas_population_variations"},
+                                 {"label": "GWAS Top Variations", "category": "gwas_top_variations"},
+                                 {"label": "GWAS Population Traits", "category": "gwas_population_traits"},
+                                 {"label": "GWAS Population Kinships", "category": "gwas_population_kinships"},
+                                 {"label": "GWAS Gene Lists", "category": "gwas_gene_lists"}                             
+                             ]
+                         },
+                         {
+                             "label": "Metabolic Models",
+                             "category": "models",
+                             "children": [
+                                 {"label": "Flux Balance Analysis Models", "category": "models_fba"},
+                                 {"label": "Media", "category": "models_media"}
+                             ]
+                         },
+                         {
+                             "label": "Narratives",
+                             "category": "narratives"                             
+                         },
+                         {
+                             "label": "Networks",
+                             "category": "networks",
+                             "children": [
+                                 {"label": "Co-Expression Networks", "category": "networks_coexpression"},
+                                 {"label": "Regulon Networks", "category": "networks_regulons"},
+                                 {"label": "PPI Interaction Networks", "category": "networks_ppi"},
+                                 {
+                                     "label": "Clusters",
+                                     "category": "networks_clusters",
+                                     "children": [
+                                         {"label": "PPI Interactions", "category": "networks_clusters_ppi"},
+                                         {
+                                             "label": "BiClusters",
+                                             "category": "networks_clusters_bi",
+                                             "children": [
+                                                 {"label": "Mak BiClusters", "category": "networks_clusters_bi_mak"},
+                                                 {"label": "cMonkey BiClusters", "category": "networks_clusters_bi_cmonkey"}
+                                             ]
+                                         }
+                                     ]
+                                 }
+                             ]
+                         },
+                         {
+                             "label": "Trees",
+                             "category": "trees",
+                             "children": [
+                                 {"label": "Gene Trees", "category": "trees_gene"}
+                             ]
+                         }
+                     ]
+                 }
+            }
+}
