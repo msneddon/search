@@ -1,9 +1,0 @@
-{
-    "category": "WSProteinGenes",
-    "display": "Protein Genes",
-    "solr": {
-        "secure": true,
-        "core": "wsGenomeFeatures",
-        "query_string": "&fq=object_type:Feature&fq=feature_type:CDS"
-    }
-}

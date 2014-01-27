@@ -1,8 +1,0 @@
-{
-    "category": "CSArchaea",
-    "display": "Archaea",
-    "solr": {
-        "core": "genomes",
-        "query_string": "&fq=taxonomy:Archaea"
-    }
-}

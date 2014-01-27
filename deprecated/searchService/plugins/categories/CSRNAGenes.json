@@ -1,8 +1,0 @@
-{
-    "category": "CSRNAGenes",
-    "display": "RNA Genes",
-    "solr": {
-        "core": "features",
-        "query_string": "&fq=feature_type:rna"
-    }
-}

@@ -1,9 +1,0 @@
-{
-    "category": "WSGenomes",
-    "display": "Genomes",
-    "solr": {
-        "secure": true,
-        "core": "wsGenomeFeatures",
-        "query_string": "&fq=object_type:Genome"
-    }
-}

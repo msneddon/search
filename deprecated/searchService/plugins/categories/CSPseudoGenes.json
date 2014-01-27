@@ -1,8 +1,0 @@
-{
-    "category": "CSPseudoGenes",
-    "display": "PseudoGenes",
-    "solr": {
-        "core": "features",
-        "query_string": "&fq=feature_type:pseudo"
-    }
-}

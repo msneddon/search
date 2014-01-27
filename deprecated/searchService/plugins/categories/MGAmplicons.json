@@ -1,8 +1,0 @@
-{
-    "category": "MGAmplicons",
-    "display": "Amplicon Metagenomes",
-    "solr": {
-        "core": "metagenomes",
-        "query_string": "&fq=text:Amplicon"
-    }
-}

@@ -1,8 +1,0 @@
-{
-    "category": "CSFeatures",
-    "display": "Features",
-    "solr": {
-        "core": "features",
-        "query_string": ""
-    }
-}

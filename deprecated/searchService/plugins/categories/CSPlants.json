@@ -1,8 +1,0 @@
-{
-    "category": "CSPlants",
-    "display": "Plants",
-    "solr": {
-        "core": "genomes",
-        "query_string": "&fq=taxonomy:Viridiplantae"
-    }
-}

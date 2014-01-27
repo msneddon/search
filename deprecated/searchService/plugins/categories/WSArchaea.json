@@ -1,9 +1,0 @@
-{
-    "category": "WSArchaea",
-    "display": "Archaea",
-    "solr": {
-        "secure": true,
-        "core": "wsGenomeFeatures",
-        "query_string": "&fq=object_type:Genome&fq=text:Archaea"
-    }
-}
