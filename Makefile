@@ -61,9 +61,9 @@ install:
 
 # Test Section
 
-test: test-init test-client test-scripts test-service
+test: build-cores test-client test-scripts test-service
 
-test-init: 
+build-cores: 
 #	./setup.sh --test
 	./install/data/retrieveLoadData.sh
 

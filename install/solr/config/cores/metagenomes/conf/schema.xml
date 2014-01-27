@@ -80,12 +80,12 @@
    <field name="metagenome_metadata" type="text_general" indexed="true" stored="true"/>
    <field name="sequence_type" type="text_general" indexed="true" stored="true"/>
    <field name="seq_method" type="text_general" indexed="true" stored="true"/>
-   <field name="metagenome_created" type="date" indexed="true" stored="true"/>
+   <field name="metagenome_created" type="text_general" indexed="true" stored="true"/>
 
    <field name="project_id" boost="2.0" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="project_name" type="text_general" indexed="true" stored="true"/>
    <field name="project_description" type="text_general" indexed="true" stored="true"/>
-   <field name="project_created" type="date" indexed="true" stored="true"/>
+   <field name="project_created" type="text_general" indexed="true" stored="true"/>
    <field name="PI_info" type="text_general" indexed="true" stored="true"/>
    <field name="tech_contact" type="text_general" indexed="true" stored="true"/>
    <field name="funding_source" type="text_general" indexed="true" stored="true"/>
@@ -96,7 +96,7 @@
 
    <field name="sample_id" boost="2.0" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="sample_name" type="text_general" indexed="true" stored="true"/>
-   <field name="sample_created" type="date" indexed="true" stored="true"/>
+   <field name="sample_created" type="text_general" indexed="true" stored="true"/>
    <field name="collection_date" type="text_general" indexed="true" stored="true"/>
    <field name="env_package_type" type="text_general" indexed="true" stored="true"/>
    <field name="feature" type="text_general" indexed="true" stored="true"/>
