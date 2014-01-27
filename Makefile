@@ -54,7 +54,7 @@ SERVER_TESTS = $(wildcard server-tests/*.t)
 
 
 default:
-	echo Nothing to do (no compilation steps).
+	echo Nothing to do--no compilation steps.
 
 # Test Section
 
