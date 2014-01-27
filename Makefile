@@ -54,17 +54,13 @@ SERVER_TESTS = $(wildcard server-tests/*.t)
 
 
 default:
-	echo Default target is currently a no-op.
-
-install:
-	./setup.sh --install
+	echo Nothing to do (no compilation steps).
 
 # Test Section
 
 test: build-cores test-client test-scripts test-service
 
 build-cores: 
-#	./setup.sh --test
 	./install/data/retrieveLoadData.sh
 
 
@@ -186,13 +182,7 @@ deploy-scripts:
 # The start server script needs to know the service port and needs
 # to set the $KB_DEPLOYMENT_CONFIG environment variable.
 deploy-service:
-	./setup.sh --install
-
-deploy-solr:
-	./setup.sh --install-solr
-
-deploy-data:
-	./setup.sh --import
+	echo "service deploy not yet implemented"
 
 # Deploying docs here refers to the deployment of documentation
 # of the API. We'll include a description of deploying documentation
