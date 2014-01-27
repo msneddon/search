@@ -1,8 +1,0 @@
-{
-    "category": "CSPlantLoci",
-    "display": "Plant Loci",
-    "solr": {
-        "core": "features",
-        "query_string": "&fq=feature_type:locus"
-    }
-}

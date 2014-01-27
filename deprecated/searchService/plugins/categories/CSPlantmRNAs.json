@@ -1,8 +1,0 @@
-{
-    "category": "CSPlantmRNAs",
-    "display": "Plant mRNA",
-    "solr": {
-        "core": "features",
-        "query_string": "&fq=feature_type:mRNA"
-    }
-}

@@ -1,9 +1,0 @@
-{
-    "category": "WSPlantmRNAs",
-    "display": "Plant mRNAs",
-    "solr": {
-        "secure": true,
-        "core": "wsGenomeFeatures",
-        "query_string": "&fq=object_type:Feature&fq=feature_type:mRNA"
-    }
-}

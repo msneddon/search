@@ -1,9 +1,0 @@
-{
-    "category": "WSModels",
-    "display": "Models",
-    "solr": {
-        "secure": true,
-        "core": "wsModels",
-        "query_string": "&fq=object_type:Model"
-    }
-}

@@ -1,8 +1,0 @@
-{
-    "category": "MGAll",
-    "display": "Metagenomes",
-    "solr": {
-        "core": "metagenomes",
-        "query_string": ""
-    }
-}

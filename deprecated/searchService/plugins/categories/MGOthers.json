@@ -1,8 +1,0 @@
-{
-    "category": "MGOthers",
-    "display": "Other Metagenomes",
-    "solr": {
-        "core": "metagenomes",
-        "query_string": "&fq=!text:Amplicon&fq=!text:WGS&fq=!text:MT"
-    }
-}

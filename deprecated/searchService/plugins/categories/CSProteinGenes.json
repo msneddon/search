@@ -1,8 +1,0 @@
-{
-    "category": "CSProteinGenes",
-    "display": "Protein Genes",
-    "solr": {
-        "core": "features",
-        "query_string": "&fq=feature_type:CDS"
-    }
-}
