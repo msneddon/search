@@ -182,7 +182,8 @@ deploy-scripts:
 # The start server script needs to know the service port and needs
 # to set the $KB_DEPLOYMENT_CONFIG environment variable.
 deploy-service:
-	echo "service deploy not yet implemented"
+	echo "warning: service deploy not yet fully implemented"
+	./deploy.py --install-service
 
 # Deploying docs here refers to the deployment of documentation
 # of the API. We'll include a description of deploying documentation

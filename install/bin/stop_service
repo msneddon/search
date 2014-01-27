@@ -58,9 +58,9 @@ popd > /dev/null
 log status OK
 
 echo ;
-pushd $SERVICE_SOLR_HOME > /dev/null
-./bin/tomcatStop.sh > /dev/null
-popd > /dev/null
+
+log stopping Tomcat
+$CATALINA_HOME/bin/shutdown.sh
 
 log status "OK: All services stopped"
 echo ;
