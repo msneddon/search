@@ -1,8 +1,10 @@
 {
-    "category": "GWASAll",
-    "display": "Genomes",
+    "category": "gwas_populations",
     "solr": {
         "core": "gwas",
+        "visible_fields": ["object_id", "object_type", "object_name", "kbase_genome_name", "kbase_genome_id", "source_genome_name", "source", "GwasPopulation_description", "ecotype_details"],
+        "sort_fields": ["kbase_genome_name"],
+        "facet_fields": ["ecotype_details"],
         "query_string": ""
     }
 }

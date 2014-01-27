@@ -1,8 +1,10 @@
 {
-    "category": "GWASAll",
-    "display": "Genomes",
+    "category": "gwas_population_variations",
     "solr": {
         "core": "gwas",
+        "visible_fields": ["object_id", "object_type", "object_name", "GwasPopulation_obj_id", "filetype", "comment", "assay", "originator", "GwasPopulationVariation_parent_obj_id"],
+        "sort_fields": ["object_name", "originator", "GwasPopulationVariation_parent_obj_id"],
+        "facet_fields": ["ecotype_details", "originator"],
         "query_string": ""
     }
 }

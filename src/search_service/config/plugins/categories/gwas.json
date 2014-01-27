@@ -3,6 +3,9 @@
     "display": "Genomes",
     "solr": {
         "core": "gwas",
+        "visible_fields": ["object_id", "object_type", "object_name"],
+        "sort_fields": [],
+        "facet_fields": [],
         "query_string": ""
     }
 }
