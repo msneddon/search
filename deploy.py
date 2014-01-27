@@ -92,7 +92,7 @@ if __name__ == "__main__":
             os.makedirs(service_target_dir)
 
         startup_files = ['start_service','stop_service']
-        for file in startup_files:
+        for x in startup_files:
             if os.path.isdir(os.path.join(service_script_source_dir,x)):
                 print "Copying directory structure : " + os.path.join(service_script_source_dir, x) + " to " + os.path.join(service_target_dir, x)
                 shutil.copytree(os.path.join(service_script_source_dir, x), os.path.join(service_target_dir, x))
