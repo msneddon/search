@@ -41,6 +41,7 @@ if __name__ == "__main__":
             shutil.copy(os.path.join(tomcat_config_source_dir, "conf/server.xml"), tomcat_config_target_dir)
         except OSError, e:
             shutil.copy(os.path.join(tomcat_config_source_dir, "Catalina/localhost/search.xml"), os.path.join(tomcat_config_target_dir,"Catalina/localhost/"))
+            shutil.copy(os.path.join(tomcat_config_source_dir, "conf/server.xml"), tomcat_config_target_dir)
         
         # edit the copied file and set the correct path to where the solr files are located
         search_config_file = open(os.path.join(tomcat_config_target_dir, "Catalina/localhost/search.xml"), 'r+')
