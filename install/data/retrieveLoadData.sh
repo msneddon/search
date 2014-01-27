@@ -8,7 +8,7 @@ echo extracting load data
 tar xzf tmp/searchSolrData.tar.gz -C $tmpsolrdir
 
 # full cores
-for core in gwas ontology
+for core in gwas ontology metagenomes
 do
     echo loading data into $core
     cat $tmpsolrdir/$core/${core}ToSolr.tab.headers $tmpsolrdir/$core/${core}ToSolr.tab  | curl -q http://localhost:7077/search/$core/update?wt=json\&separator=%09 --data-binary @- -H 'Content-type:application/csv; charset=utf-8'
