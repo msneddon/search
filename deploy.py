@@ -38,7 +38,7 @@ if __name__ == "__main__":
         try:            
             os.makedirs(os.path.join(tomcat_config_target_dir, "Catalina/localhost"))
             shutil.copy(os.path.join(tomcat_config_source_dir, "Catalina/localhost/search.xml"), os.path.join(tomcat_config_target_dir,"Catalina/localhost/"))
-            shutil.copy(os.path.join(tomcat_config_source_dir, "conf/server.xml"), os.path.join(tomcat_config_target_dir,"/"))
+            shutil.copy(os.path.join(tomcat_config_source_dir, "conf/server.xml"), tomcat_config_target_dir)
         except OSError, e:
             shutil.copy(os.path.join(tomcat_config_source_dir, "Catalina/localhost/search.xml"), os.path.join(tomcat_config_target_dir,"Catalina/localhost/"))
         
