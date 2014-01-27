@@ -80,9 +80,10 @@
    <field name="scientific_name" type="text_general" indexed="true" stored="true"/>
    <field name="genome_dna_size" type="int" indexed="true" stored="true"/>
    <field name="num_contigs" type="int" indexed="true" stored="true"/>
+   <field name="complete" type="boolean" indexed="true" stored="true"/>
    <field name="domain" type="text_general" indexed="true" stored="true"/>
    <field name="taxonomy" type="text_general" indexed="true" stored="true"/>
-   <field name="gc_content" type="text_general" indexed="true" stored="true"/>
+   <field name="gc_content" type="float" indexed="true" stored="true"/>
    <field name="genome_publications" type="text_ws_general" indexed="true" stored="true"/>
    <field name="feature_publications" type="text_ws_general" indexed="true" stored="true"/>
    <field name="roles" type="text_general" indexed="true" stored="true"/>

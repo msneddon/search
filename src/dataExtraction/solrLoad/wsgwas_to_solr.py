@@ -12,12 +12,13 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
-wsname = 'gwas_datasets'
+wsname = 'KBasePublicGwasData'
 
 def export_gwas_from_ws(maxNumObjects):
     #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
     # ranjan's Gwas objects are currently in Gavin's dev workspace
-    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
+#    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
+    ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})
     
