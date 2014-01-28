@@ -24,29 +24,27 @@ log setting environment
 DEPLOYMENT=${DEPLOY-/kb/deployment}
 RUNTIME=${RUNTIME-/kb/runtime}
 CATALINA_HOME="$RUNTIME/tomcat"
-JAVA_HOME="$RUNTIME/java"
+export CATALINA_PID=/var/run/tomcat.pid
+
 
 SERVICE="search"
-
-SERVICE_HOME="$DEPLOYMENT/services/$SERVICE"
-SERVICE_SOLR_HOME="$SERVICE_HOME/solr"
-SERVICE_SERVICE_HOME="$SERVICE_HOME/searchService"
-#SERVICE_APP_HOME="$SERVICE_HOME/searchWebapp"
-#SERVICE_DOC_HOME="$SERVICE_HOME/searchDocapp"
-
-CATALINE_PID="$DEPLOYMENT/services/$SERVICE/solr/run/tomcat.pid"
 
 export PATH=$JAVA_PATH/bin:$PATH
 source $DEPLOYMENT/user-env.sh
 
 log starting Tomcat
-$CATALINA_HOME/bin/startup.sh
+kill -0 $(cat $CATALINA_PID)
+if [ $? -gt 0 ]
+then
+    $CATALINA_HOME/bin/startup.sh
+else
+    echo -n 'tomcat already running on pid: '
+    cat $CATALINA_PID
+fi
 
 echo ;
 log starting "API service"
-pushd $SERVICE_SERVICE_HOME > /dev/null
-./bin/startservice > /dev/null
-popd > /dev/null
+
 log status OK
 
 log status "OK: All services started"
