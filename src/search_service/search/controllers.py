@@ -41,11 +41,11 @@ def get_results(request):
 
         try :
             response = requests.get(computed_solr_url, auth=requests.auth.HTTPBasicAuth(solr_user, solr_pass))
-            solr_results = response.json()
+            solr_results = response.json
         except:
             logger.error(computed_solr_url)
             response = requests.get(computed_solr_url)
-            solr_results = response.json()
+            solr_results = response.json
     except Exception, e:
         logger.exception(e)
 
