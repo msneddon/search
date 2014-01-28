@@ -101,6 +101,16 @@ if __name__ == "__main__":
                 print "Copying file : " + os.path.join(service_script_source_dir, x) + " to " + service_target_dir
                 shutil.copy(os.path.join(service_script_source_dir, x), service_target_dir)
 
+        virtualenv_dir = os.path.join(service_target_dir,"venv")
+        
+        # create a virtualenv under the services directory
+        import subprocess
+        subprocess.call(["virtualenv","--python","python2.7","--system-site-packages",virtualenv_dir])
+        subprocess.call([os.path.join(virtualenv_dir, "bin/pip"), "install","flask","requests","httplib2"])
+                
+        # copy service code into the virtualenv directory
+        shutil.copytree(os.path.join(running_dir,"src/search_service/search"), os.path.join(virtualenv_dir, "lib/python2.7/site-packages/search"))
+        
         
 
     # load solr data from tab delimited files to tomcat
