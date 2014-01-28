@@ -43,11 +43,10 @@ else
 fi
 
 echo ;
-log starting "API service"
+log starting "Search service"
+uwsgi --ini /kb/deployment/service/search/config/uwsgi_search.ini
 
-log status OK
-
-log status "OK: All services started"
+log status "Service and Tomcat successfully started"
 echo ;
 
 
