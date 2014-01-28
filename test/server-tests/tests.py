@@ -69,7 +69,7 @@ def bad_query_service_categories(queryString):
     
     service_url = "http://localhost:7078/getResults?q=" + queryString + "&category="
 
-    for c in getCategories():
+    for c in getBadCategories():
         print "category: " + c
         response = requests.get(service_url + c)
         print "Checking for status 500"
