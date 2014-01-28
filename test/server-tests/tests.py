@@ -82,13 +82,6 @@ def bad_query_service_categories(queryString):
 
         print "Searched for " + queryString
 
-        if search_result["totalResults"] == 0:
-            print "No results found."
-            print str(search_result)
-        else:
-            print "Found " + str(search_result["totalResults"]) + " results"
-            print "First item : " + str(search_result["items"][0])
-
 def query_service_categories(queryString):
     import requests
     
