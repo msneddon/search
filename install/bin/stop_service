@@ -32,7 +32,7 @@ export CATALINA_PID=/var/run/tomcat.pid
 export PATH=$JAVA_PATH/bin:$PATH
 
 log stopping "Search service"
-uwsgi --stop /var/run/uwsgi.pid
+uwsgi --stop /kb/deployment/services/search/service.pid
 
 log status OK
 echo ;
