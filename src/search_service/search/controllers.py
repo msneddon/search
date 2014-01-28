@@ -128,8 +128,11 @@ def validate_inputs(query):
         validatedParams['username'] = auth_token[0:auth_token.find('|')].split('=')[1]
 
     # check for and set the category, which will determine which core to search
-    if query.has_key('category') and query['category'] is not None:
-        validatedParams['category'] = query['category'][:]
+    if query.has_key('category') and query['category'] is not None:        
+        if query['category'] not in plugins.keys():
+            raise InvalidSearchRequestError(query['category'] + " is not a valid search category.")
+        
+        validatedParams['category'] = query['category'][:]                
 
     # check for and set the number of items per page
     if query.has_key('itemsPerPage') and query['itemsPerPage'] is not None:

@@ -18,6 +18,7 @@ search_wsgi.logger.addHandler(syslog_handler)
     
 search_wsgi.logger.setLevel(logging.DEBUG)
 
+import exceptions
 import controllers
 controllers.logger = search_wsgi.logger
 
@@ -27,7 +28,10 @@ def index():
 
 @search_wsgi.route('/getResults', methods = ['GET'])
 def get_results():
-    return controllers.get_results(flask.request)
+    try:
+        return controllers.get_results(flask.request)
+    except exceptions.InvalidSearchRequestError, e:
+        abort(400)
 
 @search_wsgi.route('/categories', methods = ['GET'])
 def get_categories():
