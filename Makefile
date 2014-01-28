@@ -77,7 +77,7 @@ test-client:
 	# run each test
 	for t in $(CLIENT_TESTS) ; do \
 		if [ -f $$t ] ; then \
-			$(DEPLOY_RUNTIME)/bin/perl $$t ; \
+			nosetests -v --nocapture $$t ; \
 			if [ $$? -ne 0 ] ; then \
 				exit 1 ; \
 			fi \
