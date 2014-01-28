@@ -74,15 +74,7 @@ build-cores:
 # to the test-client target if it makes sense to you. This test
 # example assumes there is already a tested running server.
 test-client:
-	# run each test
-	for t in $(CLIENT_TESTS) ; do \
-		if [ -f $$t ] ; then \
-			nosetests -v --nocapture $$t ; \
-			if [ $$? -ne 0 ] ; then \
-				exit 1 ; \
-			fi \
-		fi \
-	done
+	nosetests -v --nocapture test/client-tests/
 
 # What does it mean to test a script? A script test should test
 # the command line scripts. If the script is a client in a client-
@@ -101,7 +93,7 @@ test-scripts:
 # or test-scripts targets. Otherwise, a circular dependency
 # graph could result.
 test-service:
-	@echo "running client and test-service"
+	nosetests -v --nocapture test/server-tests/
 
 # Deployment:
 # 
