@@ -31,7 +31,7 @@ def get_results():
     try:
         return controllers.get_results(flask.request)
     except exceptions.InvalidSearchRequestError, e:
-        abort(400)
+        flask.abort(400)
 
 @search_wsgi.route('/categories', methods = ['GET'])
 def get_categories():

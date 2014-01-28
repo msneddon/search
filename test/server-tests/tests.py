@@ -12,18 +12,15 @@ def teardown():
     pass
 
 
-def is_status500(response):
-    return response.status_code == 500
-
-def is_status200(response):
-    return response.status_code == 200
+def check_statuscode(response, code):
+    return response.status_code == code
 
 
 def test_tomcat_alive():
     import requests
 
     response = requests.get("http://localhost:7077")
-    assert is_status200(response)
+    assert check_statuscode(response,200)
     print "Tomcat is alive and listening at http://localhost:7077"
 
 
@@ -31,7 +28,7 @@ def test_solr_alive():
     import requests
 
     response = requests.get("http://localhost:7077/search/")
-    assert is_status200(response)
+    assert check_statuscode(response,200)
     print "Solr is alive and listening at http://localhost:7077/search/"
 
 
@@ -46,41 +43,41 @@ def test_solr_cores_nonempty():
     for c in cores:
         response = requests.get(solr_url + "/#/" + c + "/")
         print "core: " + c
-        assert is_status200(response)
+        assert check_statuscode(response,200)
 
 
 def test_service_alive():
     import requests
     
     response = requests.get("http://localhost:7078")    
-    assert is_status200(response)
+    assert check_statuscode(response,200)
     print "KBase Search service is alive and listening at http://localhost:7078"
 
 
 def getCategories():
     return [x.split('.')[0] for x in os.listdir("/kb/deployment/services/search/config/plugins/categories/") if ".json" in x]
 
-def getBadCategories():
+def getInvalidCategories():
     return [x for x in os.listdir("/kb/deployment/services/search/config/plugins/categories/") if ".json" in x]
 
 
-def bad_query_service_categories(queryString):
+def invalid_query_service_categories(queryString):
     import requests
     
     service_url = "http://localhost:7078/getResults?q=" + queryString + "&category="
 
-    for c in getBadCategories():
-        print "category: " + c
+    for c in getInvalidCategories():
+        print "\tcategory: " + c
         response = requests.get(service_url + c)
-        print "Checking for status 500"
-        assert is_status500(response)
-        print "Checking for response body"
+        print "\tChecking for status 400"
+        assert check_statuscode(response,400)
+        print "\tChecking for response body"
         try:
             search_result = response.json    
         except Exception, e:
             print e
 
-        print "Searched for " + queryString
+        print "\tSearched for " + queryString + "\n\n"
 
 def query_service_categories(queryString):
     import requests
@@ -88,28 +85,28 @@ def query_service_categories(queryString):
     service_url = "http://localhost:7078/getResults?q=" + queryString + "&category="
 
     for c in getCategories():
-        print "category: " + c
+        print "\tcategory: " + c
         response = requests.get(service_url + c)
-        print "Checking for status 200"
-        assert is_status200(response)
-        print "Checking for response body"
+        print "\tChecking for status 200"
+        assert check_statuscode(response,200)
+        print "\tChecking for response body"
         try:
             search_result = response.json    
         except Exception, e:
             print e
 
-        print "Searched for " + queryString
+        print "\tSearched for " + queryString
 
         if search_result["totalResults"] == 0:
-            print "No results found."
-            print str(search_result)
+            print "\tNo results found."
+            print "\t" + str(search_result) + "\n\n"
         else:
-            print "Found " + str(search_result["totalResults"]) + " results"
-            print "First item : " + str(search_result["items"][0])
+            print "\tFound " + str(search_result["totalResults"]) + " results"
+            print "\tFirst item : " + str(search_result["items"][0]) + "\n\n"
 
-def test_bad_service_queries():
+def test_invalid_service_queries():
     for n in ["*", "s*", "arabidopsis", "dnaa", "e. coli"]:
-        bad_query_service_categories(n)
+        invalid_query_service_categories(n)
 
 def test_service_queries():
     for n in ["*", "s*", "arabidopsis", "dnaa", "e. coli"]:
