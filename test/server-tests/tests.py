@@ -55,13 +55,13 @@ def test_service_alive():
 
 
 def getCategories():
-    return [x for x in os.listdir("/kb/deployment/services/search/config/plugins/categories/") if ".json" in x]
+    return [x.split('.')[0] for x in os.listdir("/kb/deployment/services/search/config/plugins/categories/") if ".json" in x]
 
 
 def query_service_categories(queryString):
     import requests
     
-    service_url = "http://localhost:7078/getResults?q=" + queryString + " + "&category="
+    service_url = "http://localhost:7078/getResults?q=" + queryString + "&category="
 
     for c in getCategories():
         print "category: " + c
