@@ -74,7 +74,6 @@ def transform_solr_json(results, params):
     transform["items"] = list()
     
     for n in results["response"]["docs"]:
-        del n['_version_']
         transform["items"].append(n)
 
     transform["currentPage"] = params["page"]
