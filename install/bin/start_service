@@ -33,7 +33,7 @@ export PATH=$JAVA_PATH/bin:$PATH
 source $DEPLOYMENT/user-env.sh
 
 log starting Tomcat
-kill -0 $(cat $CATALINA_PID)
+kill -0 $(cat $CATALINA_PID) > /dev/null 2> /dev/null
 if [ $? -gt 0 ]
 then
     $CATALINA_HOME/bin/startup.sh
