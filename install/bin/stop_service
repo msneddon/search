@@ -27,34 +27,13 @@ JAVA_HOME="$RUNTIME/java"
 
 SERVICE="search"
 
-SERVICE_HOME="$DEPLOYMENT/services/$SERVICE"
-SERVICE_SOLR_HOME="$SERVICE_HOME/solr"
-SERVICE_SERVICE_HOME="$SERVICE_HOME/searchService"
-#SERVICE_APP_HOME="$SERVICE_HOME/searchWebapp"
-#SERVICE_DOC_HOME="$SERVICE_HOME/searchDocapp"
-
-CATALINE_PID="$DEPLOYMENT/services/$SERVICE/solr/run/tomcat.pid"
+export CATALINA_PID=/var/run/tomcat.pid
 
 export PATH=$JAVA_PATH/bin:$PATH
 
-#log stoping "doc service"
-#pushd $SERVICE_DOC_HOME > /dev/null
-#./bin/stopservice > /dev/null
-#popd > /dev/null
-#log status OK
-#echo ;
-
-#log stoping "Web App service"
-#pushd $SERVICE_APP_HOME > /dev/null
-#./bin/stopservice > /dev/null
-#popd > /dev/null
-#log status OK
-#echo ;
-
 log stoping "API service"
-pushd $SERVICE_SERVICE_HOME > /dev/null
-./bin/stopservice > /dev/null
-popd > /dev/null
+
+
 log status OK
 
 echo ;
