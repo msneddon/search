@@ -13,7 +13,7 @@ import biokbase.workspace.client
 
 wsname = 'KBasePublicRichGenomes'
 
-def export_genomes_from_ws(maxNumObjects):
+def export_genomes_from_ws(maxNumObjects,genome_list):
     #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
     ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     
@@ -40,7 +40,15 @@ def export_genomes_from_ws(maxNumObjects):
         workspace_id = n[0]
         workspace_name = n[1]
     
-        objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"})
+        print genome_list
+        objects_list = list()
+        if len(genome_list) > 0:
+            names_list = list()
+            for genome in genome_list:
+                names_list.append({'workspace':wsname,'name':genome})
+            objects_list = [x['info'] for x in ws_client.get_objects(names_list)]
+        else:
+            objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"})
     
         if len(objects_list) > 0:
             print "\tWorkspace %s has %d objects" % (workspace_name, len(objects_list))
@@ -367,9 +375,11 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Create import files from workspace objects')
     parser.add_argument('--count', action="store", dest="maxNumObjects", type=int)
+    parser.add_argument('genomes', action="store", nargs='*')
     args = parser.parse_args()
     maxNumObjects = sys.maxint
     if args.maxNumObjects:
         maxNumObjects = args.maxNumObjects
     
-    export_genomes_from_ws(maxNumObjects)
+    print args.genomes
+    export_genomes_from_ws(maxNumObjects,args.genomes)
