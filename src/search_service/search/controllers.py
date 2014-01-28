@@ -16,10 +16,10 @@ logger = logging.getLogger()
 config = ConfigParser.ConfigParser()
 config.read("/kb/deployment/services/search/config/search_config.ini")
 
-solr_url = config.get('solr_url')
-solr_user = config.get('solr_user')
-solr_pass = config.get('solr_pass')
-configPath = config.get('config_path')
+solr_url = config.get('search', 'solr_url')
+solr_user = config.get('search', 'solr_user')
+solr_pass = config.get('search', 'solr_pass')
+configPath = config.get('search', 'config_path')
 
 def get_results(request):
     capture_metrics(request)
