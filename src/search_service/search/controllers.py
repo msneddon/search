@@ -16,7 +16,7 @@ logger = logging.getLogger()
 config = ConfigParser.ConfigParser()
 config.read("/kb/deployment/services/search/config/search_config.ini")
 
-solr_url = config.get('search', 'solr_url')
+base_solr_url = config.get('search', 'solr_url')
 solr_user = config.get('search', 'solr_user')
 solr_pass = config.get('search', 'solr_pass')
 configPath = config.get('search', 'config_path')
@@ -29,9 +29,9 @@ def get_results(request):
     validated['request'] = request.url
 
      # compute the solr url based on the user query
-    solr_url = compute_solr_query(validated)
+    computed_solr_url = compute_solr_query(validated)
     
-    logger.info(solr_url)
+    logger.info(computed_solr_url)
 
     solr_results = dict()
     # call solr and retrieve result set
@@ -40,11 +40,11 @@ def get_results(request):
         solr_pass = "***REMOVED***"
 
         try :
-            response = requests.get(solr_url, auth=requests.auth.HTTPBasicAuth(solr_user, solr_pass))
+            response = requests.get(computed_solr_url, auth=requests.auth.HTTPBasicAuth(solr_user, solr_pass))
             solr_results = response.json()
         except:
-            logger.error(solr_url)
-            response = requests.get(solr_url)
+            logger.error(computed_solr_url)
+            response = requests.get(computed_solr_url)
             solr_results = response.json()
     except Exception, e:
         logger.exception(e)
@@ -205,6 +205,8 @@ def capture_metrics(request):
 def compute_solr_query(options):
     mapping = "search"
     paramString = ""
+
+    solr_url = base_solr_url
 
     if plugins.has_key(options['category']):
         core = plugins[options['category']]['solr']['core']
