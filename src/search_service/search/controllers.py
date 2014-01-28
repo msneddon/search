@@ -223,12 +223,12 @@ def compute_solr_query(options):
 
 
     # limit the output to the set of visible fields defined for this category
-    solr_url += "&fl=" + ','.join(plugins[validatedParams['category']]['solr']['visible_fields'])
+    solr_url += "&fl=" + ','.join(plugins[options['category']]['solr']['visible_fields'])
 
     # add faceting options, if present
-    if len(plugins[validatedParams['category']]['solr']['facet_fields']) > 0:
+    if len(plugins[options['category']]['solr']['facet_fields']) > 0:
         solr_url += "&facet=true"
-        for x in plugins[validatedParams['category']]['solr']['facet_fields']:
+        for x in plugins[options['category']]['solr']['facet_fields']:
             solr_url += "&facet.field=" + x
         
     if options.has_key('sort') and options['sort'] is not None:
