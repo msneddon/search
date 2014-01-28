@@ -2,6 +2,7 @@ import flask
 import json
 import requests
 import logging
+import ConfigParser
 
 #import biokbase.workspace.client
 
@@ -11,6 +12,14 @@ categories = dict()
 plugins = dict()
 
 logger = logging.getLogger()
+
+config = ConfigParser.ConfigParser()
+config.read("/kb/deployment/services/search/config/search_config.ini")
+
+solr_url = config.get('solr_url')
+solr_user = config.get('solr_user')
+solr_pass = config.get('solr_pass')
+configPath = config.get('config_path')
 
 def get_results(request):
     capture_metrics(request)
@@ -194,7 +203,6 @@ def capture_metrics(request):
 
 
 def compute_solr_query(options):
-    solr_url = "http://140.221.84.237:7077/"
     mapping = "search"
     paramString = ""
 
@@ -254,7 +262,7 @@ def load_categories():
         import os
         import os.path
 
-        categoryFile = open(os.path.join(os.path.abspath(os.curdir),'config/categoryInfo.json'))
+        categoryFile = open(os.path.join(os.path.abspath(configPath),'categoryInfo.json'))
         categories = json.loads(categoryFile.read())
     except:        
         logger.error(categories)
@@ -268,7 +276,7 @@ def load_plugins():
         import os
         import os.path    
 
-        pluginsDir = os.path.join(os.path.abspath(os.curdir),'config/plugins/categories')
+        pluginsDir = os.path.join(os.path.abspath(configPath),'plugins/categories')
         categoryPlugins = os.listdir(pluginsDir)
 
         for c in categoryPlugins:

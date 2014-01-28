@@ -7,8 +7,6 @@ search_wsgi = flask.Flask(__name__)
 # load configuration information
 #search_wsgi.config.from_object('')
 
-print os.path.abspath(".")
-
 # set up logging
 import logging
 import logging.handlers
