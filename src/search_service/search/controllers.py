@@ -3,7 +3,7 @@ import json
 import requests
 import logging
 
-import biokbase.workspace.client
+#import biokbase.workspace.client
 
 from exceptions import InvalidSearchRequestError
 
@@ -233,10 +233,10 @@ def compute_solr_query(options):
         if not options.has_key('username') or options['username'] is None:
             raise Exception("Missing or invalid authentication token!")
 
-        workspace_url = "https://kbase.us/services/ws/"
+        #workspace_url = "https://kbase.us/services/ws/"
 
-        workspace_service = workspaceClient.workspaceService(workspace_url)
-        workpace_service.list_workspaces({"auth_token": options['auth_token']})
+        #workspace_service = workspaceClient.workspaceService(workspace_url)
+        #workpace_service.list_workspaces({"auth_token": options['auth_token']})
 
     return solr_url
 

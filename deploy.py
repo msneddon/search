@@ -110,6 +110,7 @@ if __name__ == "__main__":
                 
         # copy service code into the virtualenv directory
         shutil.copytree(os.path.join(running_dir,"src/search_service/search"), os.path.join(virtualenv_dir, "lib/python2.7/site-packages/search"))
+        shutil.copytree(os.path.join(running_dir,"src/search_service/config"), os.path.join(service_target_dir, "config"))
         
         
 
