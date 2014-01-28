@@ -5,6 +5,6 @@
         "visible_fields": ["object_id", "object_type", "object_name", "GwasTopVariations_obj_id", "distance_cutoff", "genes", "genes_snp_list"],
         "sort_fields": ["object_name"],
         "facet_fields": ["distance_cutoff"],
-        "query_string": ""
+        "query_string": "&fq=object_type:*GwasGeneList*"
     }
 }

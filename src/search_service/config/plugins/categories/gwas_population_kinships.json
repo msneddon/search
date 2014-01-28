@@ -5,6 +5,6 @@
         "visible_fields": ["object_id", "object_type", "object_name", "kbase_genome_name", "kbase_genome_id", "GwasPopulationVariation_obj_id"],
         "sort_fields": ["kbase_genome_name"],
         "facet_fields": ["GwasPopulationVariation_obj_id"],
-        "query_string": ""
+        "query_string": "&fq=object_type:*GwasPopulationKinship-*"
     }
 }

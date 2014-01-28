@@ -3,7 +3,9 @@
     "display": "Genomes",
     "solr": {
         "core": "genomes",
-        "fields": ["genome_id", "genome_source_id"],
-        "query_string": "&q=object_type:*Genome*&facet=true&facet.limit=10&facet.field=domain"
+        "visible_fields": ["genome_id", "genome_source","genome_source_id","scientific_name","genome_dna_size","num_contigs","complete","domain","taxonomy","gc_content","genome_publications"],
+        "sort_fields": ["scientific_name","num_contigs","gc_content"],
+        "facet_fields": ["domain","complete"],
+        "query_string": "&fq=object_type:*Genome*"
     }
 }

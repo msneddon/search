@@ -5,6 +5,6 @@
         "visible_fields": ["object_id", "object_type", "object_name", "trait_ontology_id", "trait_name", "unit_of_measure", "protocol", "GwasPopulation_obj_id", "originator", "comment"],
         "sort_fields": ["object_name"],
         "facet_fields": ["unit_of_measure","protocol"],
-        "query_string": ""
+        "query_string": "&fq=object_type:*GwasPopulationTrait-*"
     }
 }

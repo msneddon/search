@@ -164,7 +164,7 @@ def validate_inputs(query):
             except:
                 raise InvalidSearchRequestError(x + " is not in the format of 'sort_field sort_order'!")
             
-            if not field in plugins[validatedParams['category']]['solr']['fields']:
+            if not field in plugins[validatedParams['category']]['solr']['sort_fields']:
                 raise InvalidSearchRequestError(field + " is not a valid sorting field!")
             
             if not order in ['asc', 'desc']:
@@ -181,13 +181,13 @@ def validate_inputs(query):
         for x in individualFacets:
             field_name, field_query = x.split(":")
             
-            if not field_name in plugins[validatedParams['category']]['solr']['fields']:
+            if not field_name in plugins[validatedParams['category']]['solr']['facet_fields']:
                 raise InvalidSearchRequestError(field_name + " is not a valid faceting field!")
             
             # the query should be one of, a single int, a single float, a range of int or float, or an alpha string
             
-                                
         validatedParams['facets'] = query['facets'][:]
+
 
     # check for the presence of a query string
     if query.has_key('q') and query['q'] is not None:
@@ -221,6 +221,16 @@ def compute_solr_query(options):
 
     paramString += "&start=" + str(options['start']) + "&rows=" + str(options['count'])
 
+
+    # limit the output to the set of visible fields defined for this category
+    solr_url += "&fl=" + ','.join(plugins[validatedParams['category']]['solr']['visible_fields'])
+
+    # add faceting options, if present
+    if len(plugins[validatedParams['category']]['solr']['facet_fields']) > 0:
+        solr_url += "&facet=true"
+        for x in plugins[validatedParams['category']]['solr']['facet_fields']:
+            solr_url += "&facet.field=" + x
+        
     if options.has_key('sort') and options['sort'] is not None:
         paramString += "&sort=" + options['sort']
 
@@ -238,6 +248,7 @@ def compute_solr_query(options):
             paramString += "&fq=" + k + ":" + facetDict[k]
 
     solr_url += options['queryString'] + paramString
+            
 
     if plugins[options['category']]['solr'].has_key('secure') and plugins[options['category']]['solr']['secure'] == True:
         if not options.has_key('username') or options['username'] is None:
