@@ -36,9 +36,6 @@ def get_results(request):
     solr_results = dict()
     # call solr and retrieve result set
     try:
-        solr_user = "admin"
-        solr_pass = "***REMOVED***"
-
         try :
             response = requests.get(computed_solr_url, auth=requests.auth.HTTPBasicAuth(solr_user, solr_pass))
             solr_results = response.json
@@ -217,7 +214,7 @@ def compute_solr_query(options):
         
         paramString = plugins[options['category']]['solr']['query_string']
     else:
-        raise Exception("No such category \"" + options['category'] + "\" !")
+        raise InvalidSearchRequestError("No such category \"" + options['category'] + "\" !")
 
     solr_url += '/select?wt=json'
 
@@ -254,7 +251,7 @@ def compute_solr_query(options):
 
     if plugins[options['category']]['solr'].has_key('secure') and plugins[options['category']]['solr']['secure'] == True:
         if not options.has_key('username') or options['username'] is None:
-            raise Exception("Missing or invalid authentication token!")
+            raise InvalidSearchRequestError("Missing or invalid authentication token!")
 
         #workspace_url = "https://kbase.us/services/ws/"
 
