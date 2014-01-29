@@ -11,6 +11,7 @@ reload(sys)
 sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
+import biokbase.cdmi.client
 
 wsname = 'KBasePublicOntologies'
 
@@ -30,6 +31,18 @@ def extractValues(d):
 
 
 def export_ontology_from_ws():
+    # production instance
+    cdmi_api = biokbase.cdmi.client.CDMI_API()
+    cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
+    # private instance
+    #cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
+    #cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
+
+    genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
+    # this Poplar version is not in production central store yet
+    if not genome_entities.has_key('kb|g.3907'):
+        genome_entities['kb|g.3907'] = {'scientific_name':'Populus trichocarpa'}
+
     #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
     ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     
@@ -94,7 +107,7 @@ def export_ontology_from_ws():
                     if wsobject['data'].has_key('gene_list'):
     #                    search_values['gene_list'] =' '.join(extractValues(wsobject['data']['gene_list']))
                         for key in wsobject['data']['gene_list']:
-                            search_values['gene_list'] += key + ': ' + ' '.join(wsobject['data']['gene_list'][key]) + ' '
+                            search_values['gene_list'] += key + ' : ' + genome_entities[key]['scientific_name'] + ' : ' + ' '.join(wsobject['data']['gene_list'][key]) + ' '
     
                     object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(wsobject['info'][0])
     
