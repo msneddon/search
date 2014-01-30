@@ -2,7 +2,7 @@
     "category": "gwas_top_variations",
     "solr": {
         "core": "gwas",
-        "visible_fields": ["object_id", "object_type", "object_name", "kbase_genome_name", "kbase_genome_id", "source_genome_name", "protocol", "unit_of_measure", "assay", "trait_ontology_id", "trait_name", "originator", "GwasPopulationVariation_obj_id", "GwasPopulation_obj_id","comment","num_population","GwasPopulationStructure_obj_id", "GwasPopulationKinship_obj_id", "pvaluecutoff"],
+        "visible_fields": ["object_id", "object_type", "object_name", "workspace_name", "kbase_genome_name", "kbase_genome_id", "source_genome_name", "protocol", "unit_of_measure", "assay", "trait_ontology_id", "trait_name", "originator", "GwasPopulationVariation_obj_id", "GwasPopulation_obj_id","comment","num_population","GwasPopulationStructure_obj_id", "GwasPopulationKinship_obj_id", "pvaluecutoff"],
         "sort_fields": ["kbase_genome_name", "originator"],
         "facet_fields": ["protocol","unit_of_measure"],
         "query_string": "&fq=object_type=*GwasTopVariations-*"

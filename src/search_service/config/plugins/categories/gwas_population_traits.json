@@ -2,7 +2,7 @@
     "category": "gwas_population_traits",
     "solr": {
         "core": "gwas",
-        "visible_fields": ["object_id", "object_type", "object_name", "trait_ontology_id", "trait_name", "unit_of_measure", "protocol", "GwasPopulation_obj_id", "originator", "comment"],
+        "visible_fields": ["object_id", "object_type", "object_name", "workspace_name", "trait_ontology_id", "trait_name", "unit_of_measure", "protocol", "GwasPopulation_obj_id", "originator", "comment"],
         "sort_fields": ["object_name"],
         "facet_fields": ["unit_of_measure","protocol"],
         "query_string": "&fq=object_type:*GwasPopulationTrait-*"

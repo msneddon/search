@@ -1,9 +1,8 @@
 {
-    "category": "GWASAll",
-    "display": "Genomes",
+    "category": "gwas",
     "solr": {
         "core": "gwas",
-        "visible_fields": ["object_id", "object_type", "object_name"],
+        "visible_fields": ["object_id", "object_type", "object_name", "workspace_name"],
         "sort_fields": [],
         "facet_fields": [],
         "query_string": ""
