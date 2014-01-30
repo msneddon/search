@@ -126,7 +126,8 @@ deploy-client: deploy-libs deploy-scripts deploy-docs
 deploy-config: deploy-config-tomcat deploy-config-solr
 
 deploy-config-tomcat:
-	./deploy.py --install-tomcat-config
+	echo 'tomcat deploy not ready yet'
+#	./deploy.py --install-tomcat-config
 
 deploy-config-solr:
 	./deploy.py --install-solr-config

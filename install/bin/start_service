@@ -21,22 +21,25 @@ alert() {
 log starting "search service"
 log setting environment
 
+SERVICE="search"
+
 DEPLOYMENT=${DEPLOY-/kb/deployment}
 RUNTIME=${RUNTIME-/kb/runtime}
 CATALINA_HOME="$RUNTIME/tomcat"
-export CATALINA_PID=/var/run/tomcat.pid
+CATALINA_BASE="$DEPLOYMENT/services/$SERVICE/catalina_base"
+CATALINA_PID="$CATALINA_BASE/run/tomcat.pid"
 
+PATH=$JAVA_PATH/bin:$PATH
 
-SERVICE="search"
-
-export PATH=$JAVA_PATH/bin:$PATH
 source $DEPLOYMENT/user-env.sh
+
+export CATALINA_BASE CATALINA_PID PATH
 
 log starting Tomcat
 kill -0 $(cat $CATALINA_PID) > /dev/null 2> /dev/null
 if [ $? -gt 0 ]
 then
-    $CATALINA_HOME/bin/startup.sh
+    $CATALINA_BASE/bin/catalina.sh start
 else
     echo -n 'tomcat already running on pid: '
     cat $CATALINA_PID
@@ -44,7 +47,7 @@ fi
 
 echo ;
 log starting "Search service"
-uwsgi --ini /kb/deployment/services/search/config/uwsgi_search.ini
+uwsgi --ini $DEPLOYMENT/services/$SERVICE/config/uwsgi_search.ini
 
 log status "Service and Tomcat successfully started"
 echo ;
