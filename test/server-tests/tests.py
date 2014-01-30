@@ -16,12 +16,12 @@ def check_statuscode(response, code):
     return response.status_code == code
 
 
-def test_tomcat_alive():
-    import requests
-
-    response = requests.get("http://localhost:7077")
-    assert check_statuscode(response,200)
-    print "Tomcat is alive and listening at http://localhost:7077"
+#def test_tomcat_alive():
+#    import requests
+#
+#    response = requests.get("http://localhost:7077")
+#    assert check_statuscode(response,200)
+#    print "Tomcat is alive and listening at http://localhost:7077"
 
 
 def test_solr_alive():

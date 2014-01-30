@@ -18,27 +18,29 @@ alert() {
 }
 
 
-log stoping "search service"
+log stopping "search service"
+
+SERVICE="search"
 
 DEPLOYMENT=${DEPLOY-/kb/deployment}
 RUNTIME=${RUNTIME-/kb/runtime}
 CATALINA_HOME="$RUNTIME/tomcat"
+CATALINA_BASE="$DEPLOYMENT/services/$SERVICE/catalina_base"
 JAVA_HOME="$RUNTIME/java"
+CATALINA_PID="$CATALINA_BASE/run/tomcat.pid"
 
-SERVICE="search"
+PATH=$JAVA_PATH/bin:$PATH
 
-export CATALINA_PID=/var/run/tomcat.pid
-
-export PATH=$JAVA_PATH/bin:$PATH
+export CATALINA_BASE CATALINA_PID PATH
 
 log stopping "Search service"
-uwsgi --stop /kb/deployment/services/search/service.pid
+uwsgi --stop $DEPLOYMENT/services/$SERVICE/service.pid
 
 log status OK
 echo ;
 
 log stopping Tomcat
-$CATALINA_HOME/bin/shutdown.sh
+$CATALINA_BASE/bin/catalina.sh stop
 
 log status "Search service and Tomcat stopped"
 echo ;
