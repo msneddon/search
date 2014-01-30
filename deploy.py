@@ -30,21 +30,19 @@ if __name__ == "__main__":
     # copy Tomcat config file for solr into the runtime
     if args.install_tomcat_config or args.install:    
         # copy tomcat config files
-        tomcat_config_source_dir = os.path.abspath(os.path.join(running_dir,"install/solr/tomcat"))
-        tomcat_config_target_dir = os.path.join(os.environ["KB_RUNTIME"], "tomcat/conf")
-        
-        print "Installing tomcat config files to " + str(tomcat_config_target_dir)
+        tomcat_config_source_dir = os.path.abspath(os.path.join(running_dir,"install/solr/catalina_base"))
+        tomcat_install_target_dir = os.path.join(os.environ["TARGET"], "services/search")
+
+        print "Installing tomcat files to " + str(tomcat_install_target_dir)
         
         try:            
-            os.makedirs(os.path.join(tomcat_config_target_dir, "Catalina/localhost"))
-            shutil.copy(os.path.join(tomcat_config_source_dir, "Catalina/localhost/search.xml"), os.path.join(tomcat_config_target_dir,"Catalina/localhost/"))
-            shutil.copy(os.path.join(tomcat_config_source_dir, "conf/server.xml"), tomcat_config_target_dir)
+            os.makedirs(tomcat_install_target_dir)
+            shutil.copy(os.path.join(tomcat_config_source_dir, "catalina_base"), os.path.join(tomcat_config_target_dir, "catalina_base"))
         except OSError, e:
-            shutil.copy(os.path.join(tomcat_config_source_dir, "Catalina/localhost/search.xml"), os.path.join(tomcat_config_target_dir,"Catalina/localhost/"))
-            shutil.copy(os.path.join(tomcat_config_source_dir, "conf/server.xml"), tomcat_config_target_dir)
+            shutil.copy(os.path.join(tomcat_config_source_dir, "catalina_base"), os.path.join(tomcat_config_target_dir, "catalina_base"))
         
         # edit the copied file and set the correct path to where the solr files are located
-        search_config_file = open(os.path.join(tomcat_config_target_dir, "Catalina/localhost/search.xml"), 'r+')
+        search_config_file = open(os.path.join(tomcat_install_target_dir, "catalina_base/Catalina/localhost/search.xml"), 'r+')
         contents = search_config_file.read()
         contents = contents.replace('SOLR_PREFIX', os.path.join(os.environ["TARGET"], "services/search/solr"))
         search_config_file.seek(0)
