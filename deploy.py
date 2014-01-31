@@ -7,6 +7,7 @@ if __name__ == "__main__":
     import os.path
     import sys
     import shutil
+    import errno
     
     # command-line options
     parser = argparse.ArgumentParser(description='Install parts of KBase Search.')
@@ -37,10 +38,54 @@ if __name__ == "__main__":
         
         try:            
             os.makedirs(tomcat_install_target_dir)
-            shutil.copy(os.path.join(tomcat_config_source_dir, "catalina_base"), os.path.join(tomcat_config_target_dir, "catalina_base"))
         except OSError, e:
-            shutil.copy(os.path.join(tomcat_config_source_dir, "catalina_base"), os.path.join(tomcat_config_target_dir, "catalina_base"))
+            if exc.errno == errno.EXIST and os.path.isdir(tomcat_install_target_dir):
+                pass
+            else:
+                raise
         
+        installPath = os.path.join(tomcat_install_target_dir, "catalina_base")
+        try:
+            shutil.copytree(os.path.join(tomcat_config_source_dir, "catalina_base"), installPath)
+        except OSError, e:
+            print "Directory : " + installPath + " already exists, remove before continuing."
+            raise
+
+        installPath = os.path.join(tomcat_install_target_dir, "logs")
+        try:
+            os.mkdir(installPath)
+        except OSError, e:
+            print "Directory : " + installPath + " already exists, remove before continuing."
+            raise
+
+        installPath = os.path.join(tomcat_install_target_dir, "run")
+        try:
+            os.mkdir(os.path.join(tomcat_install_target_dir, "run"))
+        except OSError, e:
+            print "Directory : " + installPath + " already exists, remove before continuing."
+            raise
+
+        installPath = os.path.join(tomcat_install_target_dir, "temp")
+        try:
+            os.mkdir(os.path.join(tomcat_install_target_dir, "temp"))
+        except OSError, e:
+            print "Directory : " + installPath + " already exists, remove before continuing."
+            raise
+
+        installPath = os.path.join(tomcat_install_target_dir, "webapps")
+        try:
+            os.mkdir(os.path.join(tomcat_install_target_dir, "webapps"))
+        except OSError, e:
+            print "Directory : " + installPath + " already exists, remove before continuing."
+            raise
+
+        installPath = os.path.join(tomcat_install_target_dir, "work")
+        try:
+            os.mkdir(os.path.join(tomcat_install_target_dir, "work"))
+        except OSError, e:
+            print "Directory : " + installPath + " already exists, remove before continuing."
+            raise
+
         # edit the copied file and set the correct path to where the solr files are located
         search_config_file = open(os.path.join(tomcat_install_target_dir, "catalina_base/Catalina/localhost/search.xml"), 'r+')
         contents = search_config_file.read()
