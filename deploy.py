@@ -39,7 +39,7 @@ if __name__ == "__main__":
         try:            
             os.makedirs(tomcat_install_target_dir)
         except OSError, e:
-            if e.errno == errno.EXIST and os.path.isdir(tomcat_install_target_dir):
+            if e.errno == errno.EEXIST and os.path.isdir(tomcat_install_target_dir):
                 pass
             else:
                 raise
