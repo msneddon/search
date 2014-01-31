@@ -53,11 +53,11 @@ if __name__ == "__main__":
             print "Directory : " + installPath + " already exists, remove before continuing."
             raise
 
-        directoryList = [os.path.join(tomcat_install_target_dir, "logs"),
-                         os.path.join(tomcat_install_target_dir, "run"),
-                         os.path.join(tomcat_install_target_dir, "temp"),
-                         os.path.join(tomcat_install_target_dir, "webapps"),
-                         os.path.join(tomcat_install_target_dir, "work")]
+        directoryList = [os.path.join(installPath, "logs"),
+                         os.path.join(installPath, "run"),
+                         os.path.join(installPath, "temp"),
+                         os.path.join(installPath, "webapps"),
+                         os.path.join(installPath, "work")]
 
         for n in directoryList:
             try:
