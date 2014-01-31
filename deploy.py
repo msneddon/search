@@ -146,12 +146,15 @@ if __name__ == "__main__":
 
         configFiles = os.listdir(os.path.join(service_target_dir, "config"))
         for x in configFiles:
-            f = open(os.path.join(os.path.join(service_target_dir, "config"), x), 'r+')
-            contents = f.read()
-            contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])        
-            f.seek(0)
-            f.write(contents)
-            f.close()
+            filePath = os.path.join(os.path.join(service_target_dir, "config"), x)
+
+            if not os.path.isdir(filePath):
+                f = open(filePath, 'r+')
+                contents = f.read()
+                contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])        
+                f.seek(0)
+                f.write(contents)
+                f.close()
         
 
     # load solr data from tab delimited files to tomcat
