@@ -100,7 +100,7 @@ if __name__ == "__main__":
             
             # edit file to replace template string
             core_config = open(os.path.join(os.path.join(solr_config_target_dir, x), "conf/solrconfig.xml"), 'r+')
-            contents = core.read()
+            contents = core_config.read()
             contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])
             core_config.seek(0)
             core_config.write(contents)                
