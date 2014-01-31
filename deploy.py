@@ -146,7 +146,7 @@ if __name__ == "__main__":
 
         configFiles = os.listdir(os.path.join(service_target_dir, "config"))
         for x in configFiles:
-            f = open(os.path.join(os.path.join(service_target_dir, "config"), x))
+            f = open(os.path.join(os.path.join(service_target_dir, "config"), x), 'r+')
             contents = f.read()
             contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])        
             f.seek(0)
