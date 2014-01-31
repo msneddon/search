@@ -94,17 +94,17 @@ if __name__ == "__main__":
             if os.path.isdir(os.path.join(core_top_dir,x)):
                 print "Copying directory structure : " + os.path.join(core_top_dir, x) + " to " + os.path.join(solr_config_target_dir, x)
                 shutil.copytree(os.path.join(core_top_dir, x), os.path.join(solr_config_target_dir, x))
+                
+                # edit file to replace template string
+                core_config = open(os.path.join(os.path.join(solr_config_target_dir, x), "conf/solrconfig.xml"), 'r+')
+                contents = core_config.read()
+                contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])
+                core_config.seek(0)
+                core_config.write(contents)                
+                core_config.close()
             elif os.path.isfile(os.path.join(core_top_dir,x)):
                 print "Copying file : " + os.path.join(core_top_dir, x) + " to " + solr_config_target_dir
-                shutil.copy(os.path.join(core_top_dir, x), solr_config_target_dir)        
-            
-            # edit file to replace template string
-            core_config = open(os.path.join(os.path.join(solr_config_target_dir, x), "conf/solrconfig.xml"), 'r+')
-            contents = core_config.read()
-            contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])
-            core_config.seek(0)
-            core_config.write(contents)                
-            core_config.close()
+                shutil.copy(os.path.join(core_top_dir, x), solr_config_target_dir)                    
 
         # copy solr war file
         solr_runtime_source_dir = os.path.abspath(os.path.join(running_dir,"install/solr/config/runtime"))
