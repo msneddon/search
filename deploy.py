@@ -44,7 +44,7 @@ if __name__ == "__main__":
             else:
                 raise
         
-        sourcePath = os.path.join(tomcat_config_source_dir, "catalina_base")
+        sourcePath = tomcat_config_source_dir
         installPath = os.path.join(tomcat_install_target_dir, "catalina_base")
         try:
             print "Copying " + sourcePath + " to " + installPath
