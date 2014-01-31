@@ -68,12 +68,11 @@ if __name__ == "__main__":
                 raise
 
         # edit the copied file and set the correct path to where the solr files are located
-        search_config_file = open(os.path.join(tomcat_install_target_dir, "catalina_base/conf/Catalina/localhost/search.xml"), 'r+')
+        search_config_file = open(os.path.join(tomcat_install_target_dir, "catalina_base/conf/Catalina/localhost/search.xml"), 'r')
         contents = search_config_file.read()
         contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])
-        search_config_file.seek(0)
-        search_config_file.write("")
-        search_config_file.seek(0)
+        search_config_file.close()
+        search_config_file = open(os.path.join(tomcat_install_target_dir, "catalina_base/conf/Catalina/localhost/search.xml"), 'w')
         search_config_file.write(contents)
         search_config_file.close()
     
@@ -98,12 +97,11 @@ if __name__ == "__main__":
                 shutil.copytree(os.path.join(core_top_dir, x), os.path.join(solr_config_target_dir, x))
                 
                 # edit file to replace template string
-                core_config = open(os.path.join(os.path.join(solr_config_target_dir, x), "conf/solrconfig.xml"), 'r+')
+                core_config = open(os.path.join(os.path.join(solr_config_target_dir, x), "conf/solrconfig.xml"), 'r')
                 contents = core_config.read()
                 contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])
-                core_config.seek(0)
-                core_config.write("")
-                core_config.seek(0)
+                core_config.close()
+                core_config = open(os.path.join(os.path.join(solr_config_target_dir, x), "conf/solrconfig.xml"), 'w')
                 core_config.write(contents)                
                 core_config.close()
             elif os.path.isfile(os.path.join(core_top_dir,x)):
@@ -153,12 +151,11 @@ if __name__ == "__main__":
             filePath = os.path.join(os.path.join(service_target_dir, "config"), x)
 
             if not os.path.isdir(filePath):
-                f = open(filePath, 'r+')
+                f = open(filePath, 'r')
                 contents = f.read()
                 contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])        
-                f.seek(0)
-                f.write("")
-                f.seek(0)
+                f.close()
+                f = open(filePath, 'w')
                 f.write(contents)
                 f.close()
         
