@@ -44,52 +44,33 @@ if __name__ == "__main__":
             else:
                 raise
         
+        sourcePath = os.path.join(tomcat_config_source_dir, "catalina_base")
         installPath = os.path.join(tomcat_install_target_dir, "catalina_base")
         try:
-            shutil.copytree(os.path.join(tomcat_config_source_dir, "catalina_base"), installPath)
+            print "Copying " + sourcePath + " to " + installPath
+            shutil.copytree(sourcePath, installPath)
         except OSError, e:
             print "Directory : " + installPath + " already exists, remove before continuing."
             raise
 
-        installPath = os.path.join(tomcat_install_target_dir, "logs")
-        try:
-            os.mkdir(installPath)
-        except OSError, e:
-            print "Directory : " + installPath + " already exists, remove before continuing."
-            raise
+        directoryList = [os.path.join(tomcat_install_target_dir, "logs"),
+                         os.path.join(tomcat_install_target_dir, "run"),
+                         os.path.join(tomcat_install_target_dir, "temp"),
+                         os.path.join(tomcat_install_target_dir, "webapps"),
+                         os.path.join(tomcat_install_target_dir, "work")]
 
-        installPath = os.path.join(tomcat_install_target_dir, "run")
-        try:
-            os.mkdir(os.path.join(tomcat_install_target_dir, "run"))
-        except OSError, e:
-            print "Directory : " + installPath + " already exists, remove before continuing."
-            raise
-
-        installPath = os.path.join(tomcat_install_target_dir, "temp")
-        try:
-            os.mkdir(os.path.join(tomcat_install_target_dir, "temp"))
-        except OSError, e:
-            print "Directory : " + installPath + " already exists, remove before continuing."
-            raise
-
-        installPath = os.path.join(tomcat_install_target_dir, "webapps")
-        try:
-            os.mkdir(os.path.join(tomcat_install_target_dir, "webapps"))
-        except OSError, e:
-            print "Directory : " + installPath + " already exists, remove before continuing."
-            raise
-
-        installPath = os.path.join(tomcat_install_target_dir, "work")
-        try:
-            os.mkdir(os.path.join(tomcat_install_target_dir, "work"))
-        except OSError, e:
-            print "Directory : " + installPath + " already exists, remove before continuing."
-            raise
+        for n in directoryList:
+            try:
+                print "Creating directory : " + n
+                os.mkdir(n)
+            except OSError, e:
+                print "Directory : " + n + " already exists, remove before continuing."
+                raise
 
         # edit the copied file and set the correct path to where the solr files are located
-        search_config_file = open(os.path.join(tomcat_install_target_dir, "catalina_base/Catalina/localhost/search.xml"), 'r+')
+        search_config_file = open(os.path.join(tomcat_install_target_dir, "catalina_base/conf/Catalina/localhost/search.xml"), 'r+')
         contents = search_config_file.read()
-        contents = contents.replace('SOLR_PREFIX', os.path.join(os.environ["TARGET"], "services/search/solr"))
+        contents = contents.replace('%KB_DEPLOYMENT%', os.path.join(os.environ["TARGET"], "services/search/solr"))
         search_config_file.seek(0)
         search_config_file.write(contents)
         search_config_file.close()
@@ -116,7 +97,15 @@ if __name__ == "__main__":
             elif os.path.isfile(os.path.join(core_top_dir,x)):
                 print "Copying file : " + os.path.join(core_top_dir, x) + " to " + solr_config_target_dir
                 shutil.copy(os.path.join(core_top_dir, x), solr_config_target_dir)        
-        
+            
+            # edit file to replace template string
+            core_config = open(os.path.join(solr_config_target_dir, x), 'r+')
+            contents = core.read()
+            contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])
+            core_config.seek(0)
+            core_config.write(contents)                
+            core_config.close()
+
         # copy solr war file
         solr_runtime_source_dir = os.path.abspath(os.path.join(running_dir,"install/solr/config/runtime"))
         solr_runtime_target_dir = os.path.join(os.environ["TARGET"], "services/search/solr")
@@ -154,7 +143,15 @@ if __name__ == "__main__":
         # copy service code into the virtualenv directory
         shutil.copytree(os.path.join(running_dir,"src/search_service/search"), os.path.join(virtualenv_dir, "lib/python2.7/site-packages/search"))
         shutil.copytree(os.path.join(running_dir,"src/search_service/config"), os.path.join(service_target_dir, "config"))
-        
+
+        configFiles = os.listdir(os.path.join(service_target_dir, "config"))
+        for x in configFiles:
+            f = open(os.path.join(os.path.join(service_target_dir, "config"), x))
+            contents = f.read()
+            contents = contents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])        
+            f.seek(0)
+            f.write(contents)
+            f.close()
         
 
     # load solr data from tab delimited files to tomcat
