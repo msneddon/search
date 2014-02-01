@@ -29,7 +29,7 @@ def export_gwas_from_ws(maxNumObjects):
     # the keys in the solr schema
     # print out a header file
     # data fields must be printed in same order
-    solr_ws_keys = ['object_id','workspace_id','object_type', 'object_name']
+    solr_ws_keys = ['object_id','workspace_name','object_type', 'object_name']
     solr_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'source', 'GwasPopulation_description', 'ecotype_details', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_parent_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id','distance_cutoff','genes','genes_snp_list']
     headerOutFile = open('gwasToSolr.tab.headers', 'w')
     print >> headerOutFile, "\t".join(solr_ws_keys + solr_keys)
