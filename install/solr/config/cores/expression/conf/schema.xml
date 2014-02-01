@@ -68,29 +68,42 @@
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
    <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="gid" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
-   <field name="fid" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="source_id" type="text_general" indexed="true" stored="true"/>
-   <field name="sequence_length" type="text_general" indexed="true" stored="true"/>
+   <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
 
-   <field name="feature_type" type="text_general" indexed="true" stored="true"/>
-   <field name="function" type="text_general" indexed="true" stored="true"/>
-   <field name="alias" type="text_general" indexed="true" stored="true" omitNorms="true"/>
-   <field name="pegs" type="text_general" indexed="true" stored="true"/>
-   <field name="rnas" type="text_general" indexed="true" stored="true"/>
-   <field name="scientific_name" type="text_general" indexed="true" stored="true"/>
-   <field name="complete" type="text_general" indexed="true" stored="true"/>
-   <field name="prokaryotic" type="text_general" indexed="true" stored="true"/>
-   <field name="dna_size" type="text_general" indexed="true" stored="true"/>
-   <field name="contigs" type="text_general" indexed="true" stored="true"/>
-   <field name="domain" type="text_general" indexed="true" stored="true"/>
-   <field name="taxonomy" type="text_general" indexed="true" stored="true"/>
-   <field name="genetic_code" type="text_general" indexed="true" stored="true"/>
-   <field name="gc_content" type="text_general" indexed="true" stored="true"/>
-   <field name="phenotype" type="text_general" indexed="true" stored="true"/>
-   <field name="md5" type="text_general" indexed="true" stored="true"/>
+<!-- ExpressionSeries -->
+   <field name="source_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="series_genome_ids" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="series_sample_ids" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="title" type="text_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="summary" type="text_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="design" type="text_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="publication_id" type="text_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="external_source_date" type="text_general" indexed="true" stored="true" multiValued="false" /> 
 
-   <field name="text" type="text_general" indexed="true" stored="false" multiValued="true"/>
+<!-- ExpressionSample -->
+   <field name="sample_type" type="text_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="numerical_interpretation" type="text_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="description" type="text_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="data_quality_level" type="int" indexed="true" stored="true" multiValued="false" /> 
+   <field name="original_median" type="float" indexed="true" stored="true" multiValued="false" /> 
+   <field name="genome_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="expression_ontology_terms" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="platform_id" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="default_control_sample" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="averaged_from_samples" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="protocol" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="strain" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="persons" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="molecule" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="data_source" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+<!-- ExpressionSample expression_levels -->
+   <field name="feature_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="feature_function" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="expression_level" type="tfloat" indexed="true" stored="true" multiValued="false" /> 
+
+
+   <field name="text_boost" boost="5.0" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
 
    <field name="_version_" type="long" indexed="true" stored="true"/>
 
@@ -106,28 +119,14 @@
    <copyField source="object_id" dest="text"/>
    <copyField source="workspace_name" dest="text"/>
    <copyField source="object_type" dest="text"/>
-   <copyField source="gid" dest="text"/>
-   <copyField source="fid" dest="text"/>
-   <copyField source="source_id" dest="text"/>
-   <copyField source="sequence_length" dest="text"/>
-   <copyField source="feature_type" dest="text"/>
-   <copyField source="function" dest="text"/>
-   <copyField source="alias" dest="text"/>
-   <copyField source="pegs" dest="text"/>
-   <copyField source="rnas" dest="text"/>
-   <copyField source="scientific_name" dest="text"/>
-   <copyField source="complete" dest="text"/>
-   <copyField source="prokaryotic" dest="text"/>
-   <copyField source="dna_size" dest="text"/>
-   <copyField source="contigs" dest="text"/>
-   <copyField source="domain" dest="text"/>
-   <copyField source="taxonomy" dest="text"/>
-   <copyField source="genetic_code" dest="text"/>
-   <copyField source="gc_content" dest="text"/>
-   <copyField source="phenotype" dest="text"/>
-   <copyField source="md5" dest="text"/>
-   <copyField source="phenotype" dest="text"/>
+   <copyField source="object_name" dest="text"/>
 
+   <copyField source="source_id" dest="text"/>
+   <copyField source="title" dest="text"/>
+   <copyField source="summary" dest="text"/>
+   <copyField source="design" dest="text"/>
+   <copyField source="publication_id" dest="text"/>
+   <copyField source="external_source_date" dest="text"/>
  
   <types>
     <!-- field type definitions. The "name" attribute is
@@ -266,6 +265,26 @@
     <fieldType name="text_ws" class="solr.TextField" positionIncrementGap="100">
       <analyzer>
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+      </analyzer>
+    </fieldType>
+
+    <!-- A text field that tries to combine text_general with whitespace
+         tokenization, to preserve punctuation in identifiers
+    -->
+    <fieldType name="text_ws_general" class="solr.TextField" positionIncrementGap="100">
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <!-- in this example, we will only use synonyms at query time
+        <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+        -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
 
