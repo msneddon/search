@@ -66,7 +66,7 @@
  <fields>
         
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
-   <field name="workspace_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="gid" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="fid" type="string" indexed="true" stored="true" multiValued="false" /> 
@@ -104,7 +104,7 @@
         or to add multiple fields to the same field for easier/faster searching.  -->
 
    <copyField source="object_id" dest="text"/>
-   <copyField source="workspace_id" dest="text"/>
+   <copyField source="workspace_name" dest="text"/>
    <copyField source="object_type" dest="text"/>
    <copyField source="gid" dest="text"/>
    <copyField source="fid" dest="text"/>
