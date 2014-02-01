@@ -295,7 +295,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                             feature_function = ""
     
                         try:
-                            feature_id = fid
+                            feature_id = f['feature_id']
                         except:
                             feature_id = ""
     
