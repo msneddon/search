@@ -33,6 +33,10 @@ def export_expression_from_ws(maxNumObjects):
     # this Poplar version is not in production central store yet
     if not genome_entities.has_key('kb|g.3907'):
         genome_entities['kb|g.3907'] = {'scientific_name':'Populus trichocarpa'}
+
+    # these dicts will be used to cache feature functions from the CDMI
+    feature_functions = dict()
+    feature_encompasses = dict()
     
     pat = re.compile(r'\s+')
 
@@ -166,17 +170,30 @@ def export_expression_from_ws(maxNumObjects):
                         print "Failed trying to write to string buffer."
     
     
-                    outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
+#                    outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
 
                     if expression['data'].has_key('expression_levels'):
-                        print >> sys.stderr, 'getting fids for ' + search_values['genome_id']
-                        cdmi_features = cdmi_api.genomes_to_fids([search_values['genome_id']],[])
-                        print >> sys.stderr, 'getting functions for ' + search_values['genome_id']
-                        feature_functions = cdmi_api.fids_to_functions(cdmi_features[search_values['genome_id']])
+                        if feature_functions.has_key(search_values['genome_id']):
+                            print >> sys.stderr, 'using function cache for ' + search_values['genome_id']
+                        else:
+# need to track back to the locus features, which is where the function
+# is actually stored for plants
+                            print >> sys.stderr, 'getting fids for ' + search_values['genome_id']
+                            cdmi_features = cdmi_api.genomes_to_fids([search_values['genome_id']],[])
+                            print >> sys.stderr, 'getting functions for ' + search_values['genome_id']
+                            feature_functions[search_values['genome_id']]  = cdmi_api.fids_to_functions(cdmi_features[search_values['genome_id']])
+                            print >> sys.stderr, 'getting encompass info for ' + search_values['genome_id']
+                            feature_encompasses[search_values['genome_id']] = cdmi_entity_api.get_relationship_Encompasses(cdmi_features[search_values['genome_id']],[],['to_link'],[])
+                            print >> sys.stderr, feature_encompasses[search_values['genome_id']]
+
+
                         for feature_id in expression['data']['expression_levels'].keys():
-                            subobject_id = object_id + '.' + feature_id
+                            subobject_id = object_id + '.sub.' + feature_id
                             search_values['feature_id'] = feature_id
-                            search_values['feature_function'] = feature_functions[feature_id]
+                            if feature_functions[search_values['genome_id']].has_key(feature_id):
+                                search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_id]
+                            else:
+                                search_values['feature_function'] = ''
                             search_values['expression_level'] = expression['data']['expression_levels'][feature_id]
                             try:
                                 solr_strings = [subobject_id,workspace_name,object_type,object_name]
