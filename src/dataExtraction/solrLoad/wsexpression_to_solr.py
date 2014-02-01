@@ -18,7 +18,6 @@ wsname = 'KBasePublicExpression'
 
 def export_expression_from_ws(maxNumObjects):
     #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
-    # ranjan's Gwas objects are currently in Gavin's dev workspace
 #    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
     ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 
@@ -113,15 +112,22 @@ def export_expression_from_ws(maxNumObjects):
                             search_values[key]=''
 
                     # handle generic list fields
-                    list_keys = ['averaged_from_samples','expression_ontology_terms']
+                    list_keys = ['averaged_from_samples']
                     for key in list_keys:
                         if expression['data'].has_key(key):
+                            print >> sys.stderr, key
+                            print >> sys.stderr, expression['data'][key]
                             search_values[key] = ' '.join(expression['data'][key])
                         else:
                             search_values[key]=''
 
                     # handle special fields
 # to do: translate platform_id to readable id
+
+                    if expression['data'].has_key('expression_ontology_terms'):
+                        for expr in expression['data']['expression_ontology_terms']:
+                            search_values[key] = ' '.join(expr.values())
+
                     if expression['data'].has_key('type'):
                         search_values['sample_type'] = expression['data']['type']
                     else:
@@ -183,17 +189,41 @@ def export_expression_from_ws(maxNumObjects):
                             print >> sys.stderr, 'getting functions for ' + search_values['genome_id']
                             feature_functions[search_values['genome_id']]  = cdmi_api.fids_to_functions(cdmi_features[search_values['genome_id']])
                             print >> sys.stderr, 'getting encompass info for ' + search_values['genome_id']
-                            feature_encompasses[search_values['genome_id']] = cdmi_entity_api.get_relationship_Encompasses(cdmi_features[search_values['genome_id']],[],['to_link'],[])
-                            print >> sys.stderr, feature_encompasses[search_values['genome_id']]
+                            feature_encompasses[search_values['genome_id']] = dict()
+                            for encompass in cdmi_entity_api.get_relationship_Encompasses(cdmi_features[search_values['genome_id']],[],['to_link'],[]):
+#                                print >> sys.stderr, encompass
+                                feature_encompasses[search_values['genome_id']][encompass[1]['from_link']] = encompass[1]['to_link']
 
+                        print >> sys.stderr, feature_functions
+                        print >> sys.stderr, feature_encompasses
+                        exit(0)
 
                         for feature_id in expression['data']['expression_levels'].keys():
                             subobject_id = object_id + '.sub.' + feature_id
                             search_values['feature_id'] = feature_id
-                            if feature_functions[search_values['genome_id']].has_key(feature_id):
-                                search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_id]
+
+                            print >> sys.stderr, str(feature_id)
+#                            print >> sys.stderr, str(feature_encompasses[search_values['genome_id']])
+                            if feature_encompasses[search_values['genome_id']].has_key(feature_id):
+                                print >> sys.stderr, str(feature_encompasses[search_values['genome_id']][feature_id])
                             else:
+                                print >> sys.stderr, 'no encompass info for feature ' + feature_id
+                            # this code is horrible
+                            if feature_functions[search_values['genome_id']].has_key(feature_id):
+                                print >> sys.stderr, feature_id
+                                print >> sys.stderr, feature_functions[search_values['genome_id']][feature_id]
+                                search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_id]
+                            elif feature_encompasses[search_values['genome_id']].has_key(feature_id):
+                                if feature_functions[search_values['genome_id']].has_key(feature_encompasses[search_values['genome_id']][feature_id]):
+                                    search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]
+                                elif feature_encompasses[search_values['genome_id']][feature_id].has_key(feature_id):
+                                    if feature_functions[search_values['genome_id']].has_key(feature_encompasses[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]):
+                                        print >> sys.stderr, feature_id
+                                        search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]]
+                            else:
+                                print >> sys.stderr, feature_id + ' has no function'
                                 search_values['feature_function'] = ''
+
                             search_values['expression_level'] = expression['data']['expression_levels'][feature_id]
                             try:
                                 solr_strings = [subobject_id,workspace_name,object_type,object_name]
