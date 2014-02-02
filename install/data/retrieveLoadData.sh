@@ -17,7 +17,7 @@ do
 done
 
 # example data only cores
-for core in genomes
+for core in genomes expression
 do
     echo loading example data into $core
     ./deploy.py --load-solr-data $core $tmpsolrdir/$core/${core}ToSolr.tab.headers $tmpsolrdir/$core/${core}ToSolr.tab
