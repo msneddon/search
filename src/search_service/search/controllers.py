@@ -15,7 +15,7 @@ def get_results(request, config):
     validated['request'] = request.url
 
      # compute the solr url based on the user query
-    computed_solr_url = compute_solr_query(validated, config['search']['solr_url'])
+    computed_solr_url = compute_solr_query(validated, config)
     
     logger.info(computed_solr_url)
 
@@ -188,11 +188,11 @@ def capture_metrics(request):
     logger.info("METRICS -- " + " URL : " + request.url + " HEADERS : " + headersString)
 
 
-def compute_solr_query(options, base_solr_url = None):
+def compute_solr_query(options, config):
     mapping = "search"
     paramString = ""
 
-    solr_url = base_solr_url
+    solr_url = config['search'['solr_url']
 
     if config['plugins'].has_key(options['category']):
         core = config['plugins'][options['category']]['solr']['core']
