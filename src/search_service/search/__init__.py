@@ -66,7 +66,7 @@ def load_categories(config):
     categories = dict()
     try:
         categoryFile = open(os.path.join(os.path.abspath(config['search']['config_path']),'categoryInfo.json'))
-        categories = json.loads(categoryFile.read())
+        categories = flask.json.loads(categoryFile.read())
     except Exception, e:        
         search_wsgi.logger.exception(e)
         raise
@@ -84,7 +84,7 @@ def load_plugins(config):
         for c in categoryPlugins:
             if ".json" in c:
                 categoryInfoFile = open(os.path.join(pluginsDir,c))
-                plugins[c.split(".json")[0]] = json.loads(categoryInfoFile.read())
+                plugins[c.split(".json")[0]] = flask.json.loads(categoryInfoFile.read())
                 categoryInfoFile.close()
     except Exception, e:
         search_wsgi.logger.exception(e)
