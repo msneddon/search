@@ -89,7 +89,7 @@ def load_categories():
         categoryFile = open(os.path.join(os.path.abspath(configPath),'categoryInfo.json'))
         categories = json.loads(categoryFile.read())
     except Exception, e:        
-        logger.exception(e)
+        search_wsgi.logger.exception(e)
         raise
 
     return categories
@@ -108,7 +108,7 @@ def load_plugins():
                 plugins[c.split(".json")[0]] = json.loads(categoryInfoFile.read())
                 categoryInfoFile.close()
     except Exception, e:
-        search_uwsgi.logger.exception(e)
+        search_wsgi.logger.exception(e)
         raise
     
     return plugins
