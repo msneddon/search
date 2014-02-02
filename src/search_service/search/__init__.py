@@ -82,11 +82,16 @@ def load_service_config():
     return settings
 
 
+# get the service configuration settings
+serviceConfig = load_service_config()
+initialize_logging()
+
+
 #create a categories.json file that can be loaded and sent to the client
 def load_categories():
     categories = dict()
     try:
-        categoryFile = open(os.path.join(os.path.abspath(config['search']['config_path']),'categoryInfo.json'))
+        categoryFile = open(os.path.join(os.path.abspath(serviceConfig['search']['config_path']),'categoryInfo.json'))
         categories = json.loads(categoryFile.read())
     except Exception, e:        
         search_wsgi.logger.exception(e)
@@ -99,7 +104,7 @@ def load_categories():
 def load_plugins():
     try:
         plugins = dict()
-        pluginsDir = os.path.join(os.path.abspath(config['search']['config_path']),'plugins/categories')
+        pluginsDir = os.path.join(os.path.abspath(serviceConfig['search']['config_path']),'plugins/categories')
         categoryPlugins = os.listdir(pluginsDir)
 
         for c in categoryPlugins:
@@ -114,7 +119,4 @@ def load_plugins():
     return plugins
 
 
-# get the service configuration settings
-serviceConfig = load_service_config()
-initialize_logging()
 
