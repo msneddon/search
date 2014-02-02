@@ -10,10 +10,6 @@ import controllers
 # create the flask object for handling all requests
 search_wsgi = flask.Flask(__name__)
 
-# get the service configuration settings
-serviceConfig = load_service_config()
-initialize_logging()
-
 
 @search_wsgi.route('/', methods = ['GET'])
 def index():
@@ -110,4 +106,7 @@ def load_plugins():
     return plugins
 
 
+# get the service configuration settings
+serviceConfig = load_service_config()
+initialize_logging()
 
