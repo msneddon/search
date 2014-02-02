@@ -97,18 +97,15 @@ def load_service_config():
     settings = dict()
 
     config = ConfigParser.ConfigParser()
-    config.read("../config/search_config.ini")
+    config.read("%KB_DEPLOYMENT%/services/search/config/search_config.ini")
 
     for section in config.sections():
         settings[section] = dict()
         for option in config.options(section):
             settings[section][option] = config.get(section, option)
-    
-    categories = load_categories(settings)
-    plugins = load_plugins(settings)
-    
-    settings["categories"] = categories
-    settings["plugins"] = plugins
+        
+    settings["categories"] = load_categories(settings)
+    settings["plugins"] = load_plugins(settings)
     
     return settings
 

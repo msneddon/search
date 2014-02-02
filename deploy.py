@@ -146,6 +146,15 @@ if __name__ == "__main__":
         shutil.copytree(os.path.join(running_dir,"src/search_service/search"), os.path.join(virtualenv_dir, "lib/python2.7/site-packages/search"))
         shutil.copytree(os.path.join(running_dir,"src/search_service/config"), os.path.join(service_target_dir, "config"))
 
+        # set the path to the service config file
+        initFile = open(os.path.join(virtualenv_dir, "lib/python2.7/site-packages/search/__init__.py"), 'r')
+        initContents = initFile.read()
+        initContents = initContents.replace('%KB_DEPLOYMENT%', os.environ["TARGET"])
+        initFile.close()
+        initFile = open(os.path.join(virtualenv_dir, "lib/python2.7/site-packages/search/__init__.py"), 'w')
+        initFile.write(initContents)
+        initFile.close()
+
         configFiles = os.listdir(os.path.join(service_target_dir, "config"))
         for x in configFiles:
             filePath = os.path.join(os.path.join(service_target_dir, "config"), x)
