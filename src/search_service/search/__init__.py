@@ -86,6 +86,7 @@ def load_categories():
         categories = json.loads(categoryFile.read())
     except Exception, e:        
         logger.exception(e)
+        raise
 
     return categories
 
@@ -103,7 +104,8 @@ def load_plugins():
                 plugins[c.split(".json")[0]] = json.loads(categoryInfoFile.read())
                 categoryInfoFile.close()
     except Exception, e:
-        logger.exception(e)
+        search_uwsgi.logger.exception(e)
+        raise
     
     return plugins
 
