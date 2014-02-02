@@ -2,6 +2,7 @@ import flask
 import os
 import os.path
 import logging
+import ConfigParser
 
 # local modules
 import exceptions
