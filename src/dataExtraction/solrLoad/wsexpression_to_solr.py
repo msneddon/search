@@ -186,17 +186,18 @@ def export_expression_from_ws(maxNumObjects):
 # is actually stored for plants
                             print >> sys.stderr, 'getting fids for ' + search_values['genome_id']
                             cdmi_features = cdmi_api.genomes_to_fids([search_values['genome_id']],[])
+#                            cdmi_features[search_values['genome_id']] = random.sample(cdmi_features[search_values['genome_id']],100)
                             print >> sys.stderr, 'getting functions for ' + search_values['genome_id']
                             feature_functions[search_values['genome_id']]  = cdmi_api.fids_to_functions(cdmi_features[search_values['genome_id']])
                             print >> sys.stderr, 'getting encompass info for ' + search_values['genome_id']
                             feature_encompasses[search_values['genome_id']] = dict()
                             for encompass in cdmi_entity_api.get_relationship_Encompasses(cdmi_features[search_values['genome_id']],[],['to_link'],[]):
+# maybe we should assign to feature_functions here?
 #                                print >> sys.stderr, encompass
                                 feature_encompasses[search_values['genome_id']][encompass[1]['from_link']] = encompass[1]['to_link']
 
                         print >> sys.stderr, feature_functions
                         print >> sys.stderr, feature_encompasses
-                        exit(0)
 
                         for feature_id in expression['data']['expression_levels'].keys():
                             subobject_id = object_id + '.sub.' + feature_id
