@@ -39,7 +39,7 @@ def test_solr_cores_nonempty():
     solr_url = "http://localhost:7077/search/"
 
     print "Test to see if each solr core is active."
-    cores = os.listdir("/kb/deployment/services/search/solr/data/")
+    cores = os.listdir(os.path.join(os.environ["TARGET"], "services/search/solr/data/"))
     for c in cores:
         response = requests.get(solr_url + "/#/" + c + "/")
         print "core: " + c
@@ -55,10 +55,10 @@ def test_service_alive():
 
 
 def getCategories():
-    return [x.split('.')[0] for x in os.listdir("/kb/deployment/services/search/config/plugins/categories/") if ".json" in x]
+    return [x.split('.')[0] for x in os.listdir(os.path.join(os.environ["TARGET"], "services/search/config/plugins/categories/")) if ".json" in x]
 
 def getInvalidCategories():
-    return [x for x in os.listdir("/kb/deployment/services/search/config/plugins/categories/") if ".json" in x]
+    return [x for x in os.listdir(os.path.join(os.environ["TARGET"], "services/search/config/plugins/categories/")) if ".json" in x]
 
 
 def invalid_query_service_categories(queryString):
