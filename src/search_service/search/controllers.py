@@ -192,7 +192,7 @@ def compute_solr_query(options, config):
     mapping = "search"
     paramString = ""
 
-    solr_url = config['search'['solr_url']
+    solr_url = config['search']['solr_url']
 
     if config['plugins'].has_key(options['category']):
         core = config['plugins'][options['category']]['solr']['core']
