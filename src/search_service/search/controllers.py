@@ -8,12 +8,6 @@ import ConfigParser
 
 from exceptions import InvalidSearchRequestError
 
-categories = dict()
-plugins = dict()
-
-logger = logging.getLogger()
-
-
 def get_results(request, config):
     capture_metrics(request)
 
@@ -30,7 +24,7 @@ def get_results(request, config):
     # call solr and retrieve result set
     try:
         if config['search']['solr_auth_required'] == True:
-            response = requests.get(computed_solr_url, auth=requests.auth.HTTPBasicAuth(solr_user, solr_pass))
+            response = requests.get(computed_solr_url, auth=requests.auth.HTTPBasicAuth(config['search']['solr_user'], config['search']['solr_pass']))
         else:
             response = requests.get(computed_solr_url)
 
@@ -118,7 +112,7 @@ def validate_inputs(query):
 
     # check for and set the category, which will determine which core to search
     if query.has_key('category') and query['category'] is not None:        
-        if query['category'] not in plugins.keys():
+        if query['category'] not in config['plugins'].keys():
             raise InvalidSearchRequestError(query['category'] + " is not a valid search category.")
         
         validatedParams['category'] = query['category'][:]                
@@ -155,7 +149,7 @@ def validate_inputs(query):
             except:
                 raise InvalidSearchRequestError(x + " is not in the format of 'sort_field sort_order'!")
             
-            if not field in plugins[validatedParams['category']]['solr']['sort_fields']:
+            if not field in config['plugins'][validatedParams['category']]['solr']['sort_fields']:
                 raise InvalidSearchRequestError(field + " is not a valid sorting field!")
             
             if not order in ['asc', 'desc']:
@@ -172,7 +166,7 @@ def validate_inputs(query):
         for x in individualFacets:
             field_name, field_query = x.split(":")
             
-            if not field_name in plugins[validatedParams['category']]['solr']['facet_fields']:
+            if not field_name in config['plugins'][validatedParams['category']]['solr']['facet_fields']:
                 raise InvalidSearchRequestError(field_name + " is not a valid faceting field!")
             
             # the query should be one of, a single int, a single float, a range of int or float, or an alpha string
@@ -190,8 +184,9 @@ def validate_inputs(query):
             
 
 def capture_metrics(request):
-    logger.info(str(request))
-
+    headersString = ",".join([str(k) + " = " + str(request.headers[k]) for x in request.headers.keys()])
+    
+    logger.info("METRICS -- " + " URL : " + request.url + " HEADERS : " + headersString)
 
 def compute_solr_query(options):
     mapping = "search"
@@ -199,12 +194,12 @@ def compute_solr_query(options):
 
     solr_url = base_solr_url
 
-    if plugins.has_key(options['category']):
-        core = plugins[options['category']]['solr']['core']
+    if config['plugins'].has_key(options['category']):
+        core = config['plugins'][options['category']]['solr']['core']
 
         solr_url += mapping + '/' + core
         
-        paramString = plugins[options['category']]['solr']['query_string']
+        paramString = config['plugins'][options['category']]['solr']['query_string']
     else:
         raise InvalidSearchRequestError("No such category \"" + options['category'] + "\" !")
 
@@ -214,12 +209,12 @@ def compute_solr_query(options):
 
 
     # limit the output to the set of visible fields defined for this category
-    solr_url += "&fl=" + ','.join(plugins[options['category']]['solr']['visible_fields'])
+    solr_url += "&fl=" + ','.join(config['plugins'][options['category']]['solr']['visible_fields'])
 
     # add faceting options, if present
-    if len(plugins[options['category']]['solr']['facet_fields']) > 0:
+    if len(config['plugins'][options['category']]['solr']['facet_fields']) > 0:
         solr_url += "&facet=true"
-        for x in plugins[options['category']]['solr']['facet_fields']:
+        for x in config['plugins'][options['category']]['solr']['facet_fields']:
             solr_url += "&facet.field=" + x
         
     if options.has_key('sort') and options['sort'] is not None:
@@ -241,7 +236,7 @@ def compute_solr_query(options):
     solr_url += options['queryString'] + paramString
             
 
-    if plugins[options['category']]['solr'].has_key('secure') and plugins[options['category']]['solr']['secure'] == True:
+    if config['plugins'][options['category']]['solr'].has_key('secure') and config['plugins'][options['category']]['solr']['secure'] == True:
         if not options.has_key('username') or options['username'] is None:
             raise InvalidSearchRequestError("Missing or invalid authentication token!")
 
