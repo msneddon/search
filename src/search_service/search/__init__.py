@@ -61,37 +61,11 @@ def initialize_logging():
     search_wsgi.logger.setLevel(logging.DEBUG)
 
 
-
-def load_service_config():
-    settings = dict()
-
-    config = ConfigParser.ConfigParser()
-    config.read("/kb/deployment/services/search/config/search_config.ini")
-
-    for section in config.sections():
-        settings[section] = dict()
-        for option in config.options(section):
-            settings[section][option] = config.get(section, option)
-    
-    categories = load_categories()
-    plugins = load_plugins()
-    
-    settings["categories"] = categories
-    settings["plugins"] = plugins
-    
-    return settings
-
-
-# get the service configuration settings
-serviceConfig = load_service_config()
-initialize_logging()
-
-
 #create a categories.json file that can be loaded and sent to the client
-def load_categories():
+def load_categories(config):
     categories = dict()
     try:
-        categoryFile = open(os.path.join(os.path.abspath(serviceConfig['search']['config_path']),'categoryInfo.json'))
+        categoryFile = open(os.path.join(os.path.abspath(config['search']['config_path']),'categoryInfo.json'))
         categories = json.loads(categoryFile.read())
     except Exception, e:        
         search_wsgi.logger.exception(e)
@@ -101,10 +75,10 @@ def load_categories():
 
 
 #load up all the category json plugins
-def load_plugins():
+def load_plugins(config):
     try:
         plugins = dict()
-        pluginsDir = os.path.join(os.path.abspath(serviceConfig['search']['config_path']),'plugins/categories')
+        pluginsDir = os.path.join(os.path.abspath(config['search']['config_path']),'plugins/categories')
         categoryPlugins = os.listdir(pluginsDir)
 
         for c in categoryPlugins:
@@ -118,5 +92,29 @@ def load_plugins():
     
     return plugins
 
+
+def load_service_config():
+    settings = dict()
+
+    config = ConfigParser.ConfigParser()
+    config.read("/kb/deployment/services/search/config/search_config.ini")
+
+    for section in config.sections():
+        settings[section] = dict()
+        for option in config.options(section):
+            settings[section][option] = config.get(section, option)
+    
+    categories = load_categories(settings)
+    plugins = load_plugins(settings)
+    
+    settings["categories"] = categories
+    settings["plugins"] = plugins
+    
+    return settings
+
+
+# get the service configuration settings
+serviceConfig = load_service_config()
+initialize_logging()
 
 
