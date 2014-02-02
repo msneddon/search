@@ -62,28 +62,39 @@ def transform_solr_json(results, params):
     transform["totalResults"] = results["response"]["numFound"]
     transform["itemCount"] = len(results["response"]["docs"])
     transform["itemsPerPage"] = params["count"]
-
-    # find the page number in the request url to modify it for first, next, previous, last
-    pageSubstringStart = params["request"].find("&page=") + 6
-    pageSubstringEnd = params["request"].find("&", pageSubstringStart)
-
-    transform["navigation"] = dict()
-    transform["navigation"]["self"] = params["request"]
-    transform["navigation"]["first"] = params["request"][:pageSubstringStart] + "1" + params["request"][pageSubstringEnd:]
-        
-    if params["page"] > 1:
-        transform["navigation"]["previous"] = params["request"][:pageSubstringStart] + str(params["page"] - 1) + params["request"][pageSubstringEnd:]
-
-    if (params["start"] + transform["itemsPerPage"]) < transform["totalResults"]:
-        transform["navigation"]["next"] = params["request"][:pageSubstringStart] + str(params["page"] + 1) + params["request"][pageSubstringEnd:]
         
     if transform["totalResults"] % transform["itemsPerPage"] == 0:
         remainder = 0
     else:
         remainder = 1
-    
-    transform["navigation"]["last"] = params["request"][:pageSubstringStart] + str(transform["totalResults"]/transform["itemsPerPage"] + remainder) + params["request"][pageSubstringEnd:]
 
+    transform["navigation"] = dict()
+    transform["navigation"]["self"] = params["request"]
+
+    pageSplits = params["request"].split("page=")
+    
+    # no page parameter present in request url
+    if len(pageSplits) == 1 and params["page"] == 1:
+        transform["navigation"]["first"] = params["request"] + "&page=1"
+        
+        if (params["start"] + params["count"]) < results["response"]["numFound"]:
+            transform["navigation"]["next"] = params["request"] + "&page=2"
+
+        transform["navigation"]["last"] = params["request"] + "&page=" + str(transform["totalResults"]/transform["itemsPerPage"] + remainder)
+    # page parameter present in request url
+    elif len(pageSplits) == 2:
+        startSubstring = pageSplits[1].find(str(params["page"]))
+        pageSuffix = pageSplits[1][startSubstring:]
+        
+        transform["navigation"]["first"] = pageSplits[0] + "1" + pageSuffix        
+
+        if params["page"] > 1:
+            transform["navigation"]["previous"] = pageSplits[0] + str(params["page"] - 1) + pageSuffix
+
+        if (params["start"] + params["count"]) < results["response"]["numFound"]:
+            transform["navigation"]["next"] = pageSplits[0] + str(params["page"] + 1) + pageSuffix
+
+        transform["navigation"]["last"] = pageSplits[0] + str(transform["totalResults"]/transform["itemsPerPage"] + remainder) + pageSuffix
 
     # handle faceting
     if results.has_key("facet_counts"):
@@ -91,8 +102,6 @@ def transform_solr_json(results, params):
         
         transform["facets"] = results["facet_counts"]["facet_fields"]
 
-    #logger.info(transform)
-    
     return transform
 
 
