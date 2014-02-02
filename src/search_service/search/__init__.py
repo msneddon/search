@@ -14,15 +14,14 @@ search_wsgi = flask.Flask(__name__)
 
 @search_wsgi.route('/', methods = ['GET'])
 def index():
-    return "KBase Search Service"
+    response = flask.jsonify({'message': "KBase Search Service"})
+    response.status_code = 200
+    return response
 
 
 @search_wsgi.route('/getResults', methods = ['GET'])
 def get_results():
-    try:
-        return controllers.get_results(flask.request, serviceConfig)
-    except exceptions.InvalidSearchRequestError, e:
-        flask.abort(400)
+    return controllers.get_results(flask.request, serviceConfig)
 
 
 @search_wsgi.route('/categories', methods = ['GET'])
@@ -32,11 +31,16 @@ def get_categories():
 
 @search_wsgi.errorhandler(exceptions.InvalidSearchRequestError)
 def invalid_request(error = None):
-    return flask.make_response(flask.standard_response(None, 400, error.message), 400)
+    response = flask.jsonify({'message': error.message})
+    response.status_code = 400
+    return response
+
 
 @search_wsgi.errorhandler(Exception)
 def invalid_request(error = None):
-    return flask.make_response(flask.standard_response(None, 500, error.message), 500)
+    response = flask.jsonify({'message': error.message})
+    response.status_code = 500
+    return response
 
 
 
