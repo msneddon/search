@@ -11,7 +11,7 @@ def get_results(request, config):
     capture_metrics(request)
 
     # validate all of the required inputs
-    validated = validate_inputs(request.args)
+    validated = validate_inputs(request.args, config)
     validated['request'] = request.url
 
      # compute the solr url based on the user query
@@ -96,7 +96,7 @@ def transform_solr_json(results, params):
     return transform
 
 
-def validate_inputs(query):
+def validate_inputs(query, config):
     validatedParams = dict()
 
     # check for a jsonp callback
