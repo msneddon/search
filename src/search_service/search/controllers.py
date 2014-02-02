@@ -13,15 +13,8 @@ plugins = dict()
 
 logger = logging.getLogger()
 
-config = ConfigParser.ConfigParser()
-config.read("/kb/deployment/services/search/config/search_config.ini")
 
-base_solr_url = config.get('search', 'solr_url')
-solr_user = config.get('search', 'solr_user')
-solr_pass = config.get('search', 'solr_pass')
-configPath = config.get('search', 'config_path')
-
-def get_results(request):
+def get_results(request, config):
     capture_metrics(request)
 
     # validate all of the required inputs
@@ -36,15 +29,16 @@ def get_results(request):
     solr_results = dict()
     # call solr and retrieve result set
     try:
-        try :
+        if config['search']['solr_auth_required'] == True:
             response = requests.get(computed_solr_url, auth=requests.auth.HTTPBasicAuth(solr_user, solr_pass))
-            solr_results = response.json
-        except:
-            logger.error(computed_solr_url)
+        else:
             response = requests.get(computed_solr_url)
-            solr_results = response.json
+
+        solr_results = response.json()
     except Exception, e:
+        logger.error(computed_solr_url)
         logger.exception(e)
+        raise
 
     try:
         # transform the json into the output format    
@@ -57,8 +51,6 @@ def get_results(request):
         response = validated["callback"] + "(" + str(json.dumps(results)) + ")"
     else:
         response = flask.jsonify(results)
-
-    #logger.info(str(response))
 
     # send it back to the client
     return response
@@ -261,48 +253,3 @@ def compute_solr_query(options):
     return solr_url
 
 
-def get_categories():
-    categoriesJSON = load_categories()
-
-    return flask.jsonify(categoriesJSON)
-
-
-#create a categories.json file that can be loaded and sent to the client
-def load_categories():
-    categories = dict()
-    try:
-        import os
-        import os.path
-
-        categoryFile = open(os.path.join(os.path.abspath(configPath),'categoryInfo.json'))
-        categories = json.loads(categoryFile.read())
-    except:        
-        logger.error(categories)
-
-    return categories
-
-
-#load up all the category json plugins
-def load_plugins():
-    try:
-        import os
-        import os.path    
-
-        pluginsDir = os.path.join(os.path.abspath(configPath),'plugins/categories')
-        categoryPlugins = os.listdir(pluginsDir)
-
-        for c in categoryPlugins:
-            if ".json" in c:
-                categoryInfoFile = open(os.path.join(pluginsDir,c))
-                plugins[c.split(".json")[0]] = json.loads(categoryInfoFile.read())
-                categoryInfoFile.close()
-    except Exception, e:
-        logger.exception(e)
-
-
-
-if len(categories.keys()) == 0:
-    load_categories()
-
-if len(plugins.keys()) == 0:
-    load_plugins()

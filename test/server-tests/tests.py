@@ -73,7 +73,7 @@ def invalid_query_service_categories(queryString):
         assert check_statuscode(response,400)
         print "\tChecking for response body"
         try:
-            search_result = response.json    
+            search_result = response.json()    
         except Exception, e:
             print e
 
@@ -91,7 +91,7 @@ def query_service_categories(queryString):
         assert check_statuscode(response,200)
         print "\tChecking for response body"
         try:
-            search_result = response.json    
+            search_result = response.json()
         except Exception, e:
             print e
 
