@@ -29,7 +29,7 @@ def get_categories():
     return flask.jsonify(serviceConfig["categories"])
 
 
-@search_wsgi.errorhandler(errors.InvalidSearchRequestError)
+@search_wsgi.errorhandler(exceptions.InvalidSearchRequestError)
 def invalid_request(error = None):
     return flask.make_response(flask.standard_response(None, 400, error.message), 400)
 
@@ -64,6 +64,7 @@ def load_service_config():
     config.read("/kb/deployment/services/search/config/search_config.ini")
 
     for section in config.sections():
+        settings[section] = dict()
         for option in config.options(section):
             settings[section][option] = config.get(section, option)
     

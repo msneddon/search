@@ -2,7 +2,6 @@ import flask
 import json
 import requests
 import logging
-import ConfigParser
 
 #import biokbase.workspace.client
 
