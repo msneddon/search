@@ -86,7 +86,7 @@ def load_service_config():
 def load_categories():
     categories = dict()
     try:
-        categoryFile = open(os.path.join(os.path.abspath(configPath),'categoryInfo.json'))
+        categoryFile = open(os.path.join(os.path.abspath(config['search']['config_path']),'categoryInfo.json'))
         categories = json.loads(categoryFile.read())
     except Exception, e:        
         search_wsgi.logger.exception(e)
@@ -99,7 +99,7 @@ def load_categories():
 def load_plugins():
     try:
         plugins = dict()
-        pluginsDir = os.path.join(os.path.abspath(configPath),'plugins/categories')
+        pluginsDir = os.path.join(os.path.abspath(config['search']['config_path']),'plugins/categories')
         categoryPlugins = os.listdir(pluginsDir)
 
         for c in categoryPlugins:
