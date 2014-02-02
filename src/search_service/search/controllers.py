@@ -183,7 +183,7 @@ def validate_inputs(query):
             
 
 def capture_metrics(request):
-    headersString = ",".join([str(k) + " = " + str(request.headers[k]) for x in request.headers.keys()])
+    headersString = ",".join([str(k) + " = " + str(request.headers[k]) for k in request.headers.keys()])
     
     logger.info("METRICS -- " + " URL : " + request.url + " HEADERS : " + headersString)
 
