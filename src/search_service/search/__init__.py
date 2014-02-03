@@ -107,6 +107,11 @@ def load_service_config():
     settings["categories"] = load_categories(settings)
     settings["plugins"] = load_plugins(settings)
     
+    for p in setting["plugins"].keys():
+        settings["categories"]["categories"][p] = dict()
+        settings["categories"]["categories"][p]["fields"] = settings["plugins"][p]["visible_fields"][:]
+        settings["categories"]["categories"][p]["sortable"] = setting["plugins"][p]["sort_fields"][:]
+        settings["categories"]["categories"][p]["facets"] = setting["plugins"][p]["facet_fields"][:]    
     return settings
 
 
