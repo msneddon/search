@@ -107,11 +107,14 @@ def load_service_config():
     settings["categories"] = load_categories(settings)
     settings["plugins"] = load_plugins(settings)
     
-    for p in setting["plugins"].keys():
+    for p in settings["plugins"].keys():
         settings["categories"]["categories"][p] = dict()
         settings["categories"]["categories"][p]["fields"] = settings["plugins"][p]["visible_fields"][:]
-        settings["categories"]["categories"][p]["sortable"] = setting["plugins"][p]["sort_fields"][:]
-        settings["categories"]["categories"][p]["facets"] = setting["plugins"][p]["facet_fields"][:]    
+        settings["categories"]["categories"][p]["sortable"] = settings["plugins"][p]["sort_fields"][:]
+        settings["categories"]["categories"][p]["facets"] = settings["plugins"][p]["facet_fields"][:]
+        
+    search_wsgi.logger.info(settings)    
+        
     return settings
 
 
