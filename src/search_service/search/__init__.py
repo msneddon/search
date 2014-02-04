@@ -109,9 +109,9 @@ def load_service_config():
     
     for p in settings["plugins"].keys():
         settings["categories"]["categories"][p] = dict()
-        settings["categories"]["categories"][p]["fields"] = settings["plugins"][p]["visible_fields"][:]
-        settings["categories"]["categories"][p]["sortable"] = settings["plugins"][p]["sort_fields"][:]
-        settings["categories"]["categories"][p]["facets"] = settings["plugins"][p]["facet_fields"][:]
+        settings["categories"]["categories"][p]["fields"] = settings["plugins"][p]["solr"]["visible_fields"][:]
+        settings["categories"]["categories"][p]["sortable"] = settings["plugins"][p]["solr"]["sort_fields"][:]
+        settings["categories"]["categories"][p]["facets"] = settings["plugins"][p]["solr"]["facet_fields"][:]
         
     search_wsgi.logger.info(settings)    
         
