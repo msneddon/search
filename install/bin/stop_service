@@ -22,7 +22,7 @@ log stopping "search service"
 
 SERVICE="search"
 
-DEPLOYMENT=${DEPLOY-/kb/deployment}
+DEPLOYMENT=${KB_TOP-/kb/deployment}
 RUNTIME=${RUNTIME-/kb/runtime}
 CATALINA_HOME="$RUNTIME/tomcat"
 CATALINA_BASE="$DEPLOYMENT/services/$SERVICE/catalina_base"
