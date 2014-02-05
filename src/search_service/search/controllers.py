@@ -1,5 +1,4 @@
 import flask
-import json
 import requests
 import logging
 
@@ -41,7 +40,7 @@ def get_results(request, config):
          raise
 
     if validated.has_key("callback"):
-        response = flask.jsonify(validated["callback"] + "(" + flask.json.dumps(results) + ")")
+        response = validated["callback"] + "(" + flask.json.dumps(results) + ")"
     else:
         response = flask.jsonify(results)
 
