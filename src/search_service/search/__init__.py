@@ -24,7 +24,7 @@ def get_results():
     result = controllers.get_results(flask.request, serviceConfig)
     
     if type(result) != type(flask.Response):
-        response = flask.Response(response=result, mime_type="application/json")
+        response = flask.Response(result, mime_type="application/json")
         response.status_code = 200                                  
         return response
     else:
