@@ -22,8 +22,8 @@ def index():
 @search_wsgi.route('/getResults', methods = ['GET'])
 def get_results():
     response = flask.Response(response = controllers.get_results(flask.request, serviceConfig),
-                              content_type = "application/json",
-                              status_code = 200)
+                              content_type = "application/json")
+    response.status_code = 200                                  
     return response
 
 
