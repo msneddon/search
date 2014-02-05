@@ -21,7 +21,7 @@ def index():
 
 @search_wsgi.route('/getResults', methods = ['GET'])
 def get_results():
-    response = flask.jsonify(controllers.get_results(flask.request, serviceConfig))
+    response = controllers.get_results(flask.request, serviceConfig)
     response.status_code = 200
     return response
 
