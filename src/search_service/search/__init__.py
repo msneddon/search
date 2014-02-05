@@ -35,6 +35,7 @@ def get_categories():
 
 @search_wsgi.errorhandler(exceptions.InvalidSearchRequestError)
 def invalid_request(error = None):
+    search_wsgi.logger.error(error.message)
     response = flask.jsonify({'message': error.message})
     response.status_code = 400
     return response
@@ -42,6 +43,7 @@ def invalid_request(error = None):
 
 @search_wsgi.errorhandler(Exception)
 def invalid_request(error = None):
+    search_wsgi.logger.exception(error)
     response = flask.jsonify({'message': error.message})
     response.status_code = 500
     return response
