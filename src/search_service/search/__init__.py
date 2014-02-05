@@ -25,8 +25,11 @@ def get_results():
     
     if type(result) != type(flask.Response):
         response = flask.make_response(result)
-        response.mime_type = "application/json"
-        response.status_code = 200                                  
+        response.content_type = "application/json"
+        response.status_code = 200                
+        
+        search_wsgi.logger.info(response.headers)
+                          
         return response
     else:
         return result
