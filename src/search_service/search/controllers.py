@@ -62,11 +62,12 @@ def transform_solr_json(results, params):
     transform["totalResults"] = results["response"]["numFound"]
     transform["itemCount"] = len(results["response"]["docs"])
     transform["itemsPerPage"] = params["count"]
-        
-    if transform["totalResults"] % transform["itemsPerPage"] == 0:
-        remainder = 0
-    else:
-        remainder = 1
+    
+    if transform["itemsPerPage"] > 0:    
+        if transform["totalResults"] % transform["itemsPerPage"] == 0:
+            remainder = 0
+        else:
+            remainder = 1
 
     transform["navigation"] = dict()
     transform["navigation"]["self"] = params["request"]
