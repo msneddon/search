@@ -21,12 +21,16 @@ def index():
 
 @search_wsgi.route('/getResults', methods = ['GET'])
 def get_results():
-    return controllers.get_results(flask.request, serviceConfig)
+    response = flask.jsonify(controllers.get_results(flask.request, serviceConfig))
+    response.status_code = 200
+    return response
 
 
 @search_wsgi.route('/categories', methods = ['GET'])
 def get_categories():
-    return flask.jsonify(serviceConfig["categories"])
+    response = flask.jsonify(serviceConfig["categories"])
+    response.status_code = 200
+    return response
 
 
 @search_wsgi.errorhandler(exceptions.InvalidSearchRequestError)

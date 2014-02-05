@@ -41,7 +41,7 @@ def get_results(request, config):
          raise
 
     if validated.has_key("callback"):
-        response = validated["callback"] + "(" + str(json.dumps(results)) + ")"
+        response = flask.jsonify(validated["callback"] + "(" + flask.json.dumps(results) + ")")
     else:
         response = flask.jsonify(results)
 
