@@ -116,7 +116,7 @@
 
 
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
-   <field name="text_boost" type="text_ws_general" boost="5.0" indexed="true" stored="false" multiValued="true"/>
+   <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
 
    <field name="_version_" type="long" indexed="true" stored="true"/>
 

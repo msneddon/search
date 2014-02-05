@@ -102,7 +102,7 @@
    <field name="expression_level" type="tfloat" indexed="true" stored="true" multiValued="false" /> 
 
 
-   <field name="text_boost" boost="5.0" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
 
    <field name="_version_" type="long" indexed="true" stored="true"/>

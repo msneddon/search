@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<Context docBase="%KB_DEPLOYMENT%/services/search/solr/solr.war" debug="0" crossContext="true">
+<Context docBase="%KB_DEPLOYMENT%/services/search/solr/solr-4.6.1.war" debug="0" crossContext="true">
   <Environment name="solr/home" type="java.lang.String" value="%KB_DEPLOYMENT%/services/search/solr" override="true"/>
 </Context>

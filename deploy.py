@@ -111,9 +111,11 @@ if __name__ == "__main__":
         # copy solr war file
         solr_runtime_source_dir = os.path.abspath(os.path.join(running_dir,"install/solr/config/runtime"))
         solr_runtime_target_dir = os.path.join(os.environ["TARGET"], "services/search/solr")
-        
-        print "Copying solr.war file to " + solr_runtime_target_dir
-        shutil.copy(os.path.join(solr_runtime_source_dir, "solr.war"), solr_runtime_target_dir)
+
+        solr_runtime_files = os.listdir(solr_runtime_source_dir)
+        for x in solr_runtime_files:
+            print "Copying " + x + " file to " + solr_runtime_target_dir
+            shutil.copy(os.path.join(solr_runtime_source_dir, x), solr_runtime_target_dir)
     
     # copy service API files to deployment area
     if args.install_service or args.install:
