@@ -1,12 +1,8 @@
-import urllib2
 import xml.etree.ElementTree
 import datetime
 import json
-
-solr_query = "http://localhost:9077/Publications/select?wt=json&rows=100000&q=*"
-
-results = urllib2.urlopen(solr_query)
-jsonResults = json.loads(results.read())
+import sys
+import urllib2
 
 outFile = open('publications.tab', 'w')
 
@@ -16,8 +12,12 @@ pubmed_ids = list()
 month_values = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
 
 
-for x in  jsonResults['response']['docs']:
-    pubmed_ids.append(x['pid'])
+line = sys.stdin.readline()
+while line:
+    [id, pubdate, link, title] = line.split("\t")
+    pubmed_ids.append(id)
+    line = sys.stdin.readline()
+
 
 for x in pubmed_ids:
     done = False
