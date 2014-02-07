@@ -33,10 +33,6 @@ solr_admin_cores = '/admin/cores?wt=json'
 solr_req = requests.get(solr_url_base+solr_admin_cores)
 solr_cores = simplejson.loads(solr_req.text)
 
-#for core in solr_cores['status']:
-#    print core + ': ' + str(solr_cores['status'][core]['index']['numDocs'])
-
-
 wsname = 'KBasePublicRichGenomes'
 
 # set up a try block here?
@@ -69,7 +65,7 @@ genomes = ['kb|g.3907']
 #genomes = ['kb|g.19762','kb|g.1976']
 #genomes = ['kb|g.0']
 genomes = ['kb|g.3562']
-#genomes = ['kb|g.3562','kb|g.0']
+genomes = ['kb|g.3562','kb|g.0']
 # DvH, e.coli, multiple versions of arabidopsis
 # what other genomes are essential?
 #genomes = ['kb|g.3562','kb|g.0','kb|g.1105','kb|g.1103','kb|g.26509','kb|g.1104']
@@ -77,131 +73,162 @@ genomes = ['kb|g.3562']
 #genomes = ['kb|g.3562','kb|g.0','kb|g.3899','kb|g.1105','kb|g.26509','kb|g.1104']
 # chicken
 #genomes = ['kb|g.3643']
+#genomes = ['kb|g.26509']
 
 #genomeObjects = dict()
 
 
-def insert_features(fids):
+def insert_features(gid,fids):
+
+    fids_to_insert = list()
 
     feature_list = 'feature_id%3A"' + '"+feature_id%3A"'.join(fids) + '"'
-    # for each core, make a request
-    # use results to populate feature objects
     # ws.save_objects(feature_objects)
     # return...mapping?
-    feature_req = requests.get(solr_url_base + '/Feature/select?wt=json&rows=100&q=' + feature_list)
-    print >> sys.stderr, feature_req.text
-    return
 
-    featureObject = dict()
-    featureObject["feature_id"] = x
-    featureObject["genome_id"] = g
-    featureObject["source"] = 'KBase Central Store'
-    
-    if locations.has_key(x):
-        featureObject["location"] = locations[x]
-    
-    if features.has_key(x):
-        featureObject["feature_type"] = features[x]['feature_type']
-        featureObject["function"] = features[x]['function']
+    core_data = dict()
+    for core in solr_cores['status']:
+        req = requests.get(solr_url_base + '/' + core + '/select?wt=json&rows=1000000&q=' + feature_list)
+        core_data[core] = dict()
+        data = simplejson.loads(req.text)
+#        print >> sys.stderr, data
+        for doc in data['response']['docs']:
+            if not core_data[core].has_key(doc['feature_id']):
+                core_data[core][doc['feature_id']] = list()
+#            print >> sys.stderr, doc['feature_id']
+            core_data[core][doc['feature_id']].extend([doc])
+#    print >> sys.stderr, core_data
+
+    for feature_id in fids:
+        featureObject = dict()
+        featureObject["feature_id"] = feature_id
+        featureObject["genome_id"] = g
+        featureObject["source"] = 'KBase Central Store'
         
-        if features[x].has_key('alias'):
-            featureObject["aliases"] = features[x]['alias']
-    
-    if proteins.has_key(x):
-        featureObject["md5"] = proteins[x]
+        if core_data['Feature'].has_key(feature_id):
+            this_feature=core_data['Feature'][feature_id][0]
+            if this_feature.has_key('feature_type'):
+                featureObject["feature_type"] = this_feature['feature_type']
+            if this_feature.has_key('function'):
+                featureObject["function"] = this_feature['function']
+            if this_feature.has_key('sequence_length'):
+                featureObject["dna_sequence_length"] = this_feature['sequence_length']
+            if this_feature.has_key('source_id'):
+                featureObject["feature_source_id"] = this_feature['source_id']
 
-        if protein_translations.has_key(proteins[x]):
-            featureObject["protein_translation"] = protein_translations[proteins[x]]['sequence']
-            featureObject["protein_translation_length"] = len(featureObject["protein_translation"])
+        if core_data['ProteinSeq'].has_key(feature_id):
+            this_feature=core_data['ProteinSeq'][feature_id][0]
+            if this_feature.has_key('md5'):
+                featureObject["md5"] = this_feature['md5']
+            if this_feature.has_key('sequence'):
+                featureObject["protein_translation"] = this_feature['sequence']
+                featureObject["protein_translation_length"] = len(this_feature['sequence'])
 
-    # we are not going to retrieve dna sequence, see if it saves time
-#        featureObject["dna_sequence"] = cdmi_api.fids_to_dna_sequences([x])
-#        featureObject["dna_sequence_length"] = len(featureObject["dna_sequence"])
+        if core_data['FeatureAlias'].has_key(feature_id):
+            this_feature=core_data['FeatureAlias'][feature_id]
+            featureObject["aliases"] = [ x['alias'] for x in this_feature ]
 
-    if protein_families.has_key(x):
-        featureObject["protein_families"] = protein_families[x]
-    
-    if annotations.has_key(x):
-        featureObject["annotations"] = annotations[x]
-    
-    if publications.has_key(x):
-        featureObject["feature_publications"] = publications[x]
-    
-    if roles.has_key(x):
-        featureObject["roles"] = roles[x]
-    
-    if subsystems.has_key(x):
-        featureObject["subsystems"] = subsystems[x]
-    
-    if subsystem_data.has_key(x):
-        featureObject["subsystem_data"] = subsystem_data[x]
-    
-    if regulon_data.has_key(x):
-        x_reg=list()
-        for reg in regulon_data[x]:
-            this_reg=list()
-            this_reg.append(reg['regulon_id'])
-            this_reg.append(reg['regulon_set'])
-            this_reg.append(reg['tfs'])
-            x_reg.append(this_reg)
-        featureObject["regulon_data"] = x_reg
-    
-    if atomic_regulons.has_key(x):
-        featureObject["atomic_regulons"] = atomic_regulons[x]
-    
-    if co_occurring.has_key(x):
-        featureObject["co_occurring_fids"] = list()
-        for co_occur in co_occurring[x]:
-            this_co_occur = [ co_occur[0], float(co_occur[1]) ]
-            featureObject["co_occurring_fids"].append(this_co_occur)
+        if core_data['Location'].has_key(feature_id):
+            this_feature=core_data['Location'][feature_id]
+            locs = list()
+            for loc in this_feature:
+                this_loc = [ loc['contig_id'], loc['begin'], loc['dir'], loc['len'], loc['ordinal'] ] 
+                locs.append(this_loc)
+#            print >> sys.stderr, core_data['Location'][feature_id]
+            featureObject["location"] = locs
 
-    # these are not populated yet
-    # not sure of the types of these at the moment
-    # this times out even with one fid?!?
-    coexpressed = dict()
-    try:
-        coexpressed = cdmi_api.fids_to_coexpressed_fids([x])
-    except Exception, e:
-        print >> sys.stderr, 'failed coexpressed_fids on ' + x
-        print >> sys.stderr, e
+        if core_data['Families'].has_key(feature_id):
+            this_feature=core_data['Families'][feature_id]
+            fams = list()
+            for fam in this_feature:
+                this_fam = dict()
+                this_fam['id'] = fam['family_id']
+                this_fam['release_version'] = fam['release']
+                this_fam['subject_db'] = fam['type']
+                if this_fam.has_key('family_function'):
+                    this_fam['subject_description'] = fam['family_function']
+                fams.append(this_fam)
+#            print >> sys.stderr, core_data['Location'][feature_id]
+            featureObject["protein_families"] = fams
 
-    if coexpressed.has_key(x):
-        featureObject["coexpressed_fids"] = list()
-        for coexpress in coexpressed[x]:
-            this_coexpressed = [ coexpress[0], float(coexpress[1]) ]
-            featureObject["coexpressed_fids"].append(this_coexpressed)
+        if core_data['Annotations'].has_key(feature_id):
+            this_feature=core_data['Annotations'][feature_id]
+            annos = list()
+            for anno in this_feature:
+                this_anno = [ anno['comment'], anno['annotator'], anno['annotation_time'] ] 
+                annos.append(this_anno)
+#            print >> sys.stderr, core_data['Location'][feature_id]
+            featureObject["annotations"] = annos
 
-#        end = time.time()
-#        print  >> sys.stderr, "feature #" + str(x) + " processing, querying dna seqs, coexpressed, elapsed time " + str(end - start)
+        if core_data['Publications'].has_key(feature_id):
+            this_feature=core_data['Publications'][feature_id]
+            pubs = list()
+            for pub in this_feature:
+                this_pub = [ int(pub['pubmed_id']), 'PubMed', pub['article_title'], pub['pubmed_url'], pub['pubdate'], pub['authors'], pub['journal_title'] ] 
+                pubs.append(this_pub)
+#            print >> sys.stderr, core_data['Location'][feature_id]
+            featureObject["feature_publications"] = pubs
 
-# ultimately will insert these into workspace
-# need to get workspace ref back to put into the Genome object
-    # e.g.
-    # featureObject = simplejson.dumps(featureObject)
-    # ws.save_objects({'workspace': 'search_workspace',objects=[featureObject]})
-    # (or can batch a list of featureObjects, but don't want to batch
-    # too many or it'll bork)
-    feature_id = featureObject['feature_id']
+        if core_data['Roles'].has_key(feature_id):
+            this_feature=core_data['Roles'][feature_id]
+            featureObject["roles"] = [ x['role'] for x in this_feature ]
+        if core_data['Subsystems'].has_key(feature_id):
+            this_feature=core_data['Subsystems'][feature_id]
+            featureObject["subsystems"] = [ x['subsystem'] for x in this_feature ]
 
-    # test batching saves
-#        fids_to_insert.append( { "type":"KBaseSearch.Feature","data":featureObject,"name":feature_id } )
-#        if len(fids_to_insert) > 100:
-#            feature_info = ws.save_objects({"workspace":wsname,"objects": fids_to_insert })
-#            print >> sys.stderr, feature_info
+        if core_data['SubsystemData'].has_key(feature_id):
+            this_feature=core_data['SubsystemData'][feature_id]
+#            print >> sys.stderr,this_feature
+            subsystems = list()
+            for subsys in this_feature:
+                this_sys = [ subsys['subsystem'], subsys['variant'], subsys['role'] ] 
+                subsystems.append(this_sys)
+#            print >> sys.stderr, core_data['Location'][feature_id]
+            featureObject["subsystem_data"] = subsystems
+
+        if core_data['AtomicRegulons'].has_key(feature_id):
+            this_feature=core_data['AtomicRegulons'][feature_id]
+            ars = list()
+            for ar in this_feature:
+                this_ar = [ ar['atomic_regulon_id'], ar['atomic_regulon_size'] ] 
+                ars.append(this_ar)
+            featureObject["atomic_regulons"] = ars
+
+        if core_data['CoOccurringFids'].has_key(feature_id):
+            this_feature=core_data['CoOccurringFids'][feature_id]
+            coos = list()
+            for coo in this_feature:
+                this_coo = [ coo['co_occurring_fid'], coo['score'] ] 
+                coos.append(this_coo)
+            featureObject["co_occurring_fids"] = coos
+
+        if core_data['CoExpressedFids'].has_key(feature_id):
+            this_feature=core_data['CoExpressedFids'][feature_id]
+            coes = list()
+            for coe in this_feature:
+                this_coe = [ coe['co_expressed_fid'], coe['score'] ] 
+                coes.append(this_coe)
+            featureObject["coexpressed_fids"] = coes
+
+        if core_data['RegulonData'].has_key(feature_id):
+            this_feature=core_data['RegulonData'][feature_id]
+            regulons = list()
+            for reg in this_feature:
+                regulon_set = reg['regulon_set'].split(',')
+                tfs = list()
+                if reg.has_key('tfs'):
+                    tfs = reg['tfs'].split(',')
+                this_reg = [ reg['regulon_id'], regulon_set, tfs ] 
+                regulons.append(this_reg)
+            featureObject["regulon_data"] = regulons
+
+        fids_to_insert.append( { "type":"KBaseSearch.Feature","data":featureObject,"name":feature_id } )
+
+#        print >> sys.stderr, simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
         
+    feature_info = ws.save_objects({"workspace":wsname,"objects": fids_to_insert })
 
-    # original code, one save at a time
-#        feature_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.Feature","data":featureObject,"name":feature_id}]})
-
-#        print >> sys.stderr, feature_info
-
-# need to figure out what to return
-# dict of fid->feature_ref?
-    feature_ref = wsname + '/' + feature_id
-#        print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
-#    if not featureSet['features'].has_key(featureObject['feature_id']):
-#        featureSet['features'][featureObject['feature_id']] = dict()
-#    featureSet['features'][featureObject['feature_id']] = feature_ref
+    return feature_info
 
 
 for g in genomes:
@@ -286,7 +313,8 @@ for g in genomes:
 
     start = time.time()
 
-    # this died on kb|g.3907, kb|g.3643 Gallus gallus, kb|g.41 Mouse
+    # retrieving all with one call died on kb|g.3907, kb|g.3643 Gallus gallus, kb|g.41 Mouse
+    # looping over each contig_id still seems slow on chicken
     contig_sequences = dict()
     for contig_id in contig_ids:
         contig_seq = cdmi_api.contigs_to_sequences([contig_id])
@@ -360,12 +388,23 @@ for g in genomes:
         fids_to_insert.append( x )
         if len(fids_to_insert) > 99:
 
-             new_features = insert_features(fids_to_insert)
+             feature_info = insert_features(g,fids_to_insert)
+             for ws_feature in feature_info:
+                 print >> sys.stderr, ws_feature
+                 if not featureSet['features'].has_key(ws_feature[1]):
+                     featureSet['features'][ws_feature[1]] = dict()
+                 featureSet['features'][ws_feature[1]] = ws_feature[7] + '/' + ws_feature[1]
+
              fids_to_insert = list()
 
     # final fids to insert (batching code)
     if len(fids_to_insert) > 0:
-         insert_features(fids_to_insert)
+         feature_info = insert_features(g,fids_to_insert)
+         for ws_feature in feature_info:
+             print >> sys.stderr, ws_feature
+             if not featureSet['features'].has_key(ws_feature[1]):
+                 featureSet['features'][ws_feature[1]] = dict()
+             featureSet['features'][ws_feature[1]] = ws_feature[7] + '/' + ws_feature[1]
 
     end = time.time()
     print  >> sys.stderr, " processing features, elapsed time " + str(end - start)
@@ -374,16 +413,16 @@ for g in genomes:
 #    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
     # another try block here?
     featureset_id = genomeObject['genome_id'] + '.featureset'
-#    featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.FeatureSet","data":featureSet,"name":featureset_id}]})
-#    print >> sys.stderr, featureset_info
+    featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.FeatureSet","data":featureSet,"name":featureset_id}]})
+    print >> sys.stderr, featureset_info
 
     featureset_ref = wsname + '/' + featureset_id
     genomeObject['featureset_ref'] = featureset_ref
     start = time.time()
 
 #    print simplejson.dumps(genomeObject,sort_keys=True,indent=4 * ' ')
-#    genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.Genome","data":genomeObject,"name":genomeObject['genome_id']}]})
-#    print >> sys.stderr, genome_info
+    genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.Genome","data":genomeObject,"name":genomeObject['genome_id']}]})
+    print >> sys.stderr, genome_info
 
     end = time.time()
     print  >> sys.stderr, "insert genome into ws " + str(end - start)
