@@ -58,14 +58,14 @@ genomes = random.sample(genome_entities,500)
 # takes much less time when cached
 #genomes = ['kb|g.3899']
 # poplar is only in the v3 instance right now
-genomes = ['kb|g.3907']
+#genomes = ['kb|g.3907']
 # more static sets
 #genomes = ['kb|g.9','kb|g.222']
 #genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
 #genomes = ['kb|g.19762','kb|g.1976']
 #genomes = ['kb|g.0']
-genomes = ['kb|g.3562']
-genomes = ['kb|g.3562','kb|g.0']
+#genomes = ['kb|g.3562']
+#genomes = ['kb|g.3562','kb|g.0']
 # DvH, e.coli, multiple versions of arabidopsis
 # what other genomes are essential?
 #genomes = ['kb|g.3562','kb|g.0','kb|g.1105','kb|g.1103','kb|g.26509','kb|g.1104']
