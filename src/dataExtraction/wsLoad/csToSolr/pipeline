@@ -1,0 +1,12 @@
+
+core=$1
+
+echo loading core $core
+
+# curl "http://localhost:9077/search/$core/update?stream.body=<delete><query>*:*</query></delete>"
+
+curl -q "http://localhost:9077/search/admin/cores?wt=json&action=RELOAD&core=$core"
+
+cat $core.tab.headers $core.tab  | curl -q http://localhost:9077/search/$core/update?wt=json\&separator=%09 --data-binary @- -H 'Content-type:application/csv; charset=utf-8'
+
+curl -q "http://localhost:9077/search/admin/cores?wt=json&action=RELOAD&core=$core"

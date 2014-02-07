@@ -196,34 +196,34 @@ def export_expression_from_ws(maxNumObjects):
 #                                print >> sys.stderr, encompass
                                 feature_encompasses[search_values['genome_id']][encompass[1]['from_link']] = encompass[1]['to_link']
 
-                        print >> sys.stderr, feature_functions
-                        print >> sys.stderr, feature_encompasses
+#                        print >> sys.stderr, feature_functions
+#                        print >> sys.stderr, feature_encompasses
 
                         for feature_id in expression['data']['expression_levels'].keys():
                             subobject_id = object_id + '.sub.' + feature_id
                             search_values['feature_id'] = feature_id
 
-                            print >> sys.stderr, str(feature_id)
+#                            print >> sys.stderr, str(feature_id)
 #                            print >> sys.stderr, str(feature_encompasses[search_values['genome_id']])
-                            if feature_encompasses[search_values['genome_id']].has_key(feature_id):
-                                print >> sys.stderr, str(feature_encompasses[search_values['genome_id']][feature_id])
-                            else:
-                                print >> sys.stderr, 'no encompass info for feature ' + feature_id
-                            # this code is horrible
-                            if feature_functions[search_values['genome_id']].has_key(feature_id):
-                                print >> sys.stderr, feature_id
-                                print >> sys.stderr, feature_functions[search_values['genome_id']][feature_id]
-                                search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_id]
-                            elif feature_encompasses[search_values['genome_id']].has_key(feature_id):
-                                if feature_functions[search_values['genome_id']].has_key(feature_encompasses[search_values['genome_id']][feature_id]):
-                                    search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]
-                                elif feature_encompasses[search_values['genome_id']][feature_id].has_key(feature_id):
-                                    if feature_functions[search_values['genome_id']].has_key(feature_encompasses[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]):
-                                        print >> sys.stderr, feature_id
-                                        search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]]
-                            else:
-                                print >> sys.stderr, feature_id + ' has no function'
-                                search_values['feature_function'] = ''
+#                            if feature_encompasses[search_values['genome_id']].has_key(feature_id):
+#                                print >> sys.stderr, str(feature_encompasses[search_values['genome_id']][feature_id])
+#                            else:
+#                                print >> sys.stderr, 'no encompass info for feature ' + feature_id
+#                            # this code is horrible
+#                            if feature_functions[search_values['genome_id']].has_key(feature_id):
+#                                print >> sys.stderr, feature_id
+#                                print >> sys.stderr, feature_functions[search_values['genome_id']][feature_id]
+#                                search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_id]
+#                            elif feature_encompasses[search_values['genome_id']].has_key(feature_id):
+#                                if feature_functions[search_values['genome_id']].has_key(feature_encompasses[search_values['genome_id']][feature_id]):
+#                                    search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]
+#                                elif feature_encompasses[search_values['genome_id']][feature_id].has_key(feature_id):
+#                                    if feature_functions[search_values['genome_id']].has_key(feature_encompasses[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]):
+#                                        print >> sys.stderr, feature_id
+#                                        search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]]
+#                            else:
+#                                print >> sys.stderr, feature_id + ' has no function'
+#                                search_values['feature_function'] = ''
 
                             search_values['expression_level'] = expression['data']['expression_levels'][feature_id]
                             try:
