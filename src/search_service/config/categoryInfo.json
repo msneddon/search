@@ -63,25 +63,22 @@
                                      "label": "Clusters",
                                      "category": "networks_clusters",
                                      "children": [
-                                         {"label": "PPI Interactions", "category": "networks_clusters_ppi"},
                                          {
                                              "label": "BiClusters",
                                              "category": "networks_clusters_bi",
                                              "children": [
-                                                 {"label": "Mak BiClusters", "category": "networks_clusters_bi_mak"},
-                                                 {"label": "cMonkey BiClusters", "category": "networks_clusters_bi_cmonkey"}
+                                                 {"label": "cMonkey BiClusters", "category": "networks_clusters_bi_cmonkey"},
+                                                 {"label": "Mak BiClusters", "category": "networks_clusters_bi_mak"}
                                              ]
-                                         }
+                                         },
+                                         {"label": "PPI Interactions", "category": "networks_clusters_ppi"}
                                      ]
                                  }
                              ]
                          },
                          {
-                             "label": "Trees",
-                             "category": "trees",
-                             "children": [
-                                 {"label": "Gene Trees", "category": "trees_gene"}
-                             ]
+                             "label": "Ontologies",
+                             "category": "ontologies"                             
                          }
                      ]
                  }
