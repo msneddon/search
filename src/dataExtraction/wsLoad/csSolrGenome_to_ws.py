@@ -45,8 +45,12 @@ except biokbase.workspace.client.ServerError, e:
 
 #kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
 
-genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
-genomes = random.sample(genome_entities,500)
+# want to try to go in order to avoid repeats
+#genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
+genome_entities = cdmi_entity_api.all_entities_Genome(0,500,['id','scientific_name','source_id'])
+#genome_entities = cdmi_entity_api.all_entities_Genome(40,500,['id','scientific_name','source_id'])
+genomes = genome_entities
+#genomes = random.sample(genome_entities,500)
 
 #genomes = sys.argv[1:]
 
@@ -155,8 +159,9 @@ def insert_features(gid,fids):
             this_feature=core_data['Annotations'][feature_id]
             annos = list()
             for anno in this_feature:
-                this_anno = [ anno['comment'], anno['annotator'], anno['annotation_time'] ] 
-                annos.append(this_anno)
+                if anno.has_key('comment'):
+                    this_anno = [ anno['comment'], anno['annotator'], anno['annotation_time'] ] 
+                    annos.append(this_anno)
 #            print >> sys.stderr, core_data['Location'][feature_id]
             featureObject["annotations"] = annos
 

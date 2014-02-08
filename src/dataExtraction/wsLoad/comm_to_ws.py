@@ -26,9 +26,11 @@ import biokbase.workspace.client
 communities_api_url = "http://kbase.us/services/communities/"
 
 #mgrast_url_base = 'http://api.metagenomics.anl.gov/'
-ws = biokbase.workspace.client.Workspace("http://localhost:7058", user_id='***REMOVED***', password='***REMOVED***')
+#ws = biokbase.workspace.client.Workspace("http://localhost:7058", user_id='***REMOVED***', password='***REMOVED***')
+ws = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 
-wsname = 'searchCommunities_mlh'
+#wsname = 'searchCommunities_mlh'
+wsname = 'KBasePublicMetagenomes'
 wsdesc = 'Workspace for communities objects for searching'
 
 # set to small number for testing
@@ -45,6 +47,10 @@ except biokbase.workspace.client.ServerError, e:
 #mg_list = requests.get(communities_api_url + 'metagenome?limit=20&verbosity=full')
 # try verbosity=metadata
 mg_list = requests.get(communities_api_url + 'metagenome?limit=100&verbosity=metadata')
+if len(sys.argv) > 1:
+    mg_list = requests.get(communities_api_url + 'metagenome/' + sys.argv[1])
+    max_num_metagenomes = 1
+
 mg_next = True
 mg_counter = 0
 
@@ -66,10 +72,18 @@ while mg_next == True:
     #print >> sys.stderr, mg_list.status_code
     #print >> sys.stderr, mg_list.headers
 
-    content = mg_list.json
+    content = mg_list.json()
+    # possible test: if one mg given, stuff it into content['data']
+    items = list()
+    if content.has_key('data'):
+        items = content['data']
+    else:
+        items = [ content ]
+#    print >> sys.stderr, items
     
     ws_object_list = list()
-    for mg_item in content['data']:
+    for mg_item in items:
+#        print mg_item
     
         mg_id = mg_item['id']
         sample_id = mg_item['sample'][0]
@@ -77,15 +91,15 @@ while mg_next == True:
         library_id = mg_item['library'][0]
         ws_obj_name = mg_id
 
-        print >> sys.stderr, mg_id, sample_id, project_id, library_id
+#        print >> sys.stderr, mg_id, sample_id, project_id, library_id
 
         # possible feature: skip metagenomes that are already loaded
         # need to update if changing how stored
         try:
             ws.get_object_info([{"workspace": wsname,"name": ws_obj_name}],0)
-            print >> sys.stderr, 'object '  + ws_obj_name + ' found, to be updated'
-            #print >> sys.stderr, 'object '  + ws_obj_name + ' found, skipping'
-            #continue
+#            print >> sys.stderr, 'object '  + ws_obj_name + ' found, to be updated'
+            print >> sys.stderr, 'object '  + ws_obj_name + ' found, skipping'
+            continue
         except biokbase.workspace.client.ServerError:
             print >> sys.stderr, 'object '  + ws_obj_name + ' not found, adding'
     
@@ -95,7 +109,7 @@ while mg_next == True:
         if library_id != "mgl":    
             try:
                 mg_library_response = requests.get(communities_api_url + 'library/' + library_id + '?verbosity=full')
-                mg_library = mg_library_response.json
+                mg_library = mg_library_response.json()
             except Exception, e:
                 print >> sys.stderr, 'skipping, error retrieving library ' + project_id + ' for metagenome ' + mg_id
                 print >> sys.stderr, e
@@ -108,7 +122,7 @@ while mg_next == True:
         if project_id != "mgp":
             try:
                 mg_project_response = requests.get(communities_api_url + 'project/' + project_id + '?verbosity=full')
-                mg_project = mg_project_response.json
+                mg_project = mg_project_response.json()
             except Exception, e:
                 print >> sys.stderr, 'skipping, error retrieving project ' + project_id + ' for metagenome ' + mg_id
                 print >> sys.stderr, e
@@ -121,7 +135,7 @@ while mg_next == True:
         if sample_id != "mgs":
             try:
                 mg_sample_response = requests.get(communities_api_url + 'sample/' + sample_id + '?verbosity=full')
-                mg_sample = mg_sample_response.json
+                mg_sample = mg_sample_response.json()
             except Exception, e:
                 print >> sys.stderr, 'skipping, error retrieving sample ' + sample_id + ' for metagenome ' + mg_id
                 print >> sys.stderr, e
@@ -133,7 +147,7 @@ while mg_next == True:
         # skip this metagenome if mixs information cannot be obtained    
         try:
             mg_mixs_response = requests.get(communities_api_url + 'metagenome/' + mg_id + '?verbosity=mixs')
-            mg_mixs = mg_mixs_response.json
+            mg_mixs = mg_mixs_response.json()
         except Exception, e:
             print >> sys.stderr, 'skipping, error retrieving mixs ' + mg_id + ' for metagenome ' + mg_id
             print >> sys.stderr, e
@@ -142,7 +156,7 @@ while mg_next == True:
         ws_object['metagenome_id'] = mg_item['id']
         ws_object['metagenome_name'] = mg_item['name']
         ws_object['metagenome_url'] = mg_item['url']
-        #ws_object['sequence_type'] = mg_item['sequence_type']
+        ws_object['sequence_type'] = mg_item['sequence_type']
         ws_object['seq_method'] = mg_mixs['seq_method']
         #ws_object['created'] = mg_item['created']
         ws_object['library_id'] = mg_item['library'][0]
@@ -348,11 +362,11 @@ while mg_next == True:
     
     #print simplejson.dumps(ws_object_list,sort_keys=True,indent=4 * ' ')
     
-#    if len(ws_object_list) > 0:
-#        #wsobj_info = ws.save_objects({"workspace":wsname,"objects":ws_object_list})
-#        print >> sys.stderr, wsobj_info
-#    else:
-#        print >> sys.stderr, 'no objects in this set, moving to next set'
+    if len(ws_object_list) > 0:
+        wsobj_info = ws.save_objects({"workspace":wsname,"objects":ws_object_list})
+        print >> sys.stderr, wsobj_info
+    else:
+        print >> sys.stderr, 'no objects in this set, moving to next set'
 
     mg_list = requests.get(content['next'])
 
