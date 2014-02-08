@@ -152,8 +152,6 @@ def validate_inputs(query, config):
     # check for and set the fields to sort on
     if query.has_key('sort') and query['sort'] is not None:
         sortQuery = query['sort'][:]
-        sortString = ""
-
         sortFields = sortQuery.split(',')
         
         for x in sortFields:
@@ -166,11 +164,9 @@ def validate_inputs(query, config):
                 raise InvalidSearchRequestError(field + " is not a valid sorting field!")
             
             if not order in ['asc', 'desc']:
-                raise InvalidSearchRequestError(order + " is not a valid sorting order!")
-                                                
-            sortString += x
+                raise InvalidSearchRequestError(order + " is not a valid sorting order!")                                                            
         
-        validatedParams['sort'] = sortString
+        validatedParams['sort'] = ",".join(sortFields)
 
     # check for any facet selections
     if query.has_key('facets') and query['facets'] is not None:
