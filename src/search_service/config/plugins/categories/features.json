@@ -3,7 +3,7 @@
     "solr": {
         "core": "genomes",
         "visible_fields": ["object_id","object_type","workspace_name","genome_id","feature_id","genome_source_id","feature_source_id","protein_translation_length","feature_type","function","aliases","scientific_name","domain","taxonomy","feature_publications","roles","subsystems","subsystem_data","protein_families","annotations","regulon_data","coexpressed_fids","co_occurring_fids"],
-        "sort_fields": ["feature_id", "scientific_name", "feature_type", "function"],
+        "sort_fields": ["feature_id", "feature_source", "scientific_name", "feature_type", "function", "protein_translation_length"],
         "facet_fields": ["feature_type"],
         "query_string": "&fq=object_type:*Feature*"
     }
