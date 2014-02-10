@@ -178,30 +178,30 @@ def export_expression_from_ws(maxNumObjects):
     
 #                    outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
 
-                    if expression['data'].has_key('expression_levels'):
-                        if feature_functions.has_key(search_values['genome_id']):
-                            print >> sys.stderr, 'using function cache for ' + search_values['genome_id']
-                        else:
+#                    if expression['data'].has_key('expression_levels'):
+#                        if feature_functions.has_key(search_values['genome_id']):
+#                            print >> sys.stderr, 'using function cache for ' + search_values['genome_id']
+#                        else:
 # need to track back to the locus features, which is where the function
 # is actually stored for plants
-                            print >> sys.stderr, 'getting fids for ' + search_values['genome_id']
-                            cdmi_features = cdmi_api.genomes_to_fids([search_values['genome_id']],[])
+#                            print >> sys.stderr, 'getting fids for ' + search_values['genome_id']
+#                            cdmi_features = cdmi_api.genomes_to_fids([search_values['genome_id']],[])
 #                            cdmi_features[search_values['genome_id']] = random.sample(cdmi_features[search_values['genome_id']],100)
-                            print >> sys.stderr, 'getting functions for ' + search_values['genome_id']
-                            feature_functions[search_values['genome_id']]  = cdmi_api.fids_to_functions(cdmi_features[search_values['genome_id']])
-                            print >> sys.stderr, 'getting encompass info for ' + search_values['genome_id']
-                            feature_encompasses[search_values['genome_id']] = dict()
-                            for encompass in cdmi_entity_api.get_relationship_Encompasses(cdmi_features[search_values['genome_id']],[],['to_link'],[]):
+#                            print >> sys.stderr, 'getting functions for ' + search_values['genome_id']
+#                            feature_functions[search_values['genome_id']]  = cdmi_api.fids_to_functions(cdmi_features[search_values['genome_id']])
+#                            print >> sys.stderr, 'getting encompass info for ' + search_values['genome_id']
+#                            feature_encompasses[search_values['genome_id']] = dict()
+#                            for encompass in cdmi_entity_api.get_relationship_Encompasses(cdmi_features[search_values['genome_id']],[],['to_link'],[]):
 # maybe we should assign to feature_functions here?
-#                                print >> sys.stderr, encompass
-                                feature_encompasses[search_values['genome_id']][encompass[1]['from_link']] = encompass[1]['to_link']
+##                                print >> sys.stderr, encompass
+#                                feature_encompasses[search_values['genome_id']][encompass[1]['from_link']] = encompass[1]['to_link']
 
 #                        print >> sys.stderr, feature_functions
 #                        print >> sys.stderr, feature_encompasses
 
-                        for feature_id in expression['data']['expression_levels'].keys():
-                            subobject_id = object_id + '.sub.' + feature_id
-                            search_values['feature_id'] = feature_id
+#                        for feature_id in expression['data']['expression_levels'].keys():
+#                            subobject_id = object_id + '.sub.' + feature_id
+#                            search_values['feature_id'] = feature_id
 
 #                            print >> sys.stderr, str(feature_id)
 #                            print >> sys.stderr, str(feature_encompasses[search_values['genome_id']])
@@ -225,16 +225,16 @@ def export_expression_from_ws(maxNumObjects):
 #                                print >> sys.stderr, feature_id + ' has no function'
 #                                search_values['feature_function'] = ''
 
-                            search_values['expression_level'] = expression['data']['expression_levels'][feature_id]
-                            try:
-                                solr_strings = [subobject_id,workspace_name,object_type,object_name]
-                                solr_strings += [ unicode(str(search_values[x])) for x in solr_keys ]
-                                solr_line = "\t".join(solr_strings)
-                                outBuffer.write(solr_line + "\n")
-                            except Exception, e:
-                                print str(e)
+#                            search_values['expression_level'] = expression['data']['expression_levels'][feature_id]
+#                            try:
+#                                solr_strings = [subobject_id,workspace_name,object_type,object_name]
+#                                solr_strings += [ unicode(str(search_values[x])) for x in solr_keys ]
+#                                solr_line = "\t".join(solr_strings)
+#                                outBuffer.write(solr_line + "\n")
+#                            except Exception, e:
+#                                print str(e)
             #                    print search_values
-                                print "Failed trying to write to string buffer."
+#                                print "Failed trying to write to string buffer."
         
         
                     outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
