@@ -55,6 +55,7 @@ while (<STDIN>) {
     if ((scalar @new_field_names) == 1)
     {
     	$new_field{$id} .= join (' ', ' ', @vals);
+        $mt_vals_str = '';
     } else {
     	$new_field{$id} = join ("\t", @vals);
     }

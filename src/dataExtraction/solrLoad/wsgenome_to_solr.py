@@ -197,62 +197,60 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 # special keys
                         featureObject['cs_id'] = str(f['feature_id'])
 
-                        try:
-                            for role in f['roles']:
-                                featureObject['roles'] += unicode(role) + ' '
-                        except:
-                            featureObject['roles'] = ""
+                        prepopulate_keys = ['roles','annotations','subsystem_data','subsystems','feature_publications', 'atomic_regulons', 'regulon_data', 'coexpressed_fids', 'co_occurring_fids', 'protein_families', 'aliases']
+                        for key in prepopulate_keys:
+                            featureObject[key] = ''
+
+                        # prefer an if here, so that errors inside
+                        # don't get caught
+                        if f.has_key('roles'):
+#                            for role in f['roles']:
+#                                featureObject['roles'] += unicode(role) + ' '
+                            featureObject['roles'] = ','.join([str(k) for k in f["roles"]])
     
-                        try:
+                        if f.has_key('annotations'):
                             for anno in f['annotations']:
                                 featureObject['annotations'] += anno[0] + ' ' + anno[1] + ' '
                                 re.sub('\n',' ',annotations)
-                        except:
-                            featureObject['annotations'] = ""
     
-                        try:
+                        if f.has_key('subsystem_data'):
                             for ssdata in f['subsystem_data']:
                                 featureObject['subsystem_data'] += str(ssdata[0]) + ' ' + str(ssdata[2])
-                        except Exception, e:
-                            featureObject['subsystem_data'] = ""
     
-                        try:
+                        if f.has_key('feature_publications'):
                             for pub in f['feature_publications']:
                                 featureObject['feature_publications'] += str(pub[0]) + ' ' + pub[2] + ' ' + pub[3] + ' ' + pub[5] + ' ' + pub[6] + ' '
-                        except Exception, e:
-                            featureObject['feature_publications'] = ""
     
-                        try:
+                        if f.has_key('atomic_regulons'):
+                            for ar in f['atomic_regulons']:
+                                featureObject['atomic_regulons'] += ar[0] + ' '
+    
+# regulon_data is not being retrieved correctly at the moment
+                        if f.has_key('regulon_data'):
+                            for reg in f['regulon_data']:
+                                featureObject['regulon_data'] += reg[0] + ' '
+    
+                        if f.has_key('co_occurring_fids'):
                             for coo in f['co_occurring_fids']:
                                 featureObject['co_occurring_fids'] += coo[0] + ' '
-                        except:
-                            featureObject['co_occurring_fids'] = ""
     
-                        try:
+                        if f.has_key('co_expressed_fids'):
                             for coe in f['coexpressed_fids']:
                                 featureObject['coexpressed_fids'] += coe[0] + ' '
-                        except:
-                            featureObject['coexpressed_fids'] = ""
     
-                        try:
+                        if f.has_key('subsystems'):
                             for ss in f['subsystems']:
                                 featureObject['subsystems'] += unicode(ss) + ' '
-                        except:
-                            featureObject['subsystems'] = ""
     
-                        try:
+                        if f.has_key('protein_families'):
     #                        protein_families = unicode(f["protein_families"][0]['id'] + f['protein_families'][0]['subject_description'])
                             for pf in f['protein_families']:
                                 featureObject['protein_families'] += unicode(pf['id']) + ' : ' + unicode(pf['subject_description']) + ' :: '
     #                        protein_families = unicode(f["protein_families"])
-                        except:
-                            featureObject['protein_families'] = ""
     
-                        try:
+                        if f.has_key('aliases'):
                             # want something like this for roles, subsystems
                             featureObject['aliases'] = ','.join([str(k) for k in f["aliases"]])
-                        except:
-                            featureObject['aliases'] = ""
     
                         outBuffer = StringIO.StringIO()
                 

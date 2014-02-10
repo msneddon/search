@@ -46,8 +46,9 @@ except biokbase.workspace.client.ServerError, e:
 #kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
 
 # want to try to go in order to avoid repeats
-#genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
-genome_entities = cdmi_entity_api.all_entities_Genome(0,500,['id','scientific_name','source_id'])
+genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
+#genome_entities = cdmi_entity_api.all_entities_Genome(0,500,['id','scientific_name','source_id'])
+#genome_entities = cdmi_entity_api.all_entities_Genome(60,500,['id','scientific_name','source_id'])
 #genome_entities = cdmi_entity_api.all_entities_Genome(40,500,['id','scientific_name','source_id'])
 genomes = genome_entities
 #genomes = random.sample(genome_entities,500)
@@ -78,6 +79,8 @@ genomes = genome_entities
 # chicken
 #genomes = ['kb|g.3643']
 #genomes = ['kb|g.26509']
+# pseudomonas stutzeri (for microbes demo)
+#genomes = ['kb|g.27073']
 
 #genomeObjects = dict()
 
@@ -176,7 +179,11 @@ def insert_features(gid,fids):
 
         if core_data['Roles'].has_key(feature_id):
             this_feature=core_data['Roles'][feature_id]
-            featureObject["roles"] = [ x['role'] for x in this_feature ]
+            featureObject["roles"] = list()
+            for x in this_feature:
+#                featureObject["roles"] = [ x['role'] for x in this_feature ]
+                if x.has_key('role'):
+                    featureObject["roles"].append( x['role'] )
         if core_data['Subsystems'].has_key(feature_id):
             this_feature=core_data['Subsystems'][feature_id]
             featureObject["subsystems"] = [ x['subsystem'] for x in this_feature ]
@@ -237,20 +244,6 @@ def insert_features(gid,fids):
 
 
 for g in genomes:
-    print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
-
-    try:
-        ws.get_object_info([{"workspace":wsname,"name":g}],0)
-        print >> sys.stderr, 'genome '  + g + ' found, updating'
-#        print >> sys.stderr, 'genome '  + g + ' found, skipping'
-#        continue
-    except biokbase.workspace.client.ServerError:
-        print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
-
-    genomeObject = dict()
-    featureSet = dict()
-    featureSet['features'] = dict()
-
     start = time.time()
 
     # maybe use get_entity_Genome to get additional fields, like source_id and domain?
@@ -258,6 +251,23 @@ for g in genomes:
 
     end = time.time()
     print >> sys.stderr, "querying genome_data " + str(end - start)
+
+    if 'Pseudomonas' not in genome_data['scientific_name']:
+        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
+        continue
+    print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
+
+    try:
+        ws.get_object_info([{"workspace":wsname,"name":g}],0)
+#        print >> sys.stderr, 'genome '  + g + ' found, updating'
+        print >> sys.stderr, 'genome '  + g + ' found, skipping'
+        continue
+    except biokbase.workspace.client.ServerError:
+        print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
+
+    genomeObject = dict()
+    featureSet = dict()
+    featureSet['features'] = dict()
 
 ###############################################
     #fill in top level genome object properties
