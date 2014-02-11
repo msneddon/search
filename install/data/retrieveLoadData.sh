@@ -8,7 +8,7 @@ echo extracting load data
 tar xzf tmp/searchSolrData.tar.gz -C $tmpsolrdir
 
 # full cores
-for core in gwas ontology metagenomes
+for core in gwas ontology metagenomes expression
 do
     ./deploy.py --load-solr-data $core $tmpsolrdir/$core/${core}ToSolr.tab.headers $tmpsolrdir/$core/${core}ToSolr.tab
 #    echo loading data into $core
@@ -17,7 +17,7 @@ do
 done
 
 # example data only cores
-for core in genomes expression
+for core in genomes
 do
     echo loading example data into $core
     ./deploy.py --load-solr-data $core $tmpsolrdir/$core/${core}ToSolr.tab.headers $tmpsolrdir/$core/${core}ToSolr.tab
