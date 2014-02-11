@@ -65,9 +65,11 @@
 
  <fields>
         
-   <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
+   <field name="cs_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
+   <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="genome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="feature_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="genome_source" type="text_general" indexed="true" stored="true"/>
@@ -78,7 +80,8 @@
    <field name="function" type="text_general" indexed="true" stored="true"/>
    <field name="aliases" type="text_ws_general" indexed="true" stored="true" omitNorms="true"/>
    <field name="scientific_name" type="text_general" indexed="true" stored="true"/>
-   <field name="genome_dna_size" type="int" indexed="true" stored="true"/>
+   <field name="scientific_name_sort" type="string" indexed="true" stored="true"/>
+   <field name="genome_dna_size" type="long" indexed="true" stored="true"/>
    <field name="num_contigs" type="int" indexed="true" stored="true"/>
    <field name="complete" type="boolean" indexed="true" stored="true"/>
    <field name="domain" type="text_general" indexed="true" stored="true"/>
@@ -103,13 +106,14 @@
 
  </fields>
 
- <uniqueKey>object_id</uniqueKey>
+ <uniqueKey>cs_id</uniqueKey>
 
   <!-- copyField commands copy one field to another at the time a document
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
 
    <copyField source="object_id" dest="text"/>
+   <copyField source="cs_id" dest="text"/>
    <copyField source="workspace_name" dest="text"/>
    <copyField source="object_type" dest="text"/>
    <copyField source="genome_id" dest="text"/>
