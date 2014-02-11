@@ -78,7 +78,7 @@ def export_comm_from_ws(maxNumObjects):
     # [u'originator', u'comment', u'assay', u'GwasPopulation_obj_id', u'variation_file', u'filetype', u'genome', u'GwasPopulationVariation_obj_id']
     
                     # these are the keys in the solr document
-                    all_keys = [ 'metagenome_id', 'metagenome_name', 'library_id', 'metagenome_metadata', 'sequence_type', 'seq_method', 'metagenome_created', 'project_id', 'project_name', 'project_description', 'project_created', 'PI_info', 'tech_contact', 'funding_source', 'ncbi_id', 'qiime_id', 'vamps_id', 'greengenes_id', 'sample_id', 'sample_name', 'sample_created', 'collection_date', 'env_package_type', 'feature', 'biome', 'material', 'location', 'country', 'latitude', 'longitude']
+                    all_keys = [ 'metagenome_id', 'metagenome_name', 'metagenome_name_sort', 'library_id', 'metagenome_metadata', 'sequence_type', 'seq_method', 'metagenome_created', 'project_id', 'project_name', 'project_name_sort', 'project_description', 'project_created', 'PI_info', 'tech_contact', 'funding_source', 'ncbi_id', 'qiime_id', 'vamps_id', 'greengenes_id', 'sample_id', 'sample_name', 'sample_name_sort', 'sample_created', 'collection_date', 'env_package_type', 'feature', 'biome', 'material', 'location', 'country', 'latitude', 'longitude']
     
                     search_values=dict()
                     for key in all_keys:
@@ -127,7 +127,11 @@ def export_comm_from_ws(maxNumObjects):
                         search_values['tech_contact']  = pat.sub(' ',str(' '.join(mg['data']['project']['tech_contact'].values())))
     
                     object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(mg['info'][0])
-    
+
+                    search_values['metagenome_name_sort'] = "_".join(search_values['metagenome_name'].lower().split())
+                    search_values['project_name_sort'] = "_".join(search_values['project_name'].lower().split())
+                    search_values['sample_name_sort'] = "_".join(search_values['sample_name'].lower().split())
+
                     outBuffer = StringIO.StringIO()
     
                     try:

@@ -85,7 +85,7 @@
 
    <field name="project_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="project_name" type="text_general" indexed="true" stored="true"/>
-   <field name="project_name_sort" type="text_general" indexed="true" stored="true"/>
+   <field name="project_name_sort" type="string" indexed="true" stored="true"/>
    <field name="project_description" type="text_general" indexed="true" stored="true"/>
    <field name="project_created" type="text_general" indexed="true" stored="true"/>
    <field name="PI_info" type="text_general" indexed="true" stored="true"/>
