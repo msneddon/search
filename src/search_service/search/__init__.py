@@ -11,8 +11,10 @@ import controllers
 # create the flask object for handling all requests
 search_wsgi = flask.Flask(__name__)
 
+import flask_cors
 
 @search_wsgi.route('/', methods = ['GET'])
+@cross_origin(methods=['GET'])
 def index():
     response = flask.jsonify({'message': "KBase Search Service"})
     response.status_code = 200
@@ -20,6 +22,7 @@ def index():
 
 
 @search_wsgi.route('/getResults', methods = ['GET'])
+@cross_origin(methods=['GET'])
 def get_results():
     result = controllers.get_results(flask.request, serviceConfig)
     
@@ -36,6 +39,7 @@ def get_results():
 
 
 @search_wsgi.route('/categories', methods = ['GET'])
+@cross_origin(methods=['GET'])
 def get_categories():
     response = flask.jsonify(serviceConfig["categories"])
     response.status_code = 200
@@ -43,6 +47,7 @@ def get_categories():
 
 
 @search_wsgi.errorhandler(exceptions.InvalidSearchRequestError)
+@cross_origin(methods=['GET'])
 def invalid_request(error = None):
     search_wsgi.logger.error(error.message)
     response = flask.jsonify({'message': error.message})
@@ -51,6 +56,7 @@ def invalid_request(error = None):
 
 
 @search_wsgi.errorhandler(Exception)
+@cross_origin(methods=['GET'])
 def invalid_request(error = None):
     search_wsgi.logger.exception(error)
     response = flask.jsonify({'message': error.message})

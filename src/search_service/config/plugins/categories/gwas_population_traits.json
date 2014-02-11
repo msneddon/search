@@ -3,8 +3,8 @@
     "solr": {
         "core": "gwas",
         "visible_fields": ["object_id", "object_type", "object_name", "workspace_name", "trait_ontology_id", "trait_name", "unit_of_measure", "protocol", "GwasPopulation_obj_id", "originator", "comment"],
-        "sort_fields": ["object_name"],
-        "facet_fields": ["unit_of_measure","protocol"],
+        "sort_fields": ["object_id","object_name","trait_ontology_id","trait_name", "originator"],
+        "facet_fields": [],
         "query_string": "&fq=object_type:*GwasPopulationTrait-*"
     }
 }

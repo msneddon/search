@@ -3,8 +3,8 @@
     "solr": {
         "core": "gwas",
         "visible_fields": ["object_id", "object_type", "object_name", "workspace_name", "GwasPopulation_obj_id", "filetype", "comment", "assay", "originator", "GwasPopulationVariation_parent_obj_id"],
-        "sort_fields": ["object_name", "originator", "GwasPopulationVariation_parent_obj_id"],
-        "facet_fields": ["ecotype_details", "originator"],
+        "sort_fields": ["object_id", "object_name", "originator", "assay"],
+        "facet_fields": [],
         "query_string": "&fq=object_type:*GwasPopulationVariation-*"
     }
 }
