@@ -142,7 +142,7 @@ if __name__ == "__main__":
         # create a virtualenv under the services directory
         import subprocess
         subprocess.call(["virtualenv","--python","python2.7","--system-site-packages",virtualenv_dir])
-        subprocess.call([os.path.join(virtualenv_dir, "bin/pip"), "install","pip","flask","flask-cors","requests","httplib2"])
+        subprocess.call([os.path.join(virtualenv_dir, "bin/pip"), "install","pip","flask","requests","httplib2"])
                 
         # copy service code into the virtualenv directory
         shutil.copytree(os.path.join(running_dir,"src/search_service/search"), os.path.join(virtualenv_dir, "lib/python2.7/site-packages/search"))
