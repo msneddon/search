@@ -154,19 +154,28 @@ def validate_inputs(query, config):
         sortQuery = query['sort'][:]
         sortFields = sortQuery.split(',')
         
+        outFields = list()
+        
         for x in sortFields:
             try:
                 field, order = x.split(' ')
             except:
                 raise InvalidSearchRequestError(x + " is not in the format of 'sort_field sort_order'!")
-            
-            if not field in config['plugins'][validatedParams['category']]['solr']['sort_fields']:
-                raise InvalidSearchRequestError(field + " is not a valid sorting field!")
-            
+
             if not order in ['asc', 'desc']:
                 raise InvalidSearchRequestError(order + " is not a valid sorting order!")                                                            
+            
+            if not field in config['plugins'][validatedParams['category']]['solr']['sort_fields']:
+                if not field in config['plugins'][validatedParams['category']]['solr']['mapped_sort_fields']:
+                    raise InvalidSearchRequestError(field + " is not a valid sorting field!")
+                else:
+                    outFields.append(field + " " + order)
+                    continue
+            
+            outFields.append(field + " " + order)
+            
         
-        validatedParams['sort'] = ",".join(sortFields)
+        validatedParams['sort'] = ",".join(outFields)
 
     # check for any facet selections
     if query.has_key('facets') and query['facets'] is not None:
