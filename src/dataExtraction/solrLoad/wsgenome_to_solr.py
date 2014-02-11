@@ -245,7 +245,10 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                         if f.has_key('protein_families'):
     #                        protein_families = unicode(f["protein_families"][0]['id'] + f['protein_families'][0]['subject_description'])
                             for pf in f['protein_families']:
-                                featureObject['protein_families'] += unicode(pf['id']) + ' : ' + unicode(pf['subject_description']) + ' :: '
+                                subj_desc = ''
+                                if pf.has_key('subject_description'):
+                                    subj_desc = pf['subject_description']
+                                featureObject['protein_families'] += unicode(pf['id']) + ' : ' + unicode(subj_desc) + ' :: '
     #                        protein_families = unicode(f["protein_families"])
     
                         if f.has_key('aliases'):
