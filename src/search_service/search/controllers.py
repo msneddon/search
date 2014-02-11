@@ -166,10 +166,12 @@ def validate_inputs(query, config):
                 raise InvalidSearchRequestError(order + " is not a valid sorting order!")                                                            
             
             if not field in config['plugins'][validatedParams['category']]['solr']['sort_fields']:
-                if not field in config['plugins'][validatedParams['category']]['solr']['mapped_sort_fields']:
+                if not config['plugins'][validatedParams['category']]['solr'].has_key('mapped_sort_fields'):
+                    raise InvalidSearchRequestError(field + " is not a valid sorting field!")                
+                elif not field in config['plugins'][validatedParams['category']]['solr']['mapped_sort_fields'].keys():
                     raise InvalidSearchRequestError(field + " is not a valid sorting field!")
                 else:
-                    outFields.append(field + " " + order)
+                    outFields.append(config['plugins'][validatedParams['category']]['solr']['mapped_sort_fields'][field] + " " + order)
                     continue
             
             outFields.append(field + " " + order)

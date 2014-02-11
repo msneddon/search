@@ -4,7 +4,8 @@
     "solr": {
         "core": "metagenomes",
         "visible_fields": ["object_id","object_type","workspace_name","metagenome_id","metagenome_name","metagenome_metadata","sequence_type","seq_method","project_name","project_id","project_description","PI_info","tech_contact","funding_source","ncbi_id","qiime_id","vamps_id","greengenes_id","sample_id","sample_name","env_package_type","feature","biome","material","location","latitude","longitude"],
-        "sort_fields": ["metagenome_name", "sequence_type"],
+        "sort_fields": ["metagenome_id", "metagenome_name", "sample_name", "project_name", "sequence_type"],
+        "mapped_sort_fields": {"metagenome_name": "metagenome_name_sort","sample_name": "sample_name_sort", "project_name": "project_name_sort"},
         "facet_fields": ["sequence_type"],
         "query_string": ""
     }
