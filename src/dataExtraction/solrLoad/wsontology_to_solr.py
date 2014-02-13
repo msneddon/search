@@ -39,9 +39,6 @@ def export_ontology_from_ws():
     #cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
 
     genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
-    # this Poplar version is not in production central store yet
-    if not genome_entities.has_key('kb|g.3907'):
-        genome_entities['kb|g.3907'] = {'scientific_name':'Populus trichocarpa'}
 
     #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
     ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
@@ -50,6 +47,13 @@ def export_ontology_from_ws():
     
     all_workspaces = [ workspace_object ]
     
+    all_keys = [ 'object_id','workspace_name','object_type','object_name', 'ontology_id', 'ontology_type', 'ontology_domain', 'ontology_description', 'ontology_description_sort', 'gene_list', 'evidence_codes' ]
+    
+    headerOutFile = open('ontologyToSolr.tab.headers', 'w')
+    print >> headerOutFile, "\t".join(all_keys)
+    #print >> headerOutFile, "\n"
+    headerOutFile.close()
+
     outFile = open('ontologyToSolr.tab', 'w')
     
     workspace_counter = 0
@@ -71,8 +75,6 @@ def export_ontology_from_ws():
     
                     done = False
     
-                    object_type = x[2]
-    
     #                sys.stderr.write(str(x)+"\n")
                     while not done:
                         try:
@@ -84,10 +86,6 @@ def export_ontology_from_ws():
     
                     wsobject = wsobject[0]
                     
-                    # these are the keys in the solr document
-                    # (not including the default keys)
-                    all_keys = [ 'ontology_id', 'ontology_type', 'ontology_domain', 'ontology_description', 'gene_list', 'evidence_codes' ]
-    
                     # make sure every column gets a value
                     search_values=dict()
                     for key in all_keys:
@@ -101,21 +99,30 @@ def export_ontology_from_ws():
                         else:
                             search_values[key]=''
     
+                    if wsobject['data'].has_key('ontology_description'):
+                        search_values['ontology_description_sort'] = "_".join(wsobject['data']['ontology_description'].lower().split())
+
                     if wsobject['data'].has_key('evidence_codes'):
                         search_values['evidence_codes'] = ' '.join(wsobject['data']['evidence_codes'])
     
                     if wsobject['data'].has_key('gene_list'):
     #                    search_values['gene_list'] =' '.join(extractValues(wsobject['data']['gene_list']))
                         for key in wsobject['data']['gene_list']:
-                            search_values['gene_list'] += key + ' : ' + genome_entities[key]['scientific_name'] + ' : ' + ' '.join(wsobject['data']['gene_list'][key]) + ' '
+                            try:
+                                search_values['gene_list'] += key + ' : ' + genome_entities[key]['scientific_name'] + ' : ' + ' '.join(wsobject['data']['gene_list'][key]) + ' '
+                            except Exception, e:
+                                print >> sys.stderr, e
+                                print >> sys.stderr, 'perhaps genome ' + key + ' was not found'
     
-                    object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(wsobject['info'][0])
+                    search_values['object_id'] = 'kb|ws.' + str(workspace_id) + '.obj.' + str(wsobject['info'][0])
+                    search_values['object_name'] = str(wsobject['info'][1])
+                    search_values['workspace_name'] = workspace_name
+                    search_values['object_type'] = x[2]
     
                     outBuffer = StringIO.StringIO()
     
                     try:
-                        solr_strings = [object_id,workspace_name,object_type]
-                        solr_strings += [ unicode(str(search_values[x])) for x in all_keys ]
+                        solr_strings = [ unicode(str(search_values[x])) for x in all_keys ]
                         solr_line = "\t".join(solr_strings)
                         outBuffer.write(solr_line + "\n")
                     except Exception, e:
