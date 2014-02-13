@@ -4,6 +4,7 @@ import StringIO
 import json
 import sys
 import random
+import re
 
 # found at https://pythonadventures.wordpress.com/tag/unicodeencodeerror/
 reload(sys)
@@ -211,7 +212,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                         if f.has_key('annotations'):
                             for anno in f['annotations']:
                                 featureObject['annotations'] += anno[0] + ' ' + anno[1] + ' '
-                                re.sub('\n',' ',annotations)
+                                re.sub('\n',' ',featureObject['annotations'])
     
                         if f.has_key('subsystem_data'):
                             for ssdata in f['subsystem_data']:
@@ -234,7 +235,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                             for coo in f['co_occurring_fids']:
                                 featureObject['co_occurring_fids'] += coo[0] + ' '
     
-                        if f.has_key('co_expressed_fids'):
+                        if f.has_key('coexpressed_fids'):
                             for coe in f['coexpressed_fids']:
                                 featureObject['coexpressed_fids'] += coe[0] + ' '
     
