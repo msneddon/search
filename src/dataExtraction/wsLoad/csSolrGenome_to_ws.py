@@ -63,7 +63,7 @@ genomes = genome_entities
 # takes much less time when cached
 #genomes = ['kb|g.3899']
 # poplar is only in the v3 instance right now
-#genomes = ['kb|g.3907']
+genomes = ['kb|g.3907']
 # more static sets
 #genomes = ['kb|g.9','kb|g.222']
 #genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
@@ -252,7 +252,7 @@ for g in genomes:
     end = time.time()
     print >> sys.stderr, "querying genome_data " + str(end - start)
 
-    if 'Pseudomonas' not in genome_data['scientific_name']:
+    if 'P' not in genome_data['scientific_name']:
         print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
         continue
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
@@ -330,6 +330,7 @@ for g in genomes:
 
     # retrieving all with one call died on kb|g.3907, kb|g.3643 Gallus gallus, kb|g.41 Mouse
     # looping over each contig_id still seems slow on chicken
+    # these sequences are too big for ws (250MB), need to refactor
     contig_sequences = dict()
     for contig_id in contig_ids:
         contig_seq = cdmi_api.contigs_to_sequences([contig_id])
@@ -401,7 +402,7 @@ for g in genomes:
 
     for x in fids:
         fids_to_insert.append( x )
-        if len(fids_to_insert) > 99:
+        if len(fids_to_insert) > 49:
 
              feature_info = insert_features(g,fids_to_insert)
              for ws_feature in feature_info:
