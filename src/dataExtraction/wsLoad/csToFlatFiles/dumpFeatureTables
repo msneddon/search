@@ -5,13 +5,17 @@
 # prerequisite: set up .my.cnf with proper creds
 
 # define for debugging purposes
-limit=' LIMIT 5000'
+limit=' LIMIT 5000 '
 
+# might want to split out Feature and protein sequence
+# so that we can leave out protein sequence if it's too big
+# ~ 90m for query with protein sequences
 echo Feature
 time mysql -B -N -e \
  " SELECT f.id,f.id,ioo.from_link,f.sequence_length,f.feature_type,f.source_id,f.function,ps.id,length(ps.sequence),ps.sequence from Feature f left join IsOwnerOf ioo ON (ioo.to_link=f.id) left join IsProteinFor ipf ON (ipf.to_link=f.id) left join ProteinSequence ps ON (ipf.from_link = ps.id) $limit " \
   | perl -pi -e 's/"//g' > Feature.tab
 
+# ~1m
 echo FeatureAlias
 time mysql -B -N -e \
  " SELECT fa.id,fa.alias FROM FeatureAlias fa $limit " \
@@ -19,6 +23,7 @@ time mysql -B -N -e \
 
 # this may not be working right
 # need to test against v3
+# ~ 1s
 echo AtomicRegulons
 time mysql -B -N -e \
  " SELECT ifo.to_link,ifo.from_link FROM IsFormedOf ifo $limit " \
@@ -59,8 +64,8 @@ time mysql -B -N -e \
 
 echo Subsystems
 time mysql -B -N -e \
- " select c.to_link,i.from_link from Contains c join IsRoleOf iro ON (c.from_link=iro.to_link) join Includes i ON (iro.from_link=i.to_link) " \
-  | perl -pi -e 's/"//g;s/\\n/ /g' > Roles.tab
+ " select c.to_link,i.from_link from Contains c join IsRoleOf iro ON (c.from_link=iro.to_link) join Includes i ON (iro.from_link=i.to_link) $limit " \
+  | perl -pi -e 's/"//g;s/\\n/ /g' > Subsystems.tab
 
 
 echo Roles
