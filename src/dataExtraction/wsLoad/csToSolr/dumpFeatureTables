@@ -1,0 +1,42 @@
+# prerequisite: set up .my.cnf with proper creds
+
+# define for debugging purposes
+limit=' LIMIT 1000'
+
+echo Feature
+time mysql -B -N -e \
+ " SELECT f.id,f.id,ioo.from_link,f.sequence_length,f.feature_type,f.source_id,f.function,ps.id,length(ps.sequence),ps.sequence from Feature f left join IsOwnerOf ioo ON (ioo.to_link=f.id) left join IsProteinFor ipf ON (ipf.to_link=f.id) left join ProteinSequence ps ON (ipf.from_link = ps.id) $limit " \
+  | perl -pi -e 's/"//g' > Feature.tab
+
+echo FeatureAlias
+time mysql -B -N -e \
+ " SELECT fa.id,fa.alias FROM FeatureAlias fa $limit " \
+  | perl -pi -e 's/"//g' > FeatureAlias.tab
+
+# this may not be working right
+# need to test against v3
+echo AtomicRegulons
+time mysql -B -N -e \
+ " SELECT ifo.to_link,ifo.from_link FROM IsFormedOf ifo $limit " \
+  | perl -F\\t -ane 'chomp $F[1];$fid2ar{$F[0]}=$F[1];$count{$F[1]}++;if(eof){print map {$_."\t".$fid2ar{$_}."\t".$count{$fid2ar{$_}}."\n"} sort keys %fid2ar;}' \
+  | perl -pi -e 's/"//g' > AtomicRegulons.tab
+
+echo Coexpressed
+time mysql -B -N -e \
+ " SELECT icw.from_link,icw.to_link,icw.coefficient FROM IsCoregulatedWith icw $limit " \
+  | perl -pi -e 's/"//g' > CoexpressedFids.tab
+
+echo Co_occurring
+time mysql -B -N -e \
+ " select iip1.from_link,iip2.from_link,ps.score from IsDeterminedBy idb join PairSet ps ON (ps.id=idb.from_link) join IsInPair iip1 ON (iip1.to_link=idb.to_link) join IsInPair iip2 ON (iip2.to_link=idb.to_link and iip2.from_link!=iip1.from_link) $limit" \
+  | perl -pi -e 's/"//g' > CoOccurringFids.tab
+
+echo Annotation
+time mysql -B -N -e \
+ " SELECT iab.from_link, a.comment,a.annotator,a.annotation_time FROM Annotation a JOIN IsAnnotatedBy iab ON (iab.to_link=a.id) $limit " \
+  | perl -pi -e 's/"//g;s/\\n/ /g' > Annotation.tab
+
+echo SubsystemData
+time mysql -B -N -e \
+ " select c.to_link as feature_id,d.from_link as subsystem,v.code as variant,ir.from_link as role from Variant v join IsImplementedBy im ON (v.id=im.from_link) join IsRowOf r on (im.to_link=r.from_link) join Describes d on (v.id=d.to_link) join Includes i on (d.from_link=i.from_link) join Contains c on (c.from_link=r.to_link) join IsRoleOf ir on (ir.to_link = c.from_link and ir.from_link=i.to_link) $limit" \
+  | perl -pi -e 's/"//g' > SubsystemData.tab
