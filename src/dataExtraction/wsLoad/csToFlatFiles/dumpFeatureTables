@@ -4,6 +4,8 @@
 
 # prerequisite: set up .my.cnf with proper creds
 
+# all SQL queries relatively short (< 5m) unless noted
+
 # define for debugging purposes
 limit=' LIMIT 5000 '
 
@@ -15,15 +17,11 @@ time mysql -B -N -e \
  " SELECT f.id,f.id,ioo.from_link,f.sequence_length,f.feature_type,f.source_id,f.function,ps.id,length(ps.sequence),ps.sequence from Feature f left join IsOwnerOf ioo ON (ioo.to_link=f.id) left join IsProteinFor ipf ON (ipf.to_link=f.id) left join ProteinSequence ps ON (ipf.from_link = ps.id) $limit " \
   | perl -pi -e 's/"//g' > Feature.tab
 
-# ~1m
 echo FeatureAlias
 time mysql -B -N -e \
  " SELECT fa.id,fa.alias FROM FeatureAlias fa $limit " \
   | perl -pi -e 's/"//g' > FeatureAlias.tab
 
-# this may not be working right
-# need to test against v3
-# ~ 1s
 echo AtomicRegulons
 time mysql -B -N -e \
  " SELECT ifo.to_link,ifo.from_link FROM IsFormedOf ifo $limit " \
@@ -36,17 +34,24 @@ echo Publications
 time mysql -B -N -e \
  " select ipf.to_link,c.from_link from Concerns c join IsProteinFor ipf on (c.to_link=ipf.from_link) $limit " \
   | perl -pi -e 's/"//g' > fids2pubs.tab
+# this writes to publications.tab, is probably small enough to
+# fit entirely in memory
+# if not need to join these two files together
+# this actually takes a little while, ~30m?
+cut -f2 fids2pubs.tab | sort -u | python ~/dev_container/modules/search/src/dataExtraction/solrLoad/publications_to_solr.py
 
 echo Family
 time mysql -B -N -e \
  " select hm.to_link,f.id,f.release,f.type,ff.family_function from HasMember hm JOIN Family f ON (hm.from_link=f.id) join FamilyFunction ff ON (f.id=ff.id) $limit " \
   | perl -pi -e 's/"//g' > ProteinFamilies.tab
 
+# ~8m
 echo Coexpressed
 time mysql -B -N -e \
  " SELECT icw.from_link,icw.to_link,icw.coefficient FROM IsCoregulatedWith icw $limit " \
   | perl -pi -e 's/"//g' > CoexpressedFids.tab
 
+# ~5m
 echo Co_occurring
 time mysql -B -N -e \
  " select iip1.from_link,iip2.from_link,ps.score from IsDeterminedBy idb join PairSet ps ON (ps.id=idb.from_link) join IsInPair iip1 ON (iip1.to_link=idb.to_link) join IsInPair iip2 ON (iip2.to_link=idb.to_link and iip2.from_link!=iip1.from_link) $limit" \
@@ -57,34 +62,37 @@ time mysql -B -N -e \
  " SELECT iab.from_link, a.comment,a.annotator,a.annotation_time FROM Annotation a JOIN IsAnnotatedBy iab ON (iab.to_link=a.id) $limit " \
   | perl -pi -e 's/"//g;s/\\n/ /g' > Annotation.tab
 
+# ~45m
 echo SubsystemData
 time mysql -B -N -e \
  " select c.to_link as feature_id,d.from_link as subsystem,v.code as variant,ir.from_link as role from Variant v join IsImplementedBy im ON (v.id=im.from_link) join IsRowOf r on (im.to_link=r.from_link) join Describes d on (v.id=d.to_link) join Includes i on (d.from_link=i.from_link) join Contains c on (c.from_link=r.to_link) join IsRoleOf ir on (ir.to_link = c.from_link and ir.from_link=i.to_link) $limit" \
   | perl -pi -e 's/"//g' > SubsystemData.tab
 
+# ~15m
 echo Subsystems
 time mysql -B -N -e \
  " select c.to_link,i.from_link from Contains c join IsRoleOf iro ON (c.from_link=iro.to_link) join Includes i ON (iro.from_link=i.to_link) $limit " \
   | perl -pi -e 's/"//g;s/\\n/ /g' > Subsystems.tab
 
-
+# ~5m
 echo Roles
 time mysql -B -N -e \
  " select ifi.to_link,ifi.from_link from IsFunctionalIn ifi $limit " \
   | perl -pi -e 's/"//g;s/\\n/ /g' > Roles.tab
 
-# not trying to combine these, but should be able to read both
+# not trying to combine these here, but should be able to read both
 # in and combine in code
 echo RegulonData fids
 time mysql -B -N -e \
- " select iri.to_link,iri.from_link from IsRegulatedIn iri $limit " \
+ " select iri.from_link,iri.to_link from IsRegulatedIn iri $limit " \
   | perl -pi -e 's/"//g;s/\\n/ /g' > regulonData.members.tab
 
 echo RegulonData tfs
 time mysql -B -N -e \
- " select c.to_link,c.from_link from Controls c $limit " \
+ " select c.from_link,c.to_link from Controls c $limit " \
   | perl -pi -e 's/"//g;s/\\n/ /g' >  regulonData.tfs.tab
 
+# ~6m
 echo Locations
 time mysql -B -N -e \
  " select ili.from_link,ili.to_link,ili.begin,ili.dir,ili.len,ili.ordinal from IsLocatedIn ili $limit " \
@@ -92,3 +100,14 @@ time mysql -B -N -e \
 
 
 echo not getting dna sequences
+
+# don't really need to sort publications file, but can't hurt
+echo sorting files
+for file in *.tab
+do
+  echo sorting $file
+  sort -T ./tmp -S 48G $file > $file.sorted
+done
+
+# now can open .sorted files and stream through them
+
