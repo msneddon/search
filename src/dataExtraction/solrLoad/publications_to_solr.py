@@ -6,7 +6,7 @@ import urllib2
 
 outFile = open('publications.tab', 'w')
 
-outFile.write(unicode("pubmed_id\tpubmed_url\tpubdate\tjournal_title\tarticle_title\tarticle_title_sort\tauthors\tabstract\n"))
+#outFile.write(unicode("pubmed_id\tpubmed_url\tpubdate\tjournal_title\tarticle_title\tarticle_title_sort\tauthors\tabstract\n"))
 
 pubmed_ids = list()
 month_values = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul": 7, "Aug": 8, "Sep": 9, "Oct": 10, "Nov": 11, "Dec": 12}
@@ -14,13 +14,17 @@ month_values = {"Jan": 1, "Feb": 2, "Mar": 3, "Apr": 4, "May": 5, "Jun": 6, "Jul
 
 line = sys.stdin.readline()
 while line:
-    [id, pubdate, link, title] = line.split("\t")
+#    [id, pubdate, link, title] = line.split("\t")
+    [id] = line.split("\t")
+    id=id.rstrip()
     pubmed_ids.append(id)
     line = sys.stdin.readline()
 
 
 for x in pubmed_ids:
     done = False
+    print >> sys.stderr, x
+
     while not done:
         try:
             data = urllib2.urlopen('http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?id=' + x + '&db=pubmed&retmode=xml')
@@ -33,8 +37,6 @@ for x in pubmed_ids:
     doc = dict()
     doc['pubmed_id'] = x
     
-    print x
-
     pubdate = root.findall('.//PubDate')[0]
 
     if type(pubdate) == str:

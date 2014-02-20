@@ -102,6 +102,7 @@ time mysql -B -N -e \
 echo not getting dna sequences
 
 # don't really need to sort publications file, but can't hurt
+# all sorts currently take ~90min
 echo sorting files
 for file in *.tab
 do
