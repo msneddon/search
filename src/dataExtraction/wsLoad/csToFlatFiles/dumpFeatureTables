@@ -103,11 +103,12 @@ echo not getting dna sequences
 
 # don't really need to sort publications file, but can't hurt
 # all sorts currently take ~90min
+# try to force a sorting that will work on gid and fids
 echo sorting files
 for file in *.tab
 do
   echo sorting $file
-  sort -T ./tmp -S 48G $file > $file.sorted
+  sort -k2 -t '.' -T ./tmp -S 48G $file > $file.sorted
 done
 
 # now can open .sorted files and stream through them
