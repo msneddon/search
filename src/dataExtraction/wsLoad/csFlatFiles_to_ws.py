@@ -12,136 +12,144 @@ import simplejson
 import time
 import random
 import requests
+import pprint
 
 import biokbase.workspace.client
 import biokbase.cdmi.client
 
+wsname = 'KBasePublicRichGenomes'
+
+pp = pprint.PrettyPrinter(indent=4)
+
 # production CDMI instance
 cdmi_api = biokbase.cdmi.client.CDMI_API()
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
-
+    
 # berkeley private instance
 #cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
 #cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
 # v3 instance
 #cdmi_api = biokbase.cdmi.client.CDMI_API('http://140.221.84.182:7032')
 #cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://140.221.84.182:7032')
-
+    
 # production ws instance
 #ws = biokbase.workspace.client.Workspace()
 # ws team dev instance
 ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
+    
+def create_feature_objects(gid,featureData):
 
-wsname = 'KBasePublicRichGenomes'
+    featureObjects = dict()
 
-# set up a try block here?
-try:
-    retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
-# want this to catch only workspace exists errors
-except biokbase.workspace.client.ServerError, e:
-    pass
-#    print >> sys.stderr, e
+    for feature_line in featureData['Feature']:
+        feature_line=feature_line.rstrip()
+        [fid,cs_id,gid,dna_sequence_length,feature_type,feature_source_id,function,md5,protein_translation_length,protein_translation]=feature_line.split("\t")
+        featureObjects[fid]=dict()
+        featureObjects[fid]["source"] = 'KBase Central Store'
+        featureObjects[fid]['feature_id']=fid
+        featureObjects[fid]['genome_id']=gid
+        featureObjects[fid]['dna_sequence_length']=int(dna_sequence_length)
+        featureObjects[fid]['feature_type']=feature_type
+        featureObjects[fid]['feature_source_id']=feature_source_id
+        if function != 'NULL':
+            featureObjects[fid]['function']=function
+        if md5 != 'NULL':
+            featureObjects[fid]['md5']=md5
+        if protein_translation_length != 'NULL':
+            featureObjects[fid]['protein_translation_length']=int(protein_translation_length)
+        if protein_translation != 'NULL':
+            featureObjects[fid]['protein_translation']=protein_translation
+#        pp.pprint(featureObjects[fid])
 
-#kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
+    for annotation_line in featureData['Annotation']:
+        annotation_line=annotation_line.rstrip()
+        [fid,comment,annotator,annotation_time]=annotation_line.split("\t")
+        if not featureObjects[fid].has_key("annotations"):
+            featureObjects[fid]['annotations']=list()
+        annotation = [comment,annotator,int(annotation_time)]
+        featureObjects[fid]['annotations'].append(annotation)
 
-# want to try to go in order to avoid repeats
-genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
-#genome_entities = cdmi_entity_api.all_entities_Genome(0,500,['id','scientific_name','source_id'])
-#genome_entities = cdmi_entity_api.all_entities_Genome(60,500,['id','scientific_name','source_id'])
-#genome_entities = cdmi_entity_api.all_entities_Genome(40,500,['id','scientific_name','source_id'])
-genomes = genome_entities
-#genomes = random.sample(genome_entities,500)
+    for atomic_regulon_line in featureData['AtomicRegulons']:
+        atomic_regulon_line=atomic_regulon_line.rstrip()
+        [fid,atomic_regulon,count]=atomic_regulon_line.split("\t")
+        if not featureObjects[fid].has_key("atomic_regulons"):
+            featureObjects[fid]['atomic_regulons']=list()
+        atomic_regulon = [atomic_regulon,count]
+        featureObjects[fid]['atomic_regulons'].append(atomic_regulon)
 
-#genomes = sys.argv[1:]
+    for coexpressed_fid_line in featureData['CoexpressedFids']:
+        coexpressed_fid_line=coexpressed_fid_line.rstrip()
+        [fid,coexpressed_fid,score]=coexpressed_fid_line.split("\t")
+        if not featureObjects[fid].has_key("coexpressed_fids"):
+            featureObjects[fid]['coexpressed_fids']=list()
+        coexpressed_fid = [coexpressed_fid,float(score)]
+        featureObjects[fid]['coexpressed_fids'].append(coexpressed_fid)
 
-# DvH, E.coli
-# takes 4min (total) without dna_seqs, with coexpressed_fids
-# takes 5min (total) with retrieving everything
-#genomes = ['kb|g.3562','kb|g.0']
-# arabidopsis--takes 50m with individual dna_seq calls (coexpressed_fids untested)
-# takes much less time when cached
-#genomes = ['kb|g.3899']
-# poplar
-# genomes = ['kb|g.3907']
-# more static sets
-#genomes = ['kb|g.9','kb|g.222']
-#genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
-#genomes = ['kb|g.19762','kb|g.1976']
-#genomes = ['kb|g.0']
-#genomes = ['kb|g.3562']
-#genomes = ['kb|g.3562','kb|g.0']
-# DvH, e.coli, multiple versions of arabidopsis
-# what other genomes are essential?
-#genomes = ['kb|g.3562','kb|g.0','kb|g.1105','kb|g.1103','kb|g.26509','kb|g.1104']
-# kb|g.1103 has at least one feature with a bad location
-genomes = ['kb|g.3562','kb|g.0','kb|g.3899','kb|g.3907','kb|g.27073']
-# chicken
-#genomes = ['kb|g.3643']
-#genomes = ['kb|g.26509']
-# pseudomonas stutzeri (for microbes demo)
-#genomes = ['kb|g.27073']
+    for co_occurring_fid_line in featureData['CoOccurringFids']:
+        co_occurring_fid_line=co_occurring_fid_line.rstrip()
+        [fid,co_occurring_fid,score]=co_occurring_fid_line.split("\t")
+        if not featureObjects[fid].has_key("co_occurring_fids"):
+            featureObjects[fid]['co_occurring_fids']=list()
+        # is score an int or float here? not sure
+        co_occurring_fid = [co_occurring_fid,float(score)]
+        featureObjects[fid]['co_occurring_fids'].append(co_occurring_fid)
 
-#genomeObjects = dict()
+    # need to do fids2pubs (to populate publication attribute)
+
+    for alias_line in featureData['FeatureAlias']:
+        alias_line=alias_line.rstrip()
+        [fid,alias]=alias_line.split("\t")
+        if not featureObjects[fid].has_key("aliases"):
+            featureObjects[fid]['aliases']=list()
+        featureObjects[fid]['aliases'].append(alias)
+
+    for location_line in featureData['Locations']:
+        location_line=location_line.rstrip()
+        [fid,contig,begin,strand,length,ordinal]=location_line.split("\t")
+        if not featureObjects[fid].has_key("location"):
+            featureObjects[fid]['location']=list()
+        location = [contig,int(begin),strand,int(length),int(ordinal)]
+        featureObjects[fid]['location'].append(location)
+
+    for protein_families_line in featureData['ProteinFamilies']:
+        protein_families_line=protein_families_line.rstrip()
+        [fid,id,release_version,subject_db,subject_description]=protein_families_line.split("\t")
+        if not featureObjects[fid].has_key("protein_families"):
+            featureObjects[fid]['protein_families']=list()
+        protein_families = { 'id':id, 'release_version':release_version, 'subject_db':subject_db, 'subject_description':subject_description }
+        featureObjects[fid]['protein_families'].append(protein_families)
+
+    # need to do RegulonData (uses two featureData keys)
+
+    for roles_line in featureData['Roles']:
+        roles_line=roles_line.rstrip()
+        [fid,roles]=roles_line.split("\t")
+        if not featureObjects[fid].has_key("roles"):
+            featureObjects[fid]['roles']=list()
+        featureObjects[fid]['roles'].append(roles)
+
+    for subsystems_line in featureData['Subsystems']:
+        subsystems_line=subsystems_line.rstrip()
+        [fid,subsystems]=subsystems_line.split("\t")
+        if not featureObjects[fid].has_key("subsystems"):
+            featureObjects[fid]['subsystems']=list()
+        featureObjects[fid]['subsystems'].append(subsystems)
+
+    # need to do SubsystemData
+    for ssdata_line in featureData['SubsystemData']:
+        ssdata_line=ssdata_line.rstrip()
+        [fid,subsystem,variant,role]=ssdata_line.split("\t")
+        if not featureObjects[fid].has_key("ssdata"):
+            featureObjects[fid]['ssdata']=list()
+        ssdata = [subsystem,variant,role]
+        featureObjects[fid]['ssdata'].append(ssdata)
 
 
-def insert_features(gid,fids):
+    return featureObjects
 
-    fids_to_insert = list()
+#    attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','fids2pubs','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
 
-    feature_list = 'feature_id%3A"' + '"+feature_id%3A"'.join(fids) + '"'
-    # ws.save_objects(feature_objects)
-    # return...mapping?
-
-    core_data = dict()
-    for core in solr_cores['status']:
-        req = requests.get(solr_url_base + '/' + core + '/select?wt=json&rows=1000000&q=' + feature_list)
-        core_data[core] = dict()
-        data = simplejson.loads(req.text)
-#        print >> sys.stderr, data
-        for doc in data['response']['docs']:
-            if not core_data[core].has_key(doc['feature_id']):
-                core_data[core][doc['feature_id']] = list()
-#            print >> sys.stderr, doc['feature_id']
-            core_data[core][doc['feature_id']].extend([doc])
-#    print >> sys.stderr, core_data
-
-    for feature_id in fids:
-        featureObject = dict()
-        featureObject["feature_id"] = feature_id
-        featureObject["genome_id"] = g
-        featureObject["source"] = 'KBase Central Store'
-        
-        if core_data['Feature'].has_key(feature_id):
-            this_feature=core_data['Feature'][feature_id][0]
-            if this_feature.has_key('feature_type'):
-                featureObject["feature_type"] = this_feature['feature_type']
-            if this_feature.has_key('function'):
-                featureObject["function"] = this_feature['function']
-            if this_feature.has_key('sequence_length'):
-                featureObject["dna_sequence_length"] = this_feature['sequence_length']
-            if this_feature.has_key('source_id'):
-                featureObject["feature_source_id"] = this_feature['source_id']
-
-        if core_data['ProteinSeq'].has_key(feature_id):
-            this_feature=core_data['ProteinSeq'][feature_id][0]
-            if this_feature.has_key('md5'):
-                featureObject["md5"] = this_feature['md5']
-            if this_feature.has_key('sequence'):
-                featureObject["protein_translation"] = this_feature['sequence']
-                featureObject["protein_translation_length"] = len(this_feature['sequence'])
-
-        if core_data['FeatureAlias'].has_key(feature_id):
-            this_feature=core_data['FeatureAlias'][feature_id]
-            featureObject["aliases"] = [ x['alias'] for x in this_feature ]
-
-        if core_data['Location'].has_key(feature_id):
-            this_feature=core_data['Location'][feature_id]
-            locs = list()
-            for loc in this_feature:
-                this_loc = [ loc['contig_id'], loc['begin'], loc['dir'], loc['len'], loc['ordinal'] ] 
-                locs.append(this_loc)
-#            print >> sys.stderr, core_data['Location'][feature_id]
-            featureObject["location"] = locs
+    if 0:     
 
         if core_data['Families'].has_key(feature_id):
             this_feature=core_data['Families'][feature_id]
@@ -156,16 +164,6 @@ def insert_features(gid,fids):
                 fams.append(this_fam)
 #            print >> sys.stderr, core_data['Location'][feature_id]
             featureObject["protein_families"] = fams
-
-        if core_data['Annotations'].has_key(feature_id):
-            this_feature=core_data['Annotations'][feature_id]
-            annos = list()
-            for anno in this_feature:
-                if anno.has_key('comment'):
-                    this_anno = [ anno['comment'], anno['annotator'], anno['annotation_time'] ] 
-                    annos.append(this_anno)
-#            print >> sys.stderr, core_data['Location'][feature_id]
-            featureObject["annotations"] = annos
 
         if core_data['Publications'].has_key(feature_id):
             this_feature=core_data['Publications'][feature_id]
@@ -242,7 +240,7 @@ def insert_features(gid,fids):
     return feature_info
 
 
-for g in genomes:
+def insert_genome(g,genome_entities,featureData):
     start = time.time()
 
     # maybe use get_entity_Genome to get additional fields, like source_id and domain?
@@ -251,16 +249,16 @@ for g in genomes:
     end = time.time()
     print >> sys.stderr, "querying genome_data " + str(end - start)
 
-    if 'P' not in genome_data['scientific_name']:
-        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
-        continue
+#    if 'P' not in genome_data['scientific_name']:
+#        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
+#        return
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
 
     try:
         ws.get_object_info([{"workspace":wsname,"name":g}],0)
 #        print >> sys.stderr, 'genome '  + g + ' found, updating'
         print >> sys.stderr, 'genome '  + g + ' found, skipping'
-        continue
+        return
     except biokbase.workspace.client.ServerError:
         print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
 
@@ -338,7 +336,7 @@ for g in genomes:
         contig_sequences[contig_id] = ''
 
     end = time.time()
-    print  >> sys.stderr, "querying contig seqs " + str(end - start)
+    print  >> sys.stderr, "(not) querying contig seqs " + str(end - start)
 
     start = time.time()
 
@@ -392,42 +390,20 @@ for g in genomes:
     contigset_ref = wsname + '/' + contigSet['id']
     genomeObject["contigset_ref"] = contigset_ref
 
-    # for debugging
-    continue
-
 ###########################
     # build Feature objects
 
-    # feature ids
-    fids = cdmi_api.genomes_to_fids([g],[])[g]
+    start  = time.time()
 
-    start = time.time()
-    fids_to_insert = list()
-
-    for x in fids:
-        fids_to_insert.append( x )
-        if len(fids_to_insert) > 49:
-
-             feature_info = insert_features(g,fids_to_insert)
-             for ws_feature in feature_info:
-                 print >> sys.stderr, ws_feature
-                 if not featureSet['features'].has_key(ws_feature[1]):
-                     featureSet['features'][ws_feature[1]] = dict()
-                 featureSet['features'][ws_feature[1]] = ws_feature[7] + '/' + ws_feature[1]
-
-             fids_to_insert = list()
-
-    # final fids to insert (batching code)
-    if len(fids_to_insert) > 0:
-         feature_info = insert_features(g,fids_to_insert)
-         for ws_feature in feature_info:
-             print >> sys.stderr, ws_feature
-             if not featureSet['features'].has_key(ws_feature[1]):
-                 featureSet['features'][ws_feature[1]] = dict()
-             featureSet['features'][ws_feature[1]] = ws_feature[7] + '/' + ws_feature[1]
+    # with any luck this can be used directly when saving a FeatureSet
+    featureObjects = create_feature_objects(gid,featureData)
+    pp.pprint(featureObjects)
 
     end = time.time()
     print  >> sys.stderr, " processing features, elapsed time " + str(end - start)
+
+    # for debugging
+    return 
 
     # insert into workspace, get path
 #    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
@@ -446,3 +422,154 @@ for g in genomes:
 
     end = time.time()
     print  >> sys.stderr, "insert genome into ws " + str(end - start)
+
+if __name__ == "__main__":
+    import argparse
+    import os.path
+
+    parser = argparse.ArgumentParser(description='Create solr tab-delimited import files from flat file dumps from CS.')
+    parser.add_argument('--sorted-file-dir', nargs=1, help='path to sorted dump files to be parsed')
+
+    args = parser.parse_args()
+
+    sorted_file_dir = '.'
+    if args.sorted_file_dir:
+        sorted_file_dir = args.sorted_file_dir[0]
+
+    # want to try to go in order to avoid repeats
+    genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
+    #genome_entities = cdmi_entity_api.all_entities_Genome(0,500,['id','scientific_name','source_id'])
+    #genome_entities = cdmi_entity_api.all_entities_Genome(60,500,['id','scientific_name','source_id'])
+    #genome_entities = cdmi_entity_api.all_entities_Genome(40,500,['id','scientific_name','source_id'])
+    genomes = genome_entities
+    #genomes = random.sample(genome_entities,500)
+    
+    #genomes = sys.argv[1:]
+    
+
+    fileHandle = dict()
+    featureData = dict()
+    currentLine = dict()
+    currentNumericGid = -1
+    currentGid = ''
+
+    fileList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','Feature','fids2pubs','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
+    attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','fids2pubs','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
+
+    for file in fileList:
+        fileName = sorted_file_dir + '/' + file + '.tab.sorted'
+        fileHandle[file] = open ( fileName, 'r' )
+        # seed the first line
+        currentLine[file] = fileHandle[file].readline()
+
+    while currentLine['Feature']:
+        [fid,cs_id,gid,restOfLine]=currentLine['Feature'].split("\t",3)
+        [prefix,numericGid] = gid.split('.')
+        numericGid=int(numericGid)
+        if (currentNumericGid == -1):
+            currentGid = gid
+            currentNumericGid = numericGid
+        if (numericGid > currentNumericGid):
+            print >> sys.stderr, 'gid is ' + gid
+            print >> sys.stderr, 'numericGid is ' + str(numericGid)
+            print >> sys.stderr, 'currentNumericGid is ' + str(currentNumericGid)
+            # read other files and populate featureData
+            for attribute in attributeList:
+                featureData[attribute] = list()
+                while currentLine[attribute]:
+                    [attrFid,attrRestOfLine]=currentLine[attribute].split("\t",1)
+                    [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
+                    attrGid=attrGidPrefix+'.'+attrGidNumericId
+                    attrGidNumericId=int(attrGidNumericId)
+                    print >> sys.stderr, 'attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+                    if (attrGidNumericId == currentNumericGid):
+                        featureData[attribute].append(currentLine[attribute])
+                    if (attrGidNumericId < currentNumericGid):
+                        print >> sys.stderr, attribute + ' file may have extra data, skipping'
+                        print >> sys.stderr, ' '.join([attrGid, currentNumericGid])
+                    if (attrGidNumericId > currentNumericGid):
+                        print >> sys.stderr, 'need to skip to next attribute here: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+                        break
+                    currentLine[attribute] = fileHandle[attribute].readline()
+#            pp.pprint(featureData)
+            # pass featureData to a sub that creates appropriate subobjects
+            insert_genome(currentGid,genome_entities,featureData)
+
+            # make sure Python does gc right away
+            featureData = None
+            featureData = dict()
+            featureData['Feature'] = list()
+            featureData['Feature'].append(currentLine['Feature'])
+            currentNumericGid = numericGid
+            currentGid = gid
+        if (numericGid == currentNumericGid):
+            if not featureData.has_key('Feature'):
+                featureData['Feature'] = list()
+            featureData['Feature'].append(currentLine['Feature'])
+        if (numericGid < currentNumericGid):
+            print >> sys.stderr, 'There is a big problem! Feature file may not be sorted properly.'
+            print >> sys.stderr, ' '.join([numericGid, currentNumericGid])
+            print >> sys.stderr, currentLine['Feature']
+            exit(5)
+        currentLine['Feature'] = fileHandle['Feature'].readline()
+
+    # process remaining features
+    print >> sys.stderr, gid
+    print >> sys.stderr, currentNumericGid
+#    print featureData['Feature']
+    # read other files and populate featureData
+    # wsFeatures = import_features(featureData)
+    # import_genomes(wsFeatures,gid)
+
+    # set up a try block here?
+    try:
+        retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
+    # want this to catch only workspace exists errors
+    except biokbase.workspace.client.ServerError, e:
+        pass
+    #    print >> sys.stderr, e
+    
+    #kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
+    
+    # DvH, E.coli
+    # takes 4min (total) without dna_seqs, with coexpressed_fids
+    # takes 5min (total) with retrieving everything
+    #genomes = ['kb|g.3562','kb|g.0']
+    # arabidopsis--takes 50m with individual dna_seq calls (coexpressed_fids untested)
+    # takes much less time when cached
+    #genomes = ['kb|g.3899']
+    # poplar
+    # genomes = ['kb|g.3907']
+    # more static sets
+    #genomes = ['kb|g.9','kb|g.222']
+    #genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
+    #genomes = ['kb|g.19762','kb|g.1976']
+    #genomes = ['kb|g.0']
+    #genomes = ['kb|g.3562']
+    #genomes = ['kb|g.3562','kb|g.0']
+    # DvH, e.coli, multiple versions of arabidopsis
+    # what other genomes are essential?
+    #genomes = ['kb|g.3562','kb|g.0','kb|g.1105','kb|g.1103','kb|g.26509','kb|g.1104']
+    # kb|g.1103 has at least one feature with a bad location
+    genomes = ['kb|g.3562','kb|g.0','kb|g.3899','kb|g.3907','kb|g.27073']
+    # chicken
+    #genomes = ['kb|g.3643']
+    #genomes = ['kb|g.26509']
+    # pseudomonas stutzeri (for microbes demo)
+    #genomes = ['kb|g.27073']
+    
+    #genomeObjects = dict()
+    
+    
+# general arch:
+# open publications file
+# read into structure
+# close pubs
+# open other files
+# read from Features until gid is new, saving lines in structure
+# read in other files and save to structures
+# pass features structure and filehandles or structures to import_features
+# create and return feature subobjects (in python)
+# pass gid and feature subobjects to import_genome
+# create FeatureSet object in ws
+# create Genome object in ws
