@@ -43,11 +43,11 @@ def create_feature_objects(gid,featureData):
 
     for feature_line in featureData['Feature']:
         feature_line=feature_line.rstrip()
-        [fid,cs_id,gid,dna_sequence_length,feature_type,feature_source_id,function,md5,protein_translation_length,protein_translation]=feature_line.split("\t")
+        [fid,cs_id,genome_id,dna_sequence_length,feature_type,feature_source_id,function,md5,protein_translation_length,protein_translation]=feature_line.split("\t")
         featureObjects[fid]=dict()
         featureObjects[fid]["source"] = 'KBase Central Store'
         featureObjects[fid]['feature_id']=fid
-        featureObjects[fid]['genome_id']=gid
+        featureObjects[fid]['genome_id']=genome_id
         featureObjects[fid]['dna_sequence_length']=int(dna_sequence_length)
         featureObjects[fid]['feature_type']=feature_type
         featureObjects[fid]['feature_source_id']=feature_source_id
@@ -95,6 +95,14 @@ def create_feature_objects(gid,featureData):
         featureObjects[fid]['co_occurring_fids'].append(co_occurring_fid)
 
     # need to do fids2pubs (to populate publication attribute)
+    for fids2pubs_line in featureData['fids2pubs']:
+        fids2pubs_line=fids2pubs_line.rstrip()
+        [fid,id]=fids2pubs_line.split("\t")
+        if not featureObjects[fid].has_key("feature_publications"):
+            featureObjects[fid]['feature_publications']=list()
+        fids2pubs = [int(id),'source_db','article_title','link','pubdate','authors','journal_name']
+        featureObjects[fid]['feature_publications'].append(fids2pubs)
+
 
     for alias_line in featureData['FeatureAlias']:
         alias_line=alias_line.rstrip()
@@ -119,7 +127,33 @@ def create_feature_objects(gid,featureData):
         protein_families = { 'id':id, 'release_version':release_version, 'subject_db':subject_db, 'subject_description':subject_description }
         featureObjects[fid]['protein_families'].append(protein_families)
 
-    # need to do RegulonData (uses two featureData keys)
+    # RegulonData
+    # (uses two featureData keys, need to track by reg)
+    regulons2fids = dict()
+    regulons2tfs = dict()
+    fids2regulons = dict()
+    for regulon_line in featureData['regulonData.members']:
+        regulon_line=regulon_line.rstrip()
+        [fid,reg]=regulon_line.split("\t")
+        fids2regulons[fid]=reg
+        if not regulons2fids.has_key(reg):
+            regulons2fids[reg]=list()
+        regulons2fids[reg].append(fid)
+    for tfs_line in featureData['regulonData.tfs']:
+        tfs_line=tfs_line.rstrip()
+        [fid,reg]=tfs_line.split("\t")
+        if not regulons2tfs.has_key(reg):
+            regulons2tfs[reg]=list()
+        regulons2tfs[reg].append(fid)
+    for fid in fids2regulons:
+        regulon_id = fids2regulons[fid]
+        regulon_set = regulons2fids[regulon_id]
+        if regulons2tfs.has_key(regulon_id):
+            tfs = regulons2tfs[regulon_id]
+        regulon_data = [ regulon_id, regulon_set, tfs ]
+        if not featureObjects[fid].has_key("regulon_data"):
+            featureObjects[fid]['regulon_data']=list()
+        featureObjects[fid]['regulon_data'].append(regulon_data)
 
     for roles_line in featureData['Roles']:
         roles_line=roles_line.rstrip()
@@ -397,13 +431,14 @@ def insert_genome(g,genome_entities,featureData):
 
     # with any luck this can be used directly when saving a FeatureSet
     featureObjects = create_feature_objects(gid,featureData)
-    pp.pprint(featureObjects)
+    featureSet['features'] = featureObjects
+#    pp.pprint(featureObjects)
 
     end = time.time()
     print  >> sys.stderr, " processing features, elapsed time " + str(end - start)
 
     # for debugging
-    return 
+#    return 
 
     # insert into workspace, get path
 #    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
@@ -481,7 +516,7 @@ if __name__ == "__main__":
                     [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
                     attrGid=attrGidPrefix+'.'+attrGidNumericId
                     attrGidNumericId=int(attrGidNumericId)
-                    print >> sys.stderr, 'attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+#                    print >> sys.stderr, 'attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
                     if (attrGidNumericId == currentNumericGid):
                         featureData[attribute].append(currentLine[attribute])
                     if (attrGidNumericId < currentNumericGid):
