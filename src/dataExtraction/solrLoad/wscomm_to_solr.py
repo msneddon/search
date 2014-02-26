@@ -127,6 +127,7 @@ def export_comm_from_ws(maxNumObjects):
                         search_values['tech_contact']  = pat.sub(' ',str(' '.join(mg['data']['project']['tech_contact'].values())))
     
                     object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(mg['info'][0])
+                    object_name = str(mg['info'][1])
 
                     search_values['metagenome_name_sort'] = "_".join(search_values['metagenome_name'].lower().split())
                     search_values['project_name_sort'] = "_".join(search_values['project_name'].lower().split())

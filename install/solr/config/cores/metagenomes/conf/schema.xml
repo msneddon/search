@@ -73,6 +73,7 @@
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
    <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
 
    <field name="metagenome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="metagenome_name" type="text_general" indexed="true" stored="true"/>
