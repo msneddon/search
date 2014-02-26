@@ -2,20 +2,21 @@
 # suitable for creating KBaseSearch.Feature ws objects
 # the output files do need to be sorted (mysql sort is often slow)
 
-# prerequisite: set up .my.cnf with proper creds
+# prerequisite: set up ./my.cnf with proper creds in current
+# working directory
 
 # all SQL queries relatively short (< 5m) unless noted
 
 # define for debugging purposes
-#limit=' LIMIT 50000 '
+limit=' LIMIT 50000 '
 
 # might want to split out Feature and protein sequence
 # so that we can leave out protein sequence if it's too big
 # ~ 90m for query with protein sequences
-#echo Feature
-#time mysql --defaults-extra-file=./my.cnf -e \
-# " SELECT f.id,f.id,ioo.from_link,f.sequence_length,f.feature_type,f.source_id,f.function,ps.id,length(ps.sequence),ps.sequence from Feature f left join IsOwnerOf ioo ON (ioo.to_link=f.id) left join IsProteinFor ipf ON (ipf.to_link=f.id) left join ProteinSequence ps ON (ipf.from_link = ps.id) $limit " \
-#  | perl -pi -e 's/"//g' > Feature.tab
+echo Feature
+time mysql --defaults-extra-file=./my.cnf -e \
+ " SELECT f.id,f.id,ioo.from_link,f.sequence_length,f.feature_type,f.source_id,f.function,ps.id,length(ps.sequence),ps.sequence from Feature f left join IsOwnerOf ioo ON (ioo.to_link=f.id) left join IsProteinFor ipf ON (ipf.to_link=f.id) left join ProteinSequence ps ON (ipf.from_link = ps.id) $limit " \
+  | perl -pi -e 's/"//g' > Feature.tab
 
 # we're going to add a join to Feature to make sure all outputs
 # are valid features
@@ -72,6 +73,7 @@ time mysql --defaults-extra-file=./my.cnf -e \
   | perl -pi -e 's/"//g' > SubsystemData.tab
 
 # ~15m
+# this gives dups, need to remove at some point
 echo Subsystems
 time mysql --defaults-extra-file=./my.cnf -e \
  " select c.to_link,i.from_link from Contains c join IsRoleOf iro ON (c.from_link=iro.to_link) join Includes i ON (iro.from_link=i.to_link) JOIN Feature f ON (c.to_link=f.id) $limit " \
@@ -110,8 +112,14 @@ echo sorting files
 for file in *.tab
 do
   echo sorting $file
-  sort -k2 -t '.' -T ./tmp -S 48G $file > $file.sorted
+  sort -n -k2 -t '.' -T ./tmp -S 48G $file > $file.sorted
 done
+
+# extra sort for Subsystems to remove dups; is a bit
+# wasteful but not terrible
+echo sort -u Subsystems
+sort -n -k2 -t '.' -T ./tmp -S 48G -u Subsystems.tab > Subsystems.tab.sorted
+
 
 # now can open .sorted files and stream through them
 
