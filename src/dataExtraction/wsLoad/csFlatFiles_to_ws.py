@@ -149,6 +149,7 @@ def create_feature_objects(gid,featureData):
     for fid in fids2regulons:
         regulon_id = fids2regulons[fid]
         regulon_set = regulons2fids[regulon_id]
+        tfs = list()
         if regulons2tfs.has_key(regulon_id):
             tfs = regulons2tfs[regulon_id]
         regulon_data = [ regulon_id, regulon_set, tfs ]
@@ -158,10 +159,15 @@ def create_feature_objects(gid,featureData):
 
     for roles_line in featureData['Roles']:
         roles_line=roles_line.rstrip()
-        [fid,roles]=roles_line.split("\t")
+        try:
+            [fid,role]=roles_line.split("\t")
+        except Exception, e:
+            print >> sys.stderr, e
+            print >> sys.stderr, roles_line
+            continue
         if not featureObjects[fid].has_key("roles"):
             featureObjects[fid]['roles']=list()
-        featureObjects[fid]['roles'].append(roles)
+        featureObjects[fid]['roles'].append(role)
 
     for subsystems_line in featureData['Subsystems']:
         subsystems_line=subsystems_line.rstrip()
