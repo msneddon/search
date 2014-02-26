@@ -17,7 +17,8 @@ import pprint
 import biokbase.workspace.client
 import biokbase.cdmi.client
 
-wsname = 'KBasePublicRichGenomes'
+# use a temp name here; rename later when load complete
+wsname = 'KBasePublicRichGenomesLoad'
 
 pp = pprint.PrettyPrinter(indent=4)
 
@@ -444,7 +445,12 @@ def insert_genome(g,genome_entities,featureData):
 #    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
     # another try block here?
     featureset_id = genomeObject['genome_id'] + '.featureset'
+
+    start  = time.time()
+
     featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.FeatureSet","data":featureSet,"name":featureset_id}]})
+    end = time.time()
+    print  >> sys.stderr, " saving featureset to ws, elapsed time " + str(end - start)
     print >> sys.stderr, featureset_info
 
     featureset_ref = wsname + '/' + featureset_id
@@ -471,15 +477,17 @@ if __name__ == "__main__":
     if args.sorted_file_dir:
         sorted_file_dir = args.sorted_file_dir[0]
 
-    # want to try to go in order to avoid repeats
+    try:
+        retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
+        print >> sys.stderr, 'created workspace ' + wsname
+        print >> sys.stderr, retval
+    # want this to catch only workspace exists errors
+    except biokbase.workspace.client.ServerError, e:
+        pass
+#        print >> sys.stderr, e
+
     genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
-    #genome_entities = cdmi_entity_api.all_entities_Genome(0,500,['id','scientific_name','source_id'])
-    #genome_entities = cdmi_entity_api.all_entities_Genome(60,500,['id','scientific_name','source_id'])
-    #genome_entities = cdmi_entity_api.all_entities_Genome(40,500,['id','scientific_name','source_id'])
     genomes = genome_entities
-    #genomes = random.sample(genome_entities,500)
-    
-    #genomes = sys.argv[1:]
     
 
     fileHandle = dict()
