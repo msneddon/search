@@ -22,6 +22,15 @@ def export_comm_from_ws(maxNumObjects):
     
     all_workspaces = [ workspace_object ]
     
+    solr_ws_keys = ['object_id','workspace_name','object_name', 'object_type']
+    # these are the keys in the solr document
+    all_keys = [ 'metagenome_id', 'metagenome_name', 'metagenome_name_sort', 'library_id', 'metagenome_metadata', 'sequence_type', 'seq_method', 'metagenome_created', 'project_id', 'project_name', 'project_name_sort', 'project_description', 'project_created', 'PI_info', 'tech_contact', 'funding_source', 'ncbi_id', 'qiime_id', 'vamps_id', 'greengenes_id', 'sample_id', 'sample_name', 'sample_name_sort', 'sample_created', 'collection_date', 'env_package_type', 'feature', 'biome', 'material', 'location', 'country', 'latitude', 'longitude']
+    headerOutFile = open('mgToSolr.tab.headers', 'w')
+    print >> headerOutFile, "\t".join(solr_ws_keys + all_keys)
+    #print >> headerOutFile, "\n"
+    headerOutFile.close()
+
+    
     outFile = open('mgToSolr.tab', 'w')
     
     # to create a string of values from an arbitrary structure:
@@ -75,11 +84,6 @@ def export_comm_from_ws(maxNumObjects):
                     mg = mg[0]
                     #print mg['data'].keys()
                     
-    # [u'originator', u'comment', u'assay', u'GwasPopulation_obj_id', u'variation_file', u'filetype', u'genome', u'GwasPopulationVariation_obj_id']
-    
-                    # these are the keys in the solr document
-                    all_keys = [ 'metagenome_id', 'metagenome_name', 'metagenome_name_sort', 'library_id', 'metagenome_metadata', 'sequence_type', 'seq_method', 'metagenome_created', 'project_id', 'project_name', 'project_name_sort', 'project_description', 'project_created', 'PI_info', 'tech_contact', 'funding_source', 'ncbi_id', 'qiime_id', 'vamps_id', 'greengenes_id', 'sample_id', 'sample_name', 'sample_name_sort', 'sample_created', 'collection_date', 'env_package_type', 'feature', 'biome', 'material', 'location', 'country', 'latitude', 'longitude']
-    
                     search_values=dict()
                     for key in all_keys:
                         search_values[key] = ''
@@ -136,7 +140,7 @@ def export_comm_from_ws(maxNumObjects):
                     outBuffer = StringIO.StringIO()
     
                     try:
-                        solr_strings = [object_id,workspace_name,object_type]
+                        solr_strings = [object_id,workspace_name,object_name,object_type]
                         solr_strings += [ unicode(str(search_values[x])) for x in all_keys ]
                         solr_line = "\t".join(solr_strings)
                         outBuffer.write(solr_line + "\n")
