@@ -22,6 +22,10 @@ wsname = 'KBasePublicRichGenomesLoad'
 
 pp = pprint.PrettyPrinter(indent=4)
 
+# this will be used to store the pub info from PubMed
+# use that with the fids2pubs mapping to stuff pub info into a feature
+publications = dict()
+
 # production CDMI instance
 cdmi_api = biokbase.cdmi.client.CDMI_API()
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
@@ -101,7 +105,7 @@ def create_feature_objects(gid,featureData):
         [fid,id]=fids2pubs_line.split("\t")
         if not featureObjects[fid].has_key("feature_publications"):
             featureObjects[fid]['feature_publications']=list()
-        fids2pubs = [int(id),'source_db','article_title','link','pubdate','authors','journal_name']
+        fids2pubs = [int(id),'PubMed',publications[id]['article_title'],publications[id]['link'],publications[id]['pubdate'],publications[id]['authors'],publications[id]['journal_name'] ]
         featureObjects[fid]['feature_publications'].append(fids2pubs)
 
 
@@ -297,9 +301,9 @@ def insert_genome(g,genome_entities,featureData):
 
     try:
         ws.get_object_info([{"workspace":wsname,"name":g}],0)
-#        print >> sys.stderr, 'genome '  + g + ' found, updating'
-        print >> sys.stderr, 'genome '  + g + ' found, skipping'
-        return
+        print >> sys.stderr, 'genome '  + g + ' found, updating'
+#        print >> sys.stderr, 'genome '  + g + ' found, skipping'
+#        return
     except biokbase.workspace.client.ServerError:
         print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
 
@@ -414,15 +418,16 @@ def insert_genome(g,genome_entities,featureData):
 # first see if object already exists
     try:
         contigset_info=ws.get_object_info([{"workspace":wsname,"name":contigSet['id']}],0)
-#        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' found, updating'
-        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' found, skipping'
+        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' found, updating'
+#        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' found, skipping'
 #        continue
     except biokbase.workspace.client.ServerError:
         print >> sys.stderr, 'contigset '  + contigSet['id'] + ' not found, adding to ws'
         # this will reference a ContigSet object
         #print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
         # another try block here?
-        contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
+
+    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
 
     end = time.time()
     print >> sys.stderr, "inserting contigset into ws " + str(end - start)
@@ -495,6 +500,18 @@ if __name__ == "__main__":
     genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
     genomes = genome_entities
     
+    pubHandle = open ( 'publications.tab.sorted', 'r')
+    for line in pubHandle:
+        line=line.rstrip()
+        thisPub = dict()
+        columns = line.split("\t")
+        if len(columns) == 7:
+            [ thisPub['id'] , thisPub['link'] , thisPub['pubdate'] , thisPub['journal_name'] , thisPub['article_title'] , thisPub['article_title_sort'] , thisPub['authors'] , ] = columns
+        if len(columns) == 8:
+            # abstract is not in the typed object yet, but we could add
+            # it in the future, so let's just save it
+            [ thisPub['id'] , thisPub['link'] , thisPub['pubdate'] , thisPub['journal_name'] , thisPub['article_title'] , thisPub['article_title_sort'] , thisPub['authors'] , thisPub['abstract'] ] = columns
+        publications[thisPub['id']] = thisPub
 
     fileHandle = dict()
     featureData = dict()

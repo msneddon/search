@@ -105,6 +105,9 @@ time mysql --defaults-extra-file=./my.cnf -e \
 
 
 echo not getting dna sequences
+# query for contig dna seqs:
+# select iso.to_link,ico.from_link,hs.to_link,cc.sequence from IsComposedOf ico join IsSequenceOf iso ON (ico.to_link=iso.to_link) join HasSection hs ON (iso.from_link=hs.from_link) join ContigChunk cc ON (hs.to_link=cc.id) limit 5;
+# would need to sort by the hs.to_link column, and decode the sequence column 
 
 # don't really need to sort publications file, but can't hurt
 # all sorts currently take ~90min
