@@ -14,9 +14,9 @@ import biokbase.workspace.client
 
 wsname = 'KBasePublicRichGenomesLoad'
 
-solr_keys = ['cs_id', "object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "feature_type" , "function" , "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "coexpressed_fids" , "co_occurring_fids"]
+solr_keys = ['cs_id', "object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_strand", "location_length", "location_ordinal", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
-solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "feature_type" , "function" , "aliases" , "feature_publications" , "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "coexpressed_fids" , "co_occurring_fids"]
+solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "aliases" , "feature_publications" , "location_contig", "location_begin", "location_strand", "location_length", "location_ordinal", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
@@ -149,7 +149,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                         outBuffer.write(solr_line + "\n")
                     except Exception, e:
                         print str(e)
-                        print "Failed trying to write to string buffer."
+                        print "Failed trying to write to string buffer for genome " + genomeObject['cs_id']
                 
                     outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
                     outBuffer.close()
@@ -168,7 +168,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                         for key in solr_genome_keys:
                             featureObject[key] = genomeObject[key]
 
-                        scalar_keys = ['feature_id','feature_source_id','protein_translation_length','feature_type','function']
+                        scalar_keys = ['feature_id','feature_source_id','protein_translation_length','dna_sequence_length','feature_type','function']
                         for key in scalar_keys:
                             try:
                                 featureObject[key] = str(f[key])
@@ -187,12 +187,23 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 # special keys
                         featureObject['cs_id'] = str(f['feature_id'])
 
-                        prepopulate_keys = ['roles','annotations','subsystem_data','subsystems','feature_publications', 'atomic_regulons', 'regulon_data', 'coexpressed_fids', 'co_occurring_fids', 'protein_families', 'aliases']
+                        prepopulate_keys = ['location_contig', 'location_begin', 'location_strand', 'location_length', 'location_ordinal', 'roles','annotations','subsystem_data','subsystems','feature_publications', 'atomic_regulons', 'regulon_data', 'coexpressed_fids', 'co_occurring_fids', 'protein_families', 'aliases']
                         for key in prepopulate_keys:
                             featureObject[key] = ''
 
                         # prefer an if here, so that errors inside
                         # don't get caught
+                        if f.has_key('location'):
+                           for loc in f['location']:
+                              if loc[4] != 0:
+                                  continue
+#                              print >> sys.stderr, loc
+                              featureObject['location_contig'] = loc[0]
+                              featureObject['location_begin'] = str(loc[1])
+                              featureObject['location_strand'] = loc[2]
+                              featureObject['location_length'] = str(loc[3])
+                              featureObject['location_ordinal'] = str(loc[4])
+
                         if f.has_key('roles'):
 #                            for role in f['roles']:
 #                                featureObject['roles'] += unicode(role) + ' '
@@ -215,10 +226,15 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                             for ar in f['atomic_regulons']:
                                 featureObject['atomic_regulons'] += ar[0] + ' '
     
-# regulon_data is not being retrieved correctly at the moment
                         if f.has_key('regulon_data'):
                             for reg in f['regulon_data']:
                                 featureObject['regulon_data'] += reg[0] + ' '
+                                featureObject['regulon_data'] += ' :: '
+                                for member in reg[1]:
+                                    featureObject['regulon_data'] += member + ' '
+                                featureObject['regulon_data'] += ' :: '
+                                for tfs in reg[2]:
+                                    featureObject['regulon_data'] += tfs + ' '
     
                         if f.has_key('co_occurring_fids'):
                             for coo in f['co_occurring_fids']:
@@ -253,7 +269,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                             outBuffer.write(solr_line + "\n")
                         except Exception, e:
                             print str(e)
-                            print "Failed trying to write to string buffer."
+                            print "Failed trying to write to string buffer for feature " + f['feature_id']
                 
                         outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
                         outBuffer.close()
