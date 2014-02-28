@@ -93,9 +93,9 @@
    <field name="roles" type="text_general" indexed="true" stored="true"/>
    <field name="location_contig" type="string" indexed="true" stored="true"/>
    <field name="location_begin" type="int" indexed="true" stored="true"/>
+   <field name="location_end" type="int" indexed="true" stored="true"/>
    <field name="location_strand" type="string" indexed="true" stored="true"/>
-   <field name="location_length" type="int" indexed="true" stored="true"/>
-   <field name="location_ordinal" type="int" indexed="true" stored="true"/>
+   <field name="locations" type="string" indexed="true" stored="true"/>
    <field name="subsystems" type="text_general" indexed="true" stored="true"/>
    <field name="subsystem_data" type="text_general" indexed="true" stored="true"/>
    <field name="protein_families" type="text_ws_general" indexed="true" stored="true"/>
