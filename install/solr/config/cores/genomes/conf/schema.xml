@@ -106,7 +106,7 @@
    <field name="co_occurring_fids" type="text_ws_general" indexed="true" stored="true"/>
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
-   <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" compressed="true"/>
+   <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
 
    <field name="_version_" type="long" indexed="true" stored="true"/>
 
@@ -295,7 +295,7 @@
     <!-- A text field that tries to combine text_general with whitespace
          tokenization, to preserve punctuation in identifiers
     -->
-    <fieldType name="text_ws_general" class="solr.TextField" positionIncrementGap="100" compressThreshold="64">
+    <fieldType name="text_ws_general" class="solr.TextField" positionIncrementGap="100" >
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
