@@ -12,7 +12,7 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
-wsname = 'KBasePublicRichGenomes'
+wsname = 'KBasePublicRichGenomesLoad'
 
 solr_keys = ['cs_id', "object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "feature_type" , "function" , "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "coexpressed_fids" , "co_occurring_fids"]
 solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
@@ -20,8 +20,8 @@ solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_l
 
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
-    #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
-    ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
+    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
+    #ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})
     
@@ -156,29 +156,14 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 
 
                     # dump out each feature in tab delimited format
-                    # need to batch these calls, super slow one at a time
-                    features_to_retrieve = list()
-                    features_to_process = list()
-                    for fid in features:
-                        features_to_retrieve.append({"ref": workspace_name+'/'+fid})
-                        if len(features_to_retrieve) > 99:
-                            features_to_process.extend(ws_client.get_objects(features_to_retrieve))
-                            features_to_retrieve = list()
-                            print >> sys.stderr, 'retrieved features so far: ' + str(len(features_to_process)) + ' of total features: ' + str(len(features))
-                    # final batch
-                    if len(features_to_retrieve) > 0:
-                        features_to_process.extend(ws_client.get_objects(features_to_retrieve))
-    
-    #                print >> sys.stderr, len(features_to_process)
-    #                print >> sys.stderr, len(features)
-                    for feature in features_to_process:
+                    for feature in features:
     
                         featureObject=dict()
 #solr_keys = ['cs_id', "object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "feature_type" , "function" , "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "coexpressed_fids" , "co_occurring_fids"]
 #solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
 #solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "feature_type" , "function" , "aliases" , "feature_publications" , "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "coexpressed_fids" , "co_occurring_fids"]
 
-                        f = feature['data']
+                        f = features[feature]
     
                         for key in solr_genome_keys:
                             featureObject[key] = genomeObject[key]
@@ -190,10 +175,14 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                             except:
                                 featureObject[key] = ''
     
-                        featureObject['object_id'] = 'kb|ws.' + str(feature['info'][6]) + '.obj.' + str(feature['info'][0])
-                        featureObject['workspace_name'] = feature['info'][7]
-                        featureObject['object_type'] = feature['info'][2]
-                        featureObject['object_name'] = feature['info'][1]
+                         # this will likely change to reflect the ws naming convention
+#                        featureObject['object_id'] = 'kb|ws.' + str(feature['info'][6]) + '.obj.' + str(feature['info'][0])
+#                        featureObject['object_id'] = 'kb|ws.' + str(featureset_info[0]['info'][6]) + '.obj.' + str(featureset_info[0]['info'][0]) + '.sub.' + feature
+                        featureObject['object_id'] = 'kb|ws.' + str(featureset_info[0]['info'][6]) + '.obj.' + str(featureset_info[0]['info'][0]) + '/features/' + feature
+                        featureObject['workspace_name'] = featureset_info[0]['info'][7]
+#                        featureObject['object_type'] = feature['info'][2]
+                        featureObject['object_type'] = 'KBaseSearch.Feature'
+                        featureObject['object_name'] = featureset_info[0]['info'][1] + '/features/' + feature
     
 # special keys
                         featureObject['cs_id'] = str(f['feature_id'])

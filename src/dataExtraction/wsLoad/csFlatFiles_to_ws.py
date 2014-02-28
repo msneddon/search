@@ -90,6 +90,8 @@ def create_feature_objects(gid,featureData):
         coexpressed_fid = [coexpressed_fid,float(score)]
         featureObjects[fid]['coexpressed_fids'].append(coexpressed_fid)
 
+    # not working right?
+    # it's fine, db is missing some entries (see KBASE-640)
     for co_occurring_fid_line in featureData['CoOccurringFids']:
         co_occurring_fid_line=co_occurring_fid_line.rstrip()
         [fid,co_occurring_fid,score]=co_occurring_fid_line.split("\t")
@@ -99,7 +101,6 @@ def create_feature_objects(gid,featureData):
         co_occurring_fid = [co_occurring_fid,float(score)]
         featureObjects[fid]['co_occurring_fids'].append(co_occurring_fid)
 
-    # need to do fids2pubs (to populate publication attribute)
     for fids2pubs_line in featureData['fids2pubs']:
         fids2pubs_line=fids2pubs_line.rstrip()
         [fid,id]=fids2pubs_line.split("\t")
@@ -180,14 +181,13 @@ def create_feature_objects(gid,featureData):
             featureObjects[fid]['subsystems']=list()
         featureObjects[fid]['subsystems'].append(subsystems)
 
-    # need to do SubsystemData
     for ssdata_line in featureData['SubsystemData']:
         ssdata_line=ssdata_line.rstrip()
         [fid,subsystem,variant,role]=ssdata_line.split("\t")
         if not featureObjects[fid].has_key("ssdata"):
-            featureObjects[fid]['ssdata']=list()
+            featureObjects[fid]['subsystem_data']=list()
         ssdata = [subsystem,variant,role]
-        featureObjects[fid]['ssdata'].append(ssdata)
+        featureObjects[fid]['subsystem_data'].append(ssdata)
 
 
     return featureObjects
