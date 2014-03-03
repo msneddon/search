@@ -49,7 +49,7 @@ def export_expression_from_ws(maxNumObjects):
     # print out a header file
     # data fields must be printed in same order
     solr_ws_keys = ['object_id','workspace_name','object_type', 'object_name']
-    solr_keys = [ 'source_id','series_genome_ids','series_sample_ids','title','summary','design','publication_id','external_source_date','numerical_interpretation','description','data_quality_level','original_median','genome_id','expression_ontology_terms','platform_id','default_control_sample','averaged_from_samples','protocol','strain','persons','molecule','data_source','feature_id','feature_function','expression_level']
+    solr_keys = [ 'source_id','series_genome_ids','series_sample_ids','title','summary','design','publication_id','external_source_date','sample_type','numerical_interpretation','description','data_quality_level','original_median','genome_id','expression_ontology_terms','platform_id','default_control_sample','averaged_from_samples','protocol','strain','strain_wild_type','persons','molecule','data_source','feature_id','feature_function','expression_level']
     headerOutFile = open('expressionToSolr.tab.headers', 'w')
     print >> headerOutFile, "\t".join(solr_ws_keys + solr_keys)
     #print >> headerOutFile, "\n"
