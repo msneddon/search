@@ -93,6 +93,7 @@
    <field name="averaged_from_samples" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="protocol" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="strain" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="strain_wild_type" type="boolean" indexed="true" stored="true" multiValued="false" /> 
    <field name="persons" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="molecule" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="data_source" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
