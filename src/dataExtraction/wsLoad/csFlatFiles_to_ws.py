@@ -38,9 +38,9 @@ cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
 #cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://140.221.84.182:7032')
     
 # production ws instance
-#ws = biokbase.workspace.client.Workspace()
+ws = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 # ws team dev instance
-ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
+#ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
     
 def create_feature_objects(gid,featureData):
 
@@ -122,8 +122,15 @@ def create_feature_objects(gid,featureData):
         [fid,contig,begin,strand,length,ordinal]=location_line.split("\t")
         if not featureObjects[fid].has_key("location"):
             featureObjects[fid]['location']=list()
-        location = [contig,int(begin),strand,int(length),int(ordinal)]
-        featureObjects[fid]['location'].append(location)
+        # should fix this for strandedness (to be same as CDMI)
+        if strand == '-':
+            start = int(begin) + int(length) - 1
+            location = [contig,int(start),strand,int(length),int(ordinal)]
+            featureObjects[fid]['location'].append(location)
+        else:
+            location = [contig,int(begin),strand,int(length),int(ordinal)]
+            featureObjects[fid]['location'].append(location)
+#        featureObjects[fid]['location'].append(location)
 
     for protein_families_line in featureData['ProteinFamilies']:
         protein_families_line=protein_families_line.rstrip()
@@ -427,14 +434,15 @@ def insert_genome(g,genome_entities,featureData):
         #print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
         # another try block here?
 
-    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
+#    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
 
     end = time.time()
-    print >> sys.stderr, "inserting contigset into ws " + str(end - start)
-    print >> sys.stderr, contigset_info
+    print >> sys.stderr, "(not) inserting contigset into ws " + str(end - start)
+#    print >> sys.stderr, contigset_info
 
     contigset_ref = wsname + '/' + contigSet['id']
-    genomeObject["contigset_ref"] = contigset_ref
+#    genomeObject["contigset_ref"] = contigset_ref
+#    genomeObject["contigset_ref"] = contigset_ref
 
 ###########################
     # build Feature objects
