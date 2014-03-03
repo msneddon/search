@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 
 import StringIO
-import json
+import simplejson
 import sys
 import random
 import re
@@ -14,14 +14,14 @@ import biokbase.workspace.client
 
 wsname = 'KBasePublicRichGenomesLoad'
 
-solr_keys = ['cs_id', "object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_strand", "location_length", "location_ordinal", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
+solr_keys = ['cs_id', "object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
-solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "aliases" , "feature_publications" , "location_contig", "location_begin", "location_strand", "location_length", "location_ordinal", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
+solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "aliases" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
-    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
-    #ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
+#    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
+    ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})
     
@@ -187,22 +187,34 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 # special keys
                         featureObject['cs_id'] = str(f['feature_id'])
 
-                        prepopulate_keys = ['location_contig', 'location_begin', 'location_strand', 'location_length', 'location_ordinal', 'roles','annotations','subsystem_data','subsystems','feature_publications', 'atomic_regulons', 'regulon_data', 'coexpressed_fids', 'co_occurring_fids', 'protein_families', 'aliases']
+                        prepopulate_keys = ['location_contig', 'location_begin', 'location_end', 'location_strand', 'locations', 'roles','annotations','subsystem_data','subsystems','feature_publications', 'atomic_regulons', 'regulon_data', 'coexpressed_fids', 'co_occurring_fids', 'protein_families', 'aliases']
                         for key in prepopulate_keys:
                             featureObject[key] = ''
 
                         # prefer an if here, so that errors inside
                         # don't get caught
                         if f.has_key('location'):
+                           featureObject['locations'] = simplejson.dumps(f['location'])
+                           # determine strand (we hope all features have
+                           # locations on same contig and strand)
+                           # find loc[4] == 0 and loc[4] > all other locs
+                           # set begin and end appropriately
+                           featureObject['location_contig'] = f['location'][0][0]
+                           featureObject['location_strand'] = f['location'][0][2]
+                           firstLoc = list()
+                           lastLoc = f['location'][0]
                            for loc in f['location']:
-                              if loc[4] != 0:
-                                  continue
-#                              print >> sys.stderr, loc
-                              featureObject['location_contig'] = loc[0]
-                              featureObject['location_begin'] = str(loc[1])
-                              featureObject['location_strand'] = loc[2]
-                              featureObject['location_length'] = str(loc[3])
-                              featureObject['location_ordinal'] = str(loc[4])
+                              if loc[4] == 0:
+                                  firstLoc = loc
+                              if loc[4] > lastLoc[4]:
+                                  lastLoc = loc
+                           # not 100% sure about these
+                           if featureObject['location_strand'] == '-':
+                               featureObject['location_begin'] = str(firstLoc[1])
+                               featureObject['location_end'] = str(lastLoc[1]+lastLoc[3]-1)
+                           else:
+                               featureObject['location_begin'] = str(firstLoc[1])
+                               featureObject['location_end'] = str(lastLoc[1]+lastLoc[3]-1)
 
                         if f.has_key('roles'):
 #                            for role in f['roles']:
@@ -271,7 +283,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                             print str(e)
                             print "Failed trying to write to string buffer for feature " + f['feature_id']
                 
-                        outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
+                        outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"','\\"'))
                         outBuffer.close()
 
                 else:
