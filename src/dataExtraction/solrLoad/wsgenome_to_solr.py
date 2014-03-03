@@ -210,8 +210,10 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                                   lastLoc = loc
                            # not 100% sure about these
                            if featureObject['location_strand'] == '-':
-                               featureObject['location_begin'] = str(firstLoc[1])
-                               featureObject['location_end'] = str(lastLoc[1]+lastLoc[3]-1)
+#                               featureObject['location_begin'] = str(firstLoc[1])
+                               featureObject['location_begin'] = str(lastLoc[1]-lastLoc[3]+1)
+#                               featureObject['location_end'] = str(lastLoc[1]+lastLoc[3]-1)
+                               featureObject['location_end'] = str(firstLoc[1])
                            else:
                                featureObject['location_begin'] = str(firstLoc[1])
                                featureObject['location_end'] = str(lastLoc[1]+lastLoc[3]-1)
