@@ -146,7 +146,10 @@ def export_expression_from_ws(maxNumObjects):
 
                     if expression['data'].has_key('strain'):
                         search_values['strain'] = expression['data']['strain']['name'] + ' ' + expression['data']['strain']['description'] + ' ' + expression['data']['strain']['genome_id'] + ' reference_strain:' + expression['data']['strain']['reference_strain'] + ' wild_type:' + expression['data']['strain']['wild_type']
-                        search_values['strain_wild_type'] = expression['data']['strain']['wild_type']
+                        if expression['data']['strain']['wild_type'] == 'Y':
+                            search_values['strain_wild_type'] = True
+                        else:
+                            search_values['strain_wild_type'] = False
                     else:
                         search_values['strain']=''
 
