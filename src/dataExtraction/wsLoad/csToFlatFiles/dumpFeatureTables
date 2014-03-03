@@ -2,6 +2,9 @@
 # suitable for creating KBaseSearch.Feature ws objects
 # the output files do need to be sorted (mysql sort is often slow)
 
+# ultimately it might be good to convert this to a python script
+# but for now it should be sufficient
+
 # prerequisite: set up ./my.cnf with proper creds in current
 # working directory
 
@@ -125,4 +128,4 @@ sort -n -k2 -t '.' -T ./tmp -S 48G -u Subsystems.tab > Subsystems.tab.sorted
 
 
 # now can open .sorted files and stream through them
-
+# use csFlatFiles_to_ws.py script
