@@ -73,11 +73,11 @@
    <field name="genome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="feature_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="genome_source" type="text_general" indexed="true" stored="true"/>
-   <field name="genome_source_id" type="text_general" indexed="true" stored="true"/>
-   <field name="feature_source_id" type="text_general" indexed="true" stored="true"/>
+   <field name="genome_source_id" type="string" indexed="true" stored="true"/>
+   <field name="feature_source_id" type="string" indexed="true" stored="true"/>
    <field name="protein_translation_length" type="int" indexed="true" stored="true"/>
    <field name="dna_sequence_length" type="int" indexed="true" stored="true"/>
-   <field name="feature_type" type="text_general" indexed="true" stored="true"/>
+   <field name="feature_type" type="string" indexed="true" stored="true"/>
    <field name="function" type="text_general" indexed="true" stored="true"/>
    <field name="aliases" type="text_ws_general" indexed="true" stored="true" omitNorms="true"/>
    <field name="scientific_name" type="text_general" indexed="true" stored="true"/>
@@ -85,7 +85,7 @@
    <field name="genome_dna_size" type="long" indexed="true" stored="true"/>
    <field name="num_contigs" type="int" indexed="true" stored="true"/>
    <field name="complete" type="boolean" indexed="true" stored="true"/>
-   <field name="domain" type="text_general" indexed="true" stored="true"/>
+   <field name="domain" type="string" indexed="true" stored="true"/>
    <field name="taxonomy" type="text_general" indexed="true" stored="true"/>
    <field name="gc_content" type="float" indexed="true" stored="true"/>
    <field name="genome_publications" type="text_ws_general" indexed="true" stored="true"/>
