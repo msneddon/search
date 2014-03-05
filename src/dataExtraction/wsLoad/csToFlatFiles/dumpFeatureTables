@@ -29,6 +29,11 @@ time mysql --defaults-extra-file=./my.cnf -e \
  " SELECT fa.id,fa.alias FROM FeatureAlias fa JOIN Feature f ON (fa.id=f.id) $limit " \
   | perl -pi -e 's/"//g' > FeatureAlias.tab
 
+# ~18min
+echo HasAliasAssertedFrom
+time mysql --defaults-extra-file=./my.cnf -e 'select haaf.from_link as fid,haaf.alias,haaf.to_link as source_db from HasAliasAssertedFrom haaf JOIN Feature f ON (f.id=haaf.from_link)' \
+ | perl -pi -e 's/"//g' > HasAliasAssertedFrom.tab
+
 echo AtomicRegulons
 time mysql --defaults-extra-file=./my.cnf -e \
  " SELECT ifo.to_link,ifo.from_link FROM IsFormedOf ifo JOIN Feature f ON (ifo.to_link=f.id) $limit " \

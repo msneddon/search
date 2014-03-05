@@ -117,6 +117,15 @@ def create_feature_objects(gid,featureData):
             featureObjects[fid]['aliases']=list()
         featureObjects[fid]['aliases'].append(alias)
 
+    for hasalias_line in featureData['HasAliasAssertedFrom']:
+        hasalias_line=hasalias_line.rstrip()
+        [fid,alias,source_db]=hasalias_line.split("\t")
+        fullAlias=': '.join(source_db,alias)
+        # this should not overwrite anything from the FeatureAlias loop
+        if not featureObjects[fid].has_key("aliases"):
+            featureObjects[fid]['aliases']=list()
+        featureObjects[fid]['aliases'].append(fullAlias)
+
     for location_line in featureData['Locations']:
         location_line=location_line.rstrip()
         [fid,contig,begin,strand,length,ordinal]=location_line.split("\t")
@@ -527,8 +536,8 @@ if __name__ == "__main__":
     currentNumericGid = -1
     currentGid = ''
 
-    fileList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','Feature','fids2pubs','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
-    attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','fids2pubs','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
+    fileList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','Feature','fids2pubs','HasAliasAssertedFrom','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
+    attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','fids2pubs','HasAliasAssertedFrom','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
 
     for file in fileList:
         fileName = sorted_file_dir + '/' + file + '.tab.sorted'
