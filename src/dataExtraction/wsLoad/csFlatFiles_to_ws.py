@@ -597,12 +597,34 @@ if __name__ == "__main__":
         currentLine['Feature'] = fileHandle['Feature'].readline()
 
     # process remaining features
-    print >> sys.stderr, gid
-    print >> sys.stderr, currentNumericGid
-#    print featureData['Feature']
+
+
+    print >> sys.stderr, 'gid is ' + gid
+    print >> sys.stderr, 'numericGid is ' + str(numericGid)
+    print >> sys.stderr, 'currentNumericGid is ' + str(currentNumericGid)
     # read other files and populate featureData
-    # wsFeatures = import_features(featureData)
-    # import_genomes(wsFeatures,gid)
+    for attribute in attributeList:
+        featureData[attribute] = list()
+        while currentLine[attribute]:
+            [attrFid,attrRestOfLine]=currentLine[attribute].split("\t",1)
+            [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
+            attrGid=attrGidPrefix+'.'+attrGidNumericId
+            attrGidNumericId=int(attrGidNumericId)
+#            print >> sys.stderr, 'attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+            if (attrGidNumericId == currentNumericGid):
+                featureData[attribute].append(currentLine[attribute])
+            if (attrGidNumericId < currentNumericGid):
+                print >> sys.stderr, attribute + ' file may have extra data, skipping'
+                print >> sys.stderr, ' '.join([attrGid, currentNumericGid])
+            if (attrGidNumericId > currentNumericGid):
+                print >> sys.stderr, 'need to skip to next attribute here: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+                break
+            currentLine[attribute] = fileHandle[attribute].readline()
+#    pp.pprint(featureData)
+    # pass featureData to a sub that creates appropriate subobjects
+    insert_genome(currentGid,genome_entities,featureData)
+
+
 
     # set up a try block here?
     try:
