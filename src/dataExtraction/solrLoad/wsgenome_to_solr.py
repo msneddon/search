@@ -20,8 +20,10 @@ solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_l
 
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
-#    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
-    ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
+    # gavin's dev instance
+    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
+    # production instance
+#    ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})
     
@@ -221,7 +223,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                         if f.has_key('roles'):
 #                            for role in f['roles']:
 #                                featureObject['roles'] += unicode(role) + ' '
-                            featureObject['roles'] = ','.join([str(k) for k in f["roles"]])
+                            featureObject['roles'] = ' , '.join([str(k) for k in f["roles"]])
     
                         if f.has_key('annotations'):
                             for anno in f['annotations']:
@@ -259,8 +261,9 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                                 featureObject['coexpressed_fids'] += coe[0] + ' '
     
                         if f.has_key('subsystems'):
-                            for ss in f['subsystems']:
-                                featureObject['subsystems'] += unicode(ss) + ' '
+#                            for ss in f['subsystems']:
+#                                featureObject['subsystems'] += unicode(ss) + ' '
+                            featureObject['subsystems'] = ' , '.join([str(k) for k in f["subsystems"]])
     
                         if f.has_key('protein_families'):
     #                        protein_families = unicode(f["protein_families"][0]['id'] + f['protein_families'][0]['subject_description'])
@@ -272,8 +275,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
     #                        protein_families = unicode(f["protein_families"])
     
                         if f.has_key('aliases'):
-                            # want something like this for roles, subsystems
-                            featureObject['aliases'] = ','.join([str(k) for k in f["aliases"]])
+                            featureObject['aliases'] = ' :: '.join([ (str(k) + ' : ' + ' '.join(f['aliases'][k]) ) for k in f["aliases"]])
     
                         outBuffer = StringIO.StringIO()
                 
@@ -285,7 +287,8 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                             print str(e)
                             print "Failed trying to write to string buffer for feature " + f['feature_id']
                 
-                        outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"','\\"'))
+#                        outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"','\\"'))
+                        outFile.write(outBuffer.getvalue().encode('utf8').replace('\'',''))
                         outBuffer.close()
 
                 else:

@@ -38,9 +38,9 @@ cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
 #cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://140.221.84.182:7032')
     
 # production ws instance
-ws = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
+#ws = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 # ws team dev instance
-#ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
+ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
     
 def create_feature_objects(gid,featureData):
 
@@ -109,22 +109,21 @@ def create_feature_objects(gid,featureData):
         fids2pubs = [int(id),'PubMed',publications[id]['article_title'],publications[id]['link'],publications[id]['pubdate'],publications[id]['authors'],publications[id]['journal_name'] ]
         featureObjects[fid]['feature_publications'].append(fids2pubs)
 
-
-    for alias_line in featureData['FeatureAlias']:
-        alias_line=alias_line.rstrip()
-        [fid,alias]=alias_line.split("\t")
-        if not featureObjects[fid].has_key("aliases"):
-            featureObjects[fid]['aliases']=list()
-        featureObjects[fid]['aliases'].append(alias)
+#    for alias_line in featureData['FeatureAlias']:
+#        alias_line=alias_line.rstrip()
+#        [fid,alias]=alias_line.split("\t")
+#        if not featureObjects[fid].has_key("aliases"):
+#            featureObjects[fid]['aliases']=list()
+#        featureObjects[fid]['aliases'].append(alias)
 
     for hasalias_line in featureData['HasAliasAssertedFrom']:
         hasalias_line=hasalias_line.rstrip()
         [fid,alias,source_db]=hasalias_line.split("\t")
-        fullAlias=': '.join(source_db,alias)
-        # this should not overwrite anything from the FeatureAlias loop
         if not featureObjects[fid].has_key("aliases"):
-            featureObjects[fid]['aliases']=list()
-        featureObjects[fid]['aliases'].append(fullAlias)
+            featureObjects[fid]['aliases']=dict()
+        if not featureObjects[fid]["aliases"].has_key(source_db):
+            featureObjects[fid]['aliases'][source_db]=list()
+        featureObjects[fid]['aliases'][source_db].append(alias)
 
     for location_line in featureData['Locations']:
         location_line=location_line.rstrip()
@@ -208,7 +207,7 @@ def create_feature_objects(gid,featureData):
 
     return featureObjects
 
-#    attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','fids2pubs','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
+#    attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','fids2pubs','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
 
     if 0:     
 
@@ -536,8 +535,8 @@ if __name__ == "__main__":
     currentNumericGid = -1
     currentGid = ''
 
-    fileList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','Feature','fids2pubs','HasAliasAssertedFrom','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
-    attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','FeatureAlias','fids2pubs','HasAliasAssertedFrom','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
+    fileList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','Feature','fids2pubs','HasAliasAssertedFrom','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
+    attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','fids2pubs','HasAliasAssertedFrom','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
 
     for file in fileList:
         fileName = sorted_file_dir + '/' + file + '.tab.sorted'
