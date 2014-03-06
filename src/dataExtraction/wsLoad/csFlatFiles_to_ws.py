@@ -38,9 +38,9 @@ cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
 #cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://140.221.84.182:7032')
     
 # production ws instance
-#ws = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
+ws = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 # ws team dev instance
-ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
+#ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
     
 def create_feature_objects(gid,featureData):
 
@@ -156,7 +156,9 @@ def create_feature_objects(gid,featureData):
     for regulon_line in featureData['regulonData.members']:
         regulon_line=regulon_line.rstrip()
         [fid,reg]=regulon_line.split("\t")
-        fids2regulons[fid]=reg
+        if not fids2regulons.has_key(fid):
+            fids2regulons[fid]=list()
+        fids2regulons[fid].append(reg)
         if not regulons2fids.has_key(reg):
             regulons2fids[reg]=list()
         regulons2fids[reg].append(fid)
@@ -167,15 +169,16 @@ def create_feature_objects(gid,featureData):
             regulons2tfs[reg]=list()
         regulons2tfs[reg].append(fid)
     for fid in fids2regulons:
-        regulon_id = fids2regulons[fid]
-        regulon_set = regulons2fids[regulon_id]
-        tfs = list()
-        if regulons2tfs.has_key(regulon_id):
-            tfs = regulons2tfs[regulon_id]
-        regulon_data = [ regulon_id, regulon_set, tfs ]
-        if not featureObjects[fid].has_key("regulon_data"):
-            featureObjects[fid]['regulon_data']=list()
-        featureObjects[fid]['regulon_data'].append(regulon_data)
+        for regulon_id in fids2regulons[fid]:
+#            regulon_id = fids2regulons[fid]
+            regulon_set = regulons2fids[regulon_id]
+            tfs = list()
+            if regulons2tfs.has_key(regulon_id):
+                tfs = regulons2tfs[regulon_id]
+            regulon_data = [ regulon_id, regulon_set, tfs ]
+            if not featureObjects[fid].has_key("regulon_data"):
+                featureObjects[fid]['regulon_data']=list()
+            featureObjects[fid]['regulon_data'].append(regulon_data)
 
     for roles_line in featureData['Roles']:
         roles_line=roles_line.rstrip()
@@ -199,7 +202,7 @@ def create_feature_objects(gid,featureData):
     for ssdata_line in featureData['SubsystemData']:
         ssdata_line=ssdata_line.rstrip()
         [fid,subsystem,variant,role]=ssdata_line.split("\t")
-        if not featureObjects[fid].has_key("ssdata"):
+        if not featureObjects[fid].has_key("subsystem_data"):
             featureObjects[fid]['subsystem_data']=list()
         ssdata = [subsystem,variant,role]
         featureObjects[fid]['subsystem_data'].append(ssdata)
@@ -310,6 +313,7 @@ def insert_genome(g,genome_entities,featureData):
     print >> sys.stderr, "querying genome_data " + str(end - start)
 
 #    if 'P' not in genome_data['scientific_name']:
+#    if g != 'kb|g.652':
 #        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
 #        return
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
@@ -497,6 +501,7 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Create solr tab-delimited import files from flat file dumps from CS.')
     parser.add_argument('--sorted-file-dir', nargs=1, help='path to sorted dump files to be parsed')
+    parser.add_argument('--debug',action='store_true',help='debugging; skip processing last genome')
 
     args = parser.parse_args()
 
@@ -595,8 +600,13 @@ if __name__ == "__main__":
             exit(5)
         currentLine['Feature'] = fileHandle['Feature'].readline()
 
-    # process remaining features
-
+    # process remaining features if not debugging
+    # (need to skip if not parsing complete data set, since
+    # if just taking a subset of export data, some files may
+    # be incomplete, and you get key errors)
+    if args.debug:
+        print >> sys.stderr, 'skipping last genome ' + gid
+        exit(0)
 
     print >> sys.stderr, 'gid is ' + gid
     print >> sys.stderr, 'numericGid is ' + str(numericGid)
@@ -623,47 +633,6 @@ if __name__ == "__main__":
     # pass featureData to a sub that creates appropriate subobjects
     insert_genome(currentGid,genome_entities,featureData)
 
-
-
-    # set up a try block here?
-    try:
-        retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
-    # want this to catch only workspace exists errors
-    except biokbase.workspace.client.ServerError, e:
-        pass
-    #    print >> sys.stderr, e
-    
-    #kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
-    
-    # DvH, E.coli
-    # takes 4min (total) without dna_seqs, with coexpressed_fids
-    # takes 5min (total) with retrieving everything
-    #genomes = ['kb|g.3562','kb|g.0']
-    # arabidopsis--takes 50m with individual dna_seq calls (coexpressed_fids untested)
-    # takes much less time when cached
-    #genomes = ['kb|g.3899']
-    # poplar
-    # genomes = ['kb|g.3907']
-    # more static sets
-    #genomes = ['kb|g.9','kb|g.222']
-    #genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
-    #genomes = ['kb|g.19762','kb|g.1976']
-    #genomes = ['kb|g.0']
-    #genomes = ['kb|g.3562']
-    #genomes = ['kb|g.3562','kb|g.0']
-    # DvH, e.coli, multiple versions of arabidopsis
-    # what other genomes are essential?
-    #genomes = ['kb|g.3562','kb|g.0','kb|g.1105','kb|g.1103','kb|g.26509','kb|g.1104']
-    # kb|g.1103 has at least one feature with a bad location
-    genomes = ['kb|g.3562','kb|g.0','kb|g.3899','kb|g.3907','kb|g.27073']
-    # chicken
-    #genomes = ['kb|g.3643']
-    #genomes = ['kb|g.26509']
-    # pseudomonas stutzeri (for microbes demo)
-    #genomes = ['kb|g.27073']
-    
-    #genomeObjects = dict()
-    
     
 # general arch:
 # open publications file
