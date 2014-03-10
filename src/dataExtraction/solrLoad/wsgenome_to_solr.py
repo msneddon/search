@@ -21,9 +21,9 @@ solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_l
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
     # gavin's dev instance
-    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
+#    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
     # production instance
-#    ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
+    ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})
     
