@@ -196,7 +196,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 
                         # prefer an if here, so that errors inside
                         # don't get caught
-                        if f.has_key('location'):
+                        if f.has_key('location') and len(f['location']) > 0:
                            featureObject['locations'] = simplejson.dumps(f['location'])
                            # determine strand (we hope all features have
                            # locations on same contig and strand)
