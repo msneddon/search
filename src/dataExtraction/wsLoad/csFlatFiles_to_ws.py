@@ -26,6 +26,8 @@ pp = pprint.PrettyPrinter(indent=4)
 # use that with the fids2pubs mapping to stuff pub info into a feature
 publications = dict()
 
+skipExistingGenomes = False
+
 # production CDMI instance
 cdmi_api = biokbase.cdmi.client.CDMI_API()
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
@@ -36,11 +38,6 @@ cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
 # v3 instance
 #cdmi_api = biokbase.cdmi.client.CDMI_API('http://140.221.84.182:7032')
 #cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://140.221.84.182:7032')
-    
-# production ws instance
-ws = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
-# ws team dev instance
-#ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
     
 def create_feature_objects(gid,featureData):
 
@@ -79,16 +76,22 @@ def create_feature_objects(gid,featureData):
         [fid,atomic_regulon,count]=atomic_regulon_line.split("\t")
         if not featureObjects[fid].has_key("atomic_regulons"):
             featureObjects[fid]['atomic_regulons']=list()
-        atomic_regulon = [atomic_regulon,count]
+        atomic_regulon = [atomic_regulon,int(count)]
         featureObjects[fid]['atomic_regulons'].append(atomic_regulon)
 
-    for coexpressed_fid_line in featureData['CoexpressedFids']:
-        coexpressed_fid_line=coexpressed_fid_line.rstrip()
-        [fid,coexpressed_fid,score]=coexpressed_fid_line.split("\t")
-        if not featureObjects[fid].has_key("coexpressed_fids"):
-            featureObjects[fid]['coexpressed_fids']=list()
-        coexpressed_fid = [coexpressed_fid,float(score)]
-        featureObjects[fid]['coexpressed_fids'].append(coexpressed_fid)
+    # huge amount of coexpressed data for this genome makes
+    # the featureset object too big
+    # skip for now, try to figure out how to handle later
+    if len(featureData['CoexpressedFids']) > 2000000:
+        print >> sys.stderr, 'too many lines of coexpressedfids for ' + genome_id + ', skipping'
+    else:
+        for coexpressed_fid_line in featureData['CoexpressedFids']:
+            coexpressed_fid_line=coexpressed_fid_line.rstrip()
+            [fid,coexpressed_fid,score]=coexpressed_fid_line.split("\t")
+            if not featureObjects[fid].has_key("coexpressed_fids"):
+                featureObjects[fid]['coexpressed_fids']=list()
+            coexpressed_fid = [coexpressed_fid,float(score)]
+            featureObjects[fid]['coexpressed_fids'].append(coexpressed_fid)
 
     # not working right?
     # it's fine, db is missing some entries (see KBASE-640)
@@ -182,6 +185,7 @@ def create_feature_objects(gid,featureData):
 
     for roles_line in featureData['Roles']:
         roles_line=roles_line.rstrip()
+        # some lines have an empty role (grr)
         try:
             [fid,role]=roles_line.split("\t")
         except Exception, e:
@@ -210,100 +214,8 @@ def create_feature_objects(gid,featureData):
 
     return featureObjects
 
-#    attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','fids2pubs','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
+def insert_genome(g,genome_entities,ws,featureData):
 
-    if 0:     
-
-        if core_data['Families'].has_key(feature_id):
-            this_feature=core_data['Families'][feature_id]
-            fams = list()
-            for fam in this_feature:
-                this_fam = dict()
-                this_fam['id'] = fam['family_id']
-                this_fam['release_version'] = fam['release']
-                this_fam['subject_db'] = fam['type']
-                if this_fam.has_key('family_function'):
-                    this_fam['subject_description'] = fam['family_function']
-                fams.append(this_fam)
-#            print >> sys.stderr, core_data['Location'][feature_id]
-            featureObject["protein_families"] = fams
-
-        if core_data['Publications'].has_key(feature_id):
-            this_feature=core_data['Publications'][feature_id]
-            pubs = list()
-            for pub in this_feature:
-                this_pub = [ int(pub['pubmed_id']), 'PubMed', pub['article_title'], pub['pubmed_url'], pub['pubdate'], pub['authors'], pub['journal_title'] ] 
-                pubs.append(this_pub)
-#            print >> sys.stderr, core_data['Location'][feature_id]
-            featureObject["feature_publications"] = pubs
-
-        if core_data['Roles'].has_key(feature_id):
-            this_feature=core_data['Roles'][feature_id]
-            featureObject["roles"] = list()
-            for x in this_feature:
-#                featureObject["roles"] = [ x['role'] for x in this_feature ]
-                if x.has_key('role'):
-                    featureObject["roles"].append( x['role'] )
-        if core_data['Subsystems'].has_key(feature_id):
-            this_feature=core_data['Subsystems'][feature_id]
-            featureObject["subsystems"] = [ x['subsystem'] for x in this_feature ]
-
-        if core_data['SubsystemData'].has_key(feature_id):
-            this_feature=core_data['SubsystemData'][feature_id]
-#            print >> sys.stderr,this_feature
-            subsystems = list()
-            for subsys in this_feature:
-                this_sys = [ subsys['subsystem'], subsys['variant'], subsys['role'] ] 
-                subsystems.append(this_sys)
-#            print >> sys.stderr, core_data['Location'][feature_id]
-            featureObject["subsystem_data"] = subsystems
-
-        if core_data['AtomicRegulons'].has_key(feature_id):
-            this_feature=core_data['AtomicRegulons'][feature_id]
-            ars = list()
-            for ar in this_feature:
-                this_ar = [ ar['atomic_regulon_id'], ar['atomic_regulon_size'] ] 
-                ars.append(this_ar)
-            featureObject["atomic_regulons"] = ars
-
-        if core_data['CoOccurringFids'].has_key(feature_id):
-            this_feature=core_data['CoOccurringFids'][feature_id]
-            coos = list()
-            for coo in this_feature:
-                this_coo = [ coo['co_occurring_fid'], coo['score'] ] 
-                coos.append(this_coo)
-            featureObject["co_occurring_fids"] = coos
-
-        if core_data['CoExpressedFids'].has_key(feature_id):
-            this_feature=core_data['CoExpressedFids'][feature_id]
-            coes = list()
-            for coe in this_feature:
-                this_coe = [ coe['co_expressed_fid'], coe['score'] ] 
-                coes.append(this_coe)
-            featureObject["coexpressed_fids"] = coes
-
-        if core_data['RegulonData'].has_key(feature_id):
-            this_feature=core_data['RegulonData'][feature_id]
-            regulons = list()
-            for reg in this_feature:
-                regulon_set = reg['regulon_set'].split(',')
-                tfs = list()
-                if reg.has_key('tfs'):
-                    tfs = reg['tfs'].split(',')
-                this_reg = [ reg['regulon_id'], regulon_set, tfs ] 
-                regulons.append(this_reg)
-            featureObject["regulon_data"] = regulons
-
-        fids_to_insert.append( { "type":"KBaseSearch.Feature","data":featureObject,"name":feature_id } )
-
-#        print >> sys.stderr, simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
-        
-    feature_info = ws.save_objects({"workspace":wsname,"objects": fids_to_insert })
-
-    return feature_info
-
-
-def insert_genome(g,genome_entities,featureData):
     start = time.time()
 
     # maybe use get_entity_Genome to get additional fields, like source_id and domain?
@@ -313,16 +225,18 @@ def insert_genome(g,genome_entities,featureData):
     print >> sys.stderr, "querying genome_data " + str(end - start)
 
 #    if 'P' not in genome_data['scientific_name']:
-#    if g != 'kb|g.652':
+# too big?  how to split up?
+#    if g == 'kb|g.436':
 #        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
 #        return
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
 
     try:
         ws.get_object_info([{"workspace":wsname,"name":g}],0)
+        if skipExistingGenomes == True:
+            print >> sys.stderr, 'genome '  + g + ' found, skipping'
+            return
         print >> sys.stderr, 'genome '  + g + ' found, updating'
-#        print >> sys.stderr, 'genome '  + g + ' found, skipping'
-#        return
     except biokbase.workspace.client.ServerError:
         print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
 
@@ -463,7 +377,15 @@ def insert_genome(g,genome_entities,featureData):
 
     # with any luck this can be used directly when saving a FeatureSet
     featureObjects = create_feature_objects(gid,featureData)
-    featureSet['features'] = featureObjects
+
+    
+    featureSet['features'] = dict()
+    for feature in featureObjects:
+        print feature
+        individualFeature = dict()
+        individualFeature['data'] = featureObjects[feature]
+        featureSet['features'][feature] = individualFeature
+        
 #    pp.pprint(featureObjects)
 
     end = time.time()
@@ -501,13 +423,24 @@ if __name__ == "__main__":
 
     parser = argparse.ArgumentParser(description='Create solr tab-delimited import files from flat file dumps from CS.')
     parser.add_argument('--sorted-file-dir', nargs=1, help='path to sorted dump files to be parsed')
-    parser.add_argument('--debug',action='store_true',help='debugging; skip processing last genome')
+    parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
+    parser.add_argument('--debug',action='store_true',help='debugging')
+    parser.add_argument('--skip-last',action='store_true',help='skip processing last genome (in case input is incomplete)')
 
     args = parser.parse_args()
 
     sorted_file_dir = '.'
     if args.sorted_file_dir:
         sorted_file_dir = args.sorted_file_dir[0]
+    if args.skip_existing:
+        skipExistingGenomes = True
+
+    # ws public instance
+    ws = biokbase.workspace.client.Workspace("https://kbase.us/services/ws")
+    # ws team dev instance
+    # is this actually working?  seems like it's adding to prod
+    if args.debug:
+        ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
 
     try:
         retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
@@ -580,7 +513,7 @@ if __name__ == "__main__":
                     currentLine[attribute] = fileHandle[attribute].readline()
 #            pp.pprint(featureData)
             # pass featureData to a sub that creates appropriate subobjects
-            insert_genome(currentGid,genome_entities,featureData)
+            insert_genome(currentGid,genome_entities,ws,featureData)
 
             # make sure Python does gc right away
             featureData = None
@@ -604,7 +537,7 @@ if __name__ == "__main__":
     # (need to skip if not parsing complete data set, since
     # if just taking a subset of export data, some files may
     # be incomplete, and you get key errors)
-    if args.debug:
+    if args.skip_last:
         print >> sys.stderr, 'skipping last genome ' + gid
         exit(0)
 
@@ -631,7 +564,7 @@ if __name__ == "__main__":
             currentLine[attribute] = fileHandle[attribute].readline()
 #    pp.pprint(featureData)
     # pass featureData to a sub that creates appropriate subobjects
-    insert_genome(currentGid,genome_entities,featureData)
+    insert_genome(currentGid,genome_entities,ws,featureData)
 
     
 # general arch:
