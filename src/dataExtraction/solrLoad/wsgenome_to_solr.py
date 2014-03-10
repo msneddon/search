@@ -165,7 +165,8 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 #solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
 #solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "feature_type" , "function" , "aliases" , "feature_publications" , "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "coexpressed_fids" , "co_occurring_fids"]
 
-                        f = features[feature]
+                        # will want to add support for refs here
+                        f = features[feature]['data']
     
                         for key in solr_genome_keys:
                             featureObject[key] = genomeObject[key]
