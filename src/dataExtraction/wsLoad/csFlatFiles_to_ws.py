@@ -61,6 +61,8 @@ def create_feature_objects(gid,featureData):
             featureObjects[fid]['protein_translation_length']=int(protein_translation_length)
         if protein_translation != 'NULL':
             featureObjects[fid]['protein_translation']=protein_translation
+        # all features need a location
+        featureObjects[fid]['location']=list()
 #        pp.pprint(featureObjects[fid])
 
     for annotation_line in featureData['Annotation']:
@@ -131,8 +133,6 @@ def create_feature_objects(gid,featureData):
     for location_line in featureData['Locations']:
         location_line=location_line.rstrip()
         [fid,contig,begin,strand,length,ordinal]=location_line.split("\t")
-        if not featureObjects[fid].has_key("location"):
-            featureObjects[fid]['location']=list()
         # should fix this for strandedness (to be same as CDMI)
         if strand == '-':
             start = int(begin) + int(length) - 1
