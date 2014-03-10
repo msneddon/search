@@ -12,8 +12,8 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
-wsinput = 'KBasePublicRichGenomes'
-wsoutput = 'KBasePublicGenomes'
+wsinput = 'KBasePublicRichGenomesLoad'
+wsoutput = 'KBasePublicGenomesLoad'
 #wsoutput = '***REMOVED***:home'
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
@@ -50,8 +50,9 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
             if "Genome" in x[2]:
                 try:
                     ws_prod_client.get_object_info([{"workspace":wsoutput,"name":x[1]}],0)
-                    print >> sys.stderr, 'object '  + x[1] + ' found, skipping'
-                    continue
+                    print >> sys.stderr, 'object '  + x[1] + ' found, replacing'
+#                    print >> sys.stderr, 'object '  + x[1] + ' found, skipping'
+#                    continue
                 except biokbase.workspace.client.ServerError, e:
                     print >> sys.stderr, 'object '  + x[1] + ' not found, adding to ws'
 
@@ -129,33 +130,16 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                 featureset_info = ws_prod_client.get_objects([{"ref": genome['data']['featureset_ref']}])
                 features = featureset_info[0]['data']['features']
 
-                # dump out each feature in tab delimited format
-                # need to batch these calls, super slow one at a time
-                features_to_retrieve = list()
-                features_to_process = list()
-                for fid in features:
-                    features_to_retrieve.append({"ref": workspace_name+'/'+fid})
-                    if len(features_to_retrieve) > 99:
-                        features_to_process.extend(ws_prod_client.get_objects(features_to_retrieve))
-                        features_to_retrieve = list()
-                        print >> sys.stderr, 'retrieved features so far: ' + str(len(features_to_process)) + ' of total features: ' + str(len(features))
-
-
-                # final batch
-                if len(features_to_retrieve) > 0:
-                    features_to_process.extend(ws_prod_client.get_objects(features_to_retrieve))
-
-#                print >> sys.stderr, len(features_to_process)
-#                print >> sys.stderr, len(features)
-                for feature in features_to_process:
+                for feature in features:
 
                     fbaFeature=dict()
 
-                    f = feature['data']
+                    # should check whether there is a ref here
+                    f = features[feature]['data']
 
                     # these keys should have same name and structure in both object types
                     # fbagenome does not have roles
-                    structure_keys = ['function','md5','protein_translation','dna_sequence','protein_translation_length','dna_sequence_length','subsystems', 'protein_families', 'aliases','annotations','subsystem_data','regulon_data','atomic_regulons','coexpressed_fids','co_occurring_fids']
+                    structure_keys = ['function','md5','protein_translation','dna_sequence','protein_translation_length','dna_sequence_length','subsystems', 'protein_families', 'annotations','subsystem_data','regulon_data','atomic_regulons','coexpressed_fids','co_occurring_fids']
                     for key in structure_keys:
                         if f.has_key(key):
                             fbaFeature[key]=f[key]
@@ -183,12 +167,18 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                             this_loc=[contig,begin,strand,length]
                             fbaFeature['location'].append(this_loc)
 
+                    # aliases do not have the same structure
+                    # not sure how to handle the source_db, ignoring for now
+                    if f.has_key('aliases'):
+                        fbaFeature['aliases'] = list()
+                        for alias in f['aliases']:
+                            fbaFeature['aliases'].extend(f['aliases'][alias])
 
 #                    print >> sys.stderr, simplejson.dumps(fbaFeature, sort_keys=True, indent=4 * ' ')
 
                     fbaGenomeObject['features'].append(fbaFeature)
 
-#                print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
+                print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
                 genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
 #                print >> sys.stderr,genome_info
 
