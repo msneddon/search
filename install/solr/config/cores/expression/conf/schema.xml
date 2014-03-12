@@ -74,13 +74,15 @@
    <field name="source_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="series_genome_ids" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="series_sample_ids" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
-   <field name="title" type="text_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="series_title" type="text_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="summary" type="text_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="design" type="text_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="publication_id" type="text_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="external_source_date" type="text_general" indexed="true" stored="true" multiValued="false" /> 
 
 <!-- ExpressionSample -->
+   <field name="sample_series_ids" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="sample_title" type="text_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="sample_type" type="text_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="numerical_interpretation" type="text_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="description" type="text_general" indexed="true" stored="true" multiValued="false" /> 
@@ -97,10 +99,12 @@
    <field name="persons" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="molecule" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="data_source" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
+
 <!-- ExpressionSample expression_levels -->
    <field name="feature_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="feature_function" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
    <field name="expression_level" type="tfloat" indexed="true" stored="true" multiValued="false" /> 
+<!-- not sure we will store this -->
+   <field name="feature_function" type="text_ws_general" indexed="true" stored="true" multiValued="false" /> 
 
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
@@ -122,13 +126,34 @@
    <copyField source="object_type" dest="text"/>
    <copyField source="object_name" dest="text"/>
 
+   <copyField source="series_genome_ids" dest="text"/>
+   <copyField source="series_sample_ids" dest="text"/>
    <copyField source="source_id" dest="text"/>
-   <copyField source="title" dest="text"/>
    <copyField source="summary" dest="text"/>
    <copyField source="design" dest="text"/>
    <copyField source="publication_id" dest="text"/>
    <copyField source="external_source_date" dest="text"/>
  
+   <copyField source="sample_series_ids" dest="text"/>
+   <copyField source="sample_type" dest="text"/>
+   <copyField source="sample_title" dest="text"/>
+   <copyField source="numerical_interpretation" dest="text"/>
+   <copyField source="description" dest="text"/>
+   <copyField source="genome_id" dest="text"/>
+   <copyField source="expression_ontology_terms" dest="text"/>
+   <copyField source="platform_id" dest="text"/>
+   <copyField source="default_control_sample" dest="text"/>
+   <copyField source="averaged_from_samples" dest="text"/>
+   <copyField source="protocol" dest="text"/>
+   <copyField source="strain" dest="text"/>
+   <copyField source="strain_wild_type" dest="text"/>
+   <copyField source="persons" dest="text"/>
+   <copyField source="molecule" dest="text"/>
+   <copyField source="data_source" dest="text"/>
+
+   <copyField source="feature_id" dest="text"/>
+   <copyField source="feature_function" dest="text"/>
+
   <types>
     <!-- field type definitions. The "name" attribute is
        just a label to be used by field definitions.  The "class"

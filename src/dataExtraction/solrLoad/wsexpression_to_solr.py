@@ -49,7 +49,7 @@ def export_expression_from_ws(maxNumObjects):
     # print out a header file
     # data fields must be printed in same order
     solr_ws_keys = ['object_id','workspace_name','object_type', 'object_name']
-    solr_keys = [ 'source_id','series_genome_ids','series_sample_ids','title','summary','design','publication_id','external_source_date','sample_type','numerical_interpretation','description','data_quality_level','original_median','genome_id','expression_ontology_terms','platform_id','default_control_sample','averaged_from_samples','protocol','strain','strain_wild_type','persons','molecule','data_source','feature_id','feature_function','expression_level']
+    solr_keys = [ 'source_id','series_genome_ids','series_sample_ids','series_title','summary','design','publication_id','external_source_date','sample_series_ids','sample_type','sample_title','numerical_interpretation','description','data_quality_level','original_median','genome_id','expression_ontology_terms','platform_id','default_control_sample','averaged_from_samples','protocol','strain','strain_wild_type','persons','molecule','data_source','feature_id','feature_function','expression_level']
     headerOutFile = open('expressionToSolr.tab.headers', 'w')
     print >> headerOutFile, "\t".join(solr_ws_keys + solr_keys)
     #print >> headerOutFile, "\n"
@@ -63,7 +63,15 @@ def export_expression_from_ws(maxNumObjects):
         workspace_id = n[0]
         workspace_name = n[1]
     
-        objects_list = ws_client.list_objects({"ids": [workspace_id]})
+        # first get all series
+        # populate a structure mapping sample ids to series ids
+
+        samples_to_series = dict()
+        series_objects = dict()
+
+        # then get all samples and propagate series info in sample doc
+        # propagate some series and sample info into expression_level doc
+        objects_list = ws_client.list_objects({"ids": [workspace_id], "type":"KBaseExpression.ExpressionSeries"})
         if len(objects_list) > 0:
             print "\tWorkspace %s has %d objects" % (workspace_name, len(objects_list))
             object_counter = 0
@@ -74,6 +82,7 @@ def export_expression_from_ws(maxNumObjects):
             for x in objects_list:
                 print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
     
+                # this is probably now a noop
                 if "Expression" in x[2]:
     
                     done = False
@@ -84,6 +93,7 @@ def export_expression_from_ws(maxNumObjects):
     #                sys.stderr.write(str(x)+"\n")
                     while not done:
                         try:
+# should probably batch retrieving these objects at some point
                             expression = ws_client.get_objects([{"wsid": str(workspace_id), "objid": x[0]}])
                             done = True
                         except Exception, e:
@@ -92,6 +102,8 @@ def export_expression_from_ws(maxNumObjects):
     
                     #print json.dumps(expression['data'], sort_keys=True, indent=4, separators=(',',': '))
                     expression = expression[0]
+                    series_path = workspace_name + '/' + object_name
+                    series_objects[series_path] = expression['data']
                     #print expression['info']
                     
     # [u'originator', u'comment', u'assay', u'GwasPopulation_obj_id', u'variation_file', u'filetype', u'genome', u'GwasPopulationVariation_obj_id']
@@ -102,7 +114,7 @@ def export_expression_from_ws(maxNumObjects):
                     for key in solr_keys:
                         search_values[key] = ''
     
-                    scalar_keys = [ 'source_id','title','summary','design','publication_id','external_source_date','numerical_interpretation','description','data_quality_level','original_median','genome_id','platform_id','default_control_sample','molecule','data_source']
+                    scalar_keys = [ 'source_id','summary','design','publication_id','external_source_date','numerical_interpretation','description','data_quality_level','original_median','genome_id','platform_id','default_control_sample','molecule','data_source']
     
                     # handle generic scalar fields
                     for key in scalar_keys:
@@ -127,6 +139,162 @@ def export_expression_from_ws(maxNumObjects):
                     if expression['data'].has_key('expression_ontology_terms'):
                         for expr in expression['data']['expression_ontology_terms']:
                             search_values[key] = ' '.join(expr.values())
+
+                    if expression['data'].has_key('title'):
+                        search_values['series_title'] = expression['data']['title']
+                    else:
+                        search_values['series_title']=''
+
+                    if expression['data'].has_key('type'):
+                        search_values['sample_type'] = expression['data']['type']
+                    else:
+                        search_values['sample_type']=''
+
+                    if expression['data'].has_key('persons'):
+                        for x in expression['data']['persons']:
+                            search_values['persons'] += pat.sub(' ',str(x['first_name'] + ' ' + x['last_name'] + ' ' + x['institution']))
+                    else:
+                        search_values['persons']=''
+
+                    if expression['data'].has_key('protocol'):
+                        search_values['protocol'] = pat.sub(' ',str(expression['data']['protocol']['name'] + ' ' + expression['data']['protocol']['description']))
+                    else:
+                        search_values['protocol']=''
+
+                    if expression['data'].has_key('strain'):
+                        search_values['strain'] = expression['data']['strain']['name'] + ' ' + expression['data']['strain']['description'] + ' ' + expression['data']['strain']['genome_id'] + ' reference_strain:' + expression['data']['strain']['reference_strain'] + ' wild_type:' + expression['data']['strain']['wild_type']
+                        if expression['data']['strain']['wild_type'] == 'Y':
+                            search_values['strain_wild_type'] = True
+                        else:
+                            search_values['strain_wild_type'] = False
+                    else:
+                        search_values['strain']=''
+
+                    if expression['data'].has_key('genome_expression_sample_ids_map'):
+                        search_values['series_genome_ids'] = ''
+                        for key in expression['data']['genome_expression_sample_ids_map'].keys():
+                            search_values['series_genome_ids'] += ' ' + key
+                            samples = list()
+                            for x in expression['data']['genome_expression_sample_ids_map'][key]:
+                                # could also make kb|ws.NN.obj.NNNN ids out of these if we wanted
+                                [wsid,objid,ver] = x.split('/')
+                                samples.append({'wsid':wsid,'objid':objid})
+                            samples_info = ws_client.get_object_info(samples,0)
+                            search_values['series_sample_ids'] = ' '
+                            for y in samples_info:
+                                sample_path=y[7]+'/'+y[1]
+                                if not samples_to_series.has_key(sample_path):
+                                    samples_to_series[sample_path] = list()
+                                samples_to_series[sample_path].append(series_path)
+                                search_values['series_sample_ids'] += sample_path + ' ' + y[1] + ' '
+
+                    outBuffer = StringIO.StringIO()
+    
+                    try:
+                        solr_strings = [object_id,workspace_name,object_type,object_name]
+                        solr_strings += [ unicode(str(search_values[x])) for x in solr_keys ]
+                        solr_line = "\t".join(solr_strings)
+                        outBuffer.write(solr_line + "\n")
+                    except Exception, e:
+                        print str(e)
+    #                    print search_values
+                        print "Failed trying to write to string buffer."
+    
+                    outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
+
+                    outBuffer.close()
+                else:
+                    print '            skipping %s, is a %s' % (x[0], x[2])
+                object_counter += 1
+
+#        print >> sys.stderr, samples_to_series
+
+        objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseExpression.ExpressionSample"})
+        if len(objects_list) > 0:
+            print "\tWorkspace %s has %d objects" % (workspace_name, len(objects_list))
+            object_counter = 0
+    
+            if maxNumObjects < 1000 :
+                objects_list = random.sample(objects_list,maxNumObjects)
+    
+            for x in objects_list:
+                print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
+    
+                # this is now probably a no-op
+                if "Expression" in x[2]:
+    
+                    done = False
+    
+                    object_type = x[2]
+                    object_name = x[1]
+    
+    #                sys.stderr.write(str(x)+"\n")
+                    while not done:
+                        try:
+# should probably batch retrieving these objects at some point
+                            expression = ws_client.get_objects([{"wsid": str(workspace_id), "objid": x[0]}])
+                            done = True
+                        except Exception, e:
+                            print str(e)
+                            print "Having trouble getting " + str(x[0]) + " from workspace " + str(workspace_id)
+    
+                    #print json.dumps(expression['data'], sort_keys=True, indent=4, separators=(',',': '))
+                    expression = expression[0]
+                    #print expression['info']
+                    
+    # [u'originator', u'comment', u'assay', u'GwasPopulation_obj_id', u'variation_file', u'filetype', u'genome', u'GwasPopulationVariation_obj_id']
+    
+                    object_id = 'kb|ws.' + str(workspace_id) + '.obj.' + str(expression['info'][0])
+    
+                    search_values=dict()
+                    for key in solr_keys:
+                        search_values[key] = ''
+    
+                    scalar_keys = [ 'source_id','sample_title','summary','design','publication_id','external_source_date','series_title','numerical_interpretation','description','data_quality_level','original_median','genome_id','platform_id','default_control_sample','molecule','data_source']
+    
+                    # handle generic scalar fields
+                    for key in scalar_keys:
+                        if expression['data'].has_key(key):
+                            search_values[key] = pat.sub(' ', str(expression['data'][key]))
+                        else:
+                            search_values[key]=''
+
+                    # handle generic list fields
+                    list_keys = ['averaged_from_samples']
+                    for key in list_keys:
+                        if expression['data'].has_key(key):
+                            print >> sys.stderr, key
+                            print >> sys.stderr, expression['data'][key]
+                            search_values[key] = ' '.join(expression['data'][key])
+                        else:
+                            search_values[key]=''
+
+                    # handle special fields
+# to do: translate platform_id to readable id
+
+                    sample_path = x[7]+'/'+x[1]
+                    if samples_to_series.has_key(sample_path):
+                        for series in samples_to_series[sample_path]:
+                            [series_wsname,series_objname] = series.split('/')
+                            search_values['sample_series_ids'] += series + ' ' + series_objname
+                            for key in ['summary','design']:
+                                if series_objects[series].has_key(key):
+                                    search_values[key] += series_objects[series][key] + ' '
+                            if series_objects[series].has_key('title'):
+                                search_values['series_title'] = series_objects[series]['title']
+
+                            print >> sys.stderr, series_objects[series]
+                    else:
+                        print >> sys.stderr, sample_path
+
+                    if expression['data'].has_key('expression_ontology_terms'):
+                        for expr in expression['data']['expression_ontology_terms']:
+                            search_values[key] = ' '.join(expr.values())
+
+                    if expression['data'].has_key('title'):
+                        search_values['sample_title'] = expression['data']['title']
+                    else:
+                        search_values['sample_title']=''
 
                     if expression['data'].has_key('type'):
                         search_values['sample_type'] = expression['data']['type']
@@ -179,74 +347,13 @@ def export_expression_from_ws(maxNumObjects):
     #                    print search_values
                         print "Failed trying to write to string buffer."
     
-    
-#                    outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
-
-#                    if expression['data'].has_key('expression_levels'):
-#                        if feature_functions.has_key(search_values['genome_id']):
-#                            print >> sys.stderr, 'using function cache for ' + search_values['genome_id']
-#                        else:
-# need to track back to the locus features, which is where the function
-# is actually stored for plants
-#                            print >> sys.stderr, 'getting fids for ' + search_values['genome_id']
-#                            cdmi_features = cdmi_api.genomes_to_fids([search_values['genome_id']],[])
-#                            cdmi_features[search_values['genome_id']] = random.sample(cdmi_features[search_values['genome_id']],100)
-#                            print >> sys.stderr, 'getting functions for ' + search_values['genome_id']
-#                            feature_functions[search_values['genome_id']]  = cdmi_api.fids_to_functions(cdmi_features[search_values['genome_id']])
-#                            print >> sys.stderr, 'getting encompass info for ' + search_values['genome_id']
-#                            feature_encompasses[search_values['genome_id']] = dict()
-#                            for encompass in cdmi_entity_api.get_relationship_Encompasses(cdmi_features[search_values['genome_id']],[],['to_link'],[]):
-# maybe we should assign to feature_functions here?
-##                                print >> sys.stderr, encompass
-#                                feature_encompasses[search_values['genome_id']][encompass[1]['from_link']] = encompass[1]['to_link']
-
-#                        print >> sys.stderr, feature_functions
-#                        print >> sys.stderr, feature_encompasses
-
-#                        for feature_id in expression['data']['expression_levels'].keys():
-#                            subobject_id = object_id + '.sub.' + feature_id
-#                            search_values['feature_id'] = feature_id
-
-#                            print >> sys.stderr, str(feature_id)
-#                            print >> sys.stderr, str(feature_encompasses[search_values['genome_id']])
-#                            if feature_encompasses[search_values['genome_id']].has_key(feature_id):
-#                                print >> sys.stderr, str(feature_encompasses[search_values['genome_id']][feature_id])
-#                            else:
-#                                print >> sys.stderr, 'no encompass info for feature ' + feature_id
-#                            # this code is horrible
-#                            if feature_functions[search_values['genome_id']].has_key(feature_id):
-#                                print >> sys.stderr, feature_id
-#                                print >> sys.stderr, feature_functions[search_values['genome_id']][feature_id]
-#                                search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_id]
-#                            elif feature_encompasses[search_values['genome_id']].has_key(feature_id):
-#                                if feature_functions[search_values['genome_id']].has_key(feature_encompasses[search_values['genome_id']][feature_id]):
-#                                    search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]
-#                                elif feature_encompasses[search_values['genome_id']][feature_id].has_key(feature_id):
-#                                    if feature_functions[search_values['genome_id']].has_key(feature_encompasses[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]):
-#                                        print >> sys.stderr, feature_id
-#                                        search_values['feature_function'] = feature_functions[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_encompasses[search_values['genome_id']][feature_id]]]
-#                            else:
-#                                print >> sys.stderr, feature_id + ' has no function'
-#                                search_values['feature_function'] = ''
-
-#                            search_values['expression_level'] = expression['data']['expression_levels'][feature_id]
-#                            try:
-#                                solr_strings = [subobject_id,workspace_name,object_type,object_name]
-#                                solr_strings += [ unicode(str(search_values[x])) for x in solr_keys ]
-#                                solr_line = "\t".join(solr_strings)
-#                                outBuffer.write(solr_line + "\n")
-#                            except Exception, e:
-#                                print str(e)
-            #                    print search_values
-#                                print "Failed trying to write to string buffer."
-        
-        
                     outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
 
                     outBuffer.close()
                 else:
                     print '            skipping %s, is a %s' % (x[0], x[2])
                 object_counter += 1
+
     outFile.close()
     
 if __name__ == "__main__":
