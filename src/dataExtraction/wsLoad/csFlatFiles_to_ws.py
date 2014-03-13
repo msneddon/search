@@ -217,6 +217,9 @@ def create_feature_objects(gid,featureData):
 def insert_genome(g,genome_entities,ws,featureData):
 
     start = time.time()
+    numericGid=int(g.split('.')[1])
+    print >> sys.stderr, numericGid
+    
 
     # maybe use get_entity_Genome to get additional fields, like source_id and domain?
     genome_data = cdmi_api.genomes_to_genome_data([g])[g]
@@ -225,8 +228,9 @@ def insert_genome(g,genome_entities,ws,featureData):
     print >> sys.stderr, "querying genome_data " + str(end - start)
 
 #    if 'P' not in genome_data['scientific_name']:
-# too big?  how to split up?
-#    if g == 'kb|g.436':
+    # sloppy hack to pick up where it crashed
+#    if numericGid < 2207:
+#    if numericGid < 28878:
 #        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
 #        return
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
@@ -381,7 +385,7 @@ def insert_genome(g,genome_entities,ws,featureData):
     
     featureSet['features'] = dict()
     for feature in featureObjects:
-        print feature
+#        print feature
         individualFeature = dict()
         individualFeature['data'] = featureObjects[feature]
         featureSet['features'][feature] = individualFeature
