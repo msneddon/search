@@ -118,7 +118,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                         fbaContig['contigs'] = [ contig['contigs'][x] for x in contig['contigs']]
 
                     contig_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1]}]})
-                    print >> sys.stderr, contig_info
+#                    print >> sys.stderr, contig_info
 #                    print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
 
 #                print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
@@ -178,7 +178,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 
                     fbaGenomeObject['features'].append(fbaFeature)
 
-                print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
+#                print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
                 genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
 #                print >> sys.stderr,genome_info
 
