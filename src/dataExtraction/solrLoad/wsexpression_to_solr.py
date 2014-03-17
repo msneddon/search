@@ -30,8 +30,8 @@ def export_expression_from_ws(maxNumObjects):
 
     genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
     # this Poplar version is not in production central store yet
-    if not genome_entities.has_key('kb|g.3907'):
-        genome_entities['kb|g.3907'] = {'scientific_name':'Populus trichocarpa'}
+#    if not genome_entities.has_key('kb|g.3907'):
+#        genome_entities['kb|g.3907'] = {'scientific_name':'Populus trichocarpa'}
 
     # these dicts will be used to cache feature functions from the CDMI
     feature_functions = dict()
@@ -294,14 +294,33 @@ def export_expression_from_ws(maxNumObjects):
     
                     search_values['sample_feature_ids'] = ''
                     if expression['data'].has_key('expression_levels'):
+                        search_values['sample_feature_ids'] += ' '.join(expression['data']['expression_levels'].keys())
+
+                        # chase down locus-mrna-cds relationship to get functions
+                        encompass1 = cdmi_entity_api.get_relationship_IsEncompassedIn(expression['data']['expression_levels'].keys(),[],['to_link'],[])
+                        encompass=dict()
+                        for feat in encompass1:
+                            encompass[feat[1]['from_link']] = feat[1]['to_link']
+                        encompass2 = cdmi_entity_api.get_relationship_IsEncompassedIn(encompass.values(),[],['to_link'],[])
+                        for feat in encompass2:
+                            encompass[feat[1]['from_link']] = feat[1]['to_link']
+#                        print >> sys.stderr, encompass
+#                        print >> sys.stderr, encompass['kb|g.3899.CDS.62167']
+#                        print >> sys.stderr, encompass[encompass['kb|g.3899.CDS.62167']]
+                        
+
 # would like to get feature objects here
 # add to feature_objects dictionary?
-                        search_values['sample_feature_ids'] += ' '.join(expression['data']['expression_levels'].keys())
                         objectids = [ {'workspace':'KBasePublicRichGenomesLoad','name':search_values['sample_genome_id'] + '.featureset', 'included':['/features/*/data/function'] } ]
 #                        print >> sys.stderr, objectids
                         feature_objects = ws_client.get_object_subset(objectids)
-#                        print >> sys.stderr, feature_objects
-                        # now need to chase down locus-mrna-cds relationship to get functions
+#                        print >> sys.stderr, 'feature_objects'
+#                        print >> sys.stderr, feature_objects[0]['data']
+#                        print >> sys.stderr, feature_objects.keys()
+#                        print >> sys.stderr, 'feature_object trace'
+#                        print >> sys.stderr, feature_objects[0]['data']['features'][encompass[encompass['kb|g.3899.CDS.62167']]]['data']
+
+
                         for feature_id in expression['data']['expression_levels']:
                             level_search_values = dict()
                             for key in solr_keys:
@@ -315,6 +334,8 @@ def export_expression_from_ws(maxNumObjects):
 
                             level_search_values['level_feature_id'] = feature_id
                             level_search_values['level_expression_level'] = expression['data']['expression_levels'][feature_id]
+
+                            level_search_values['level_feature_function'] = feature_objects[0]['data']['features'][encompass[encompass[feature_id]]]['data']['function']
 
 #    solr_ws_keys = ['object_id','workspace_name','object_type', 'object_name']
                             try:
