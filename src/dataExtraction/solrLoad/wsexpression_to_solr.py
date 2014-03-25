@@ -16,7 +16,7 @@ import biokbase.cdmi.client
 
 wsname = 'KBasePublicExpression'
 
-def export_expression_from_ws(maxNumObjects):
+def export_expression_from_ws(maxNumObjects,expObjIds):
     #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
 #    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
     ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
@@ -70,9 +70,18 @@ def export_expression_from_ws(maxNumObjects):
         workspace_id = n[0]
         workspace_name = n[1]
 
-        # then get all samples and propagate series info in sample doc
-        # propagate some series and sample info into expression_level doc
-        objects_list = ws_client.list_objects({"ids": [workspace_id], "type":"KBaseExpression.ExpressionSeries"})
+        objects_list = list()
+
+        if len(expObjIds) > 0:
+            names_list = list()
+            for expObjId in expObjIds:
+                names_list.append({'workspace':workspace_name,'name':expObjId})
+            objects_list = [x['info'] for x in ws_client.get_objects(names_list)]
+        else:
+            # then get all samples and propagate series info in sample doc
+            # propagate some series and sample info into expression_level doc
+            objects_list = ws_client.list_objects({"ids": [workspace_id], "type":"KBaseExpression.ExpressionSeries"})
+
         if len(objects_list) > 0:
             print "\tWorkspace %s has %d objects" % (workspace_name, len(objects_list))
             object_counter = 0
@@ -83,8 +92,7 @@ def export_expression_from_ws(maxNumObjects):
             for x in objects_list:
                 print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
     
-                # this is probably now a noop
-                if "Expression" in x[2]:
+                if "ExpressionSeries" in x[2]:
     
                     done = False
     
@@ -174,7 +182,15 @@ def export_expression_from_ws(maxNumObjects):
 
 #        print >> sys.stderr, samples_to_series
 
-        objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseExpression.ExpressionSample"})
+        objects_list = list()
+
+        if len(expObjIds) > 0:
+            names_list = list()
+            for expObjId in expObjIds:
+                names_list.append({'workspace':workspace_name,'name':expObjId})
+            objects_list = [x['info'] for x in ws_client.get_objects(names_list)]
+        else:
+            objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseExpression.ExpressionSample"})
         if len(objects_list) > 0:
             print "\tWorkspace %s has %d objects" % (workspace_name, len(objects_list))
             object_counter = 0
@@ -185,8 +201,7 @@ def export_expression_from_ws(maxNumObjects):
             for x in objects_list:
                 print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
     
-                # this is now probably a no-op
-                if "Expression" in x[2]:
+                if "ExpressionSample" in x[2]:
     
                     done = False
     
@@ -244,7 +259,7 @@ def export_expression_from_ws(maxNumObjects):
                             search_values['sample_series_ids'] += series + ' ' + series_objname + ' '
                             for key in ['summary','design']:
                                 if series_objects[series].has_key(key):
-                                    search_values['series_'+key] += series_objects[series][key] + ' '
+                                    search_values['series_'+key] += pat.sub(' ',series_objects[series][key]) + ' '
                             if series_objects[series].has_key('title'):
                                 search_values['series_title'] += series_objects[series]['title'] + ' '
 
@@ -377,10 +392,12 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Create import files from workspace objects')
     parser.add_argument('--count', action="store", dest="maxNumObjects", type=int)
+    parser.add_argument('expObjIds', action="store", nargs='*')
     args = parser.parse_args()
 
     maxNumObjects = sys.maxint
     if args.maxNumObjects:
         maxNumObjects = args.maxNumObjects
     
-    export_expression_from_ws(maxNumObjects)
+    print args.expObjIds
+    export_expression_from_ws(maxNumObjects,args.expObjIds)
