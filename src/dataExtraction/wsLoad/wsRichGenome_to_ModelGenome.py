@@ -50,9 +50,9 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
             if "Genome" in x[2]:
                 try:
                     ws_prod_client.get_object_info([{"workspace":wsoutput,"name":x[1]}],0)
-                    print >> sys.stderr, 'object '  + x[1] + ' found, replacing'
-#                    print >> sys.stderr, 'object '  + x[1] + ' found, skipping'
-#                    continue
+#                    print >> sys.stderr, 'object '  + x[1] + ' found, replacing'
+                    print >> sys.stderr, 'object '  + x[1] + ' found, skipping'
+                    continue
                 except biokbase.workspace.client.ServerError, e:
                     print >> sys.stderr, 'object '  + x[1] + ' not found, adding to ws'
 
@@ -70,6 +70,11 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                 #print genome['data'].keys()
                 
                 fbaGenomeObject = dict()
+
+                if genome['data'].has_key('genome_id'):
+                    if genome['data']['genome_id'] in ['kb|g.3907','kb|g.140106','kb|g.140085','kb|g.166828','kb|g.166814','kb|g.3899']:
+                        print >> sys.stderr, 'skipping ' + genome['data']['genome_id'] + ' , searchable data too big'
+                        continue
 
                 scalar_keys = ['genetic_code','dna_size','md5','num_contigs','taxonomy','scientific_name','domain', 'complete', 'gc_content']
                 for key in scalar_keys:
@@ -179,8 +184,12 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                     fbaGenomeObject['features'].append(fbaFeature)
 
 #                print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
+
+# would like a try block here
+# if the save fails because subdata is too big, try to re-save as a genome-like object that doesn't
+# have as many searchable fields
                 genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
-#                print >> sys.stderr,genome_info
+                print >> sys.stderr,genome_info
 
             else:
                 print '            skipping %s, is a %s' % (x[0], x[2])
