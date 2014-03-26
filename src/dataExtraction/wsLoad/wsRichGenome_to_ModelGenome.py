@@ -5,6 +5,7 @@ import json
 import sys
 import random
 import simplejson
+import re
 
 # found at https://pythonadventures.wordpress.com/tag/unicodeencodeerror/
 reload(sys)
@@ -18,8 +19,9 @@ wsoutput = 'KBasePublicGenomesLoad'
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
     #ws_prod_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
-    ws_prod_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
-#    ws_dev_client = biokbase.workspace.client.Workspace('https://140.221.84.209:7058/')
+#    ws_prod_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
+    # gavin's dev instance
+    ws_prod_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058/')
     #ws_dev_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
     
     workspace_object = ws_prod_client.get_workspace_info({'workspace':wsinput})
@@ -51,10 +53,10 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                 try:
                     ws_prod_client.get_object_info([{"workspace":wsoutput,"name":x[1]}],0)
 #                    print >> sys.stderr, 'object '  + x[1] + ' found, replacing'
-                    print >> sys.stderr, 'object '  + x[1] + ' found, skipping'
+                    print >> sys.stderr, 'object '  + x[1] + ' found in ws ' + wsoutput + ' , skipping'
                     continue
                 except biokbase.workspace.client.ServerError, e:
-                    print >> sys.stderr, 'object '  + x[1] + ' not found, adding to ws'
+                    print >> sys.stderr, 'object '  + x[1] + ' not found, adding to ws ' + wsoutput
 
                 done = False
                 while not done:
@@ -71,10 +73,10 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                 
                 fbaGenomeObject = dict()
 
-                if genome['data'].has_key('genome_id'):
-                    if genome['data']['genome_id'] in ['kb|g.3907','kb|g.140106','kb|g.140085','kb|g.166828','kb|g.166814','kb|g.3899']:
-                        print >> sys.stderr, 'skipping ' + genome['data']['genome_id'] + ' , searchable data too big'
-                        continue
+#                if genome['data'].has_key('genome_id'):
+#                    if genome['data']['genome_id'] in ['kb|g.3907','kb|g.140106','kb|g.140085','kb|g.166828','kb|g.166814','kb|g.3899']:
+#                        print >> sys.stderr, 'skipping ' + genome['data']['genome_id'] + ' , searchable data too big'
+#                        continue
 
                 scalar_keys = ['genetic_code','dna_size','md5','num_contigs','taxonomy','scientific_name','domain', 'complete', 'gc_content']
                 for key in scalar_keys:
@@ -188,7 +190,15 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 # would like a try block here
 # if the save fails because subdata is too big, try to re-save as a genome-like object that doesn't
 # have as many searchable fields
-                genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                try:
+                    genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                except biokbase.workspace.client.ServerError as err:
+                    rematch = re.search('subdata size \d+ exceeds limit', str(err))
+                    if rematch != None:
+                        print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, trying to save as BasicGenome object'
+                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"kkellerKBaseGenomes.BasicGenome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                    else:
+                        raise
                 print >> sys.stderr,genome_info
 
             else:
