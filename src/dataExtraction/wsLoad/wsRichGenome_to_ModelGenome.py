@@ -19,9 +19,9 @@ wsoutput = 'KBasePublicGenomesLoad'
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
     #ws_prod_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
-#    ws_prod_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
+    ws_prod_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
     # gavin's dev instance
-    ws_prod_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058/')
+#    ws_prod_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058/')
     #ws_dev_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
     
     workspace_object = ws_prod_client.get_workspace_info({'workspace':wsinput})
@@ -73,7 +73,12 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                 
                 fbaGenomeObject = dict()
 
+                # sometimes genomes are problematic
+                # can hard-code list of genomes to skip
 #                if genome['data'].has_key('genome_id'):
+#                    if genome['data']['genome_id'] in ['kb|g.23167']:
+#                        print >> sys.stderr, 'skipping ' + genome['data']['genome_id'] + ' , possible problem with RichGenome object'
+#                        continue
 #                    if genome['data']['genome_id'] in ['kb|g.3907','kb|g.140106','kb|g.140085','kb|g.166828','kb|g.166814','kb|g.3899']:
 #                        print >> sys.stderr, 'skipping ' + genome['data']['genome_id'] + ' , searchable data too big'
 #                        continue
@@ -195,8 +200,10 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                 except biokbase.workspace.client.ServerError as err:
                     rematch = re.search('subdata size \d+ exceeds limit', str(err))
                     if rematch != None:
-                        print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, trying to save as BasicGenome object'
-                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"kkellerKBaseGenomes.BasicGenome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                        print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, skipping for now'
+                        continue
+#                        print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, trying to save as BasicGenome object'
+#                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"kkellerKBaseGenomes.BasicGenome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
                     else:
                         raise
                 print >> sys.stderr,genome_info
