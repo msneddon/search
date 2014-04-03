@@ -220,9 +220,23 @@ def insert_genome(g,genome_entities,ws,featureData):
     numericGid=int(g.split('.')[1])
     print >> sys.stderr, numericGid
     
+    try:
+        ws.get_object_info([{"workspace":wsname,"name":g}],0)
+        if skipExistingGenomes == True:
+            print >> sys.stderr, 'genome '  + g + ' found, skipping'
+            return
+        print >> sys.stderr, 'genome '  + g + ' found, updating'
+    except biokbase.workspace.client.ServerError:
+        print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
 
     # maybe use get_entity_Genome to get additional fields, like source_id and domain?
-    genome_data = cdmi_api.genomes_to_genome_data([g])[g]
+    all_genome_data = cdmi_api.genomes_to_genome_data([g])
+    genome_data = dict()
+    if all_genome_data.has_key(g):
+        genome_data = all_genome_data[g]
+    else:
+        print >> sys.stderr, 'genome ' + g + ' has no entry in cdmi, skipping'
+        return
 
     end = time.time()
     print >> sys.stderr, "querying genome_data " + str(end - start)
@@ -234,15 +248,6 @@ def insert_genome(g,genome_entities,ws,featureData):
 #        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
 #        return
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
-
-    try:
-        ws.get_object_info([{"workspace":wsname,"name":g}],0)
-        if skipExistingGenomes == True:
-            print >> sys.stderr, 'genome '  + g + ' found, skipping'
-            return
-        print >> sys.stderr, 'genome '  + g + ' found, updating'
-    except biokbase.workspace.client.ServerError:
-        print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
 
     genomeObject = dict()
     featureSet = dict()
