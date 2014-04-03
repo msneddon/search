@@ -37,7 +37,20 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
             names_list.append({'workspace':wsinput,'name':genome})
         objects_list = [x['info'] for x in ws_prod_client.get_objects(names_list)]
     else:
-        objects_list = ws_prod_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"})
+        # need to loop through to make sure we get all objects; limit of 5000 items returned by ws
+#        objects_list = ws_prod_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"},limit:5000,skip:skipNum)
+        object_count = 1
+        skipNum = 0
+        limitNum = 5000
+        while object_count != 0:
+            this_list = ws_prod_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome","limit":limitNum,"skip":skipNum})
+            object_count=len(this_list)
+            skipNum += limitNum
+            objects_list.extend(this_list)
+
+#    print objects_list
+#    print len(objects_list)
+#    exit(0)
 
     if len(objects_list) > 0:
         print "\tWorkspace %s has %d matching objects" % (workspace_name, len(objects_list))
