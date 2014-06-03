@@ -217,20 +217,9 @@ def create_feature_objects(gid,featureData):
 def insert_genome(g,genome_entities,ws,featureData):
 
     start = time.time()
-
-    # maybe use get_entity_Genome to get additional fields, like source_id and domain?
-    genome_data = cdmi_api.genomes_to_genome_data([g])[g]
-
-    end = time.time()
-    print >> sys.stderr, "querying genome_data " + str(end - start)
-
-#    if 'P' not in genome_data['scientific_name']:
-# too big?  how to split up?
-#    if g == 'kb|g.436':
-#        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
-#        return
-    print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
-
+    numericGid=int(g.split('.')[1])
+    print >> sys.stderr, numericGid
+    
     try:
         ws.get_object_info([{"workspace":wsname,"name":g}],0)
         if skipExistingGenomes == True:
@@ -239,6 +228,26 @@ def insert_genome(g,genome_entities,ws,featureData):
         print >> sys.stderr, 'genome '  + g + ' found, updating'
     except biokbase.workspace.client.ServerError:
         print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
+
+    # maybe use get_entity_Genome to get additional fields, like source_id and domain?
+    all_genome_data = cdmi_api.genomes_to_genome_data([g])
+    genome_data = dict()
+    if all_genome_data.has_key(g):
+        genome_data = all_genome_data[g]
+    else:
+        print >> sys.stderr, 'genome ' + g + ' has no entry in cdmi, skipping'
+        return
+
+    end = time.time()
+    print >> sys.stderr, "querying genome_data " + str(end - start)
+
+#    if 'P' not in genome_data['scientific_name']:
+    # sloppy hack to pick up where it crashed
+#    if numericGid < 2207:
+#    if numericGid < 28878:
+#        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
+#        return
+    print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
 
     genomeObject = dict()
     featureSet = dict()
@@ -381,7 +390,7 @@ def insert_genome(g,genome_entities,ws,featureData):
     
     featureSet['features'] = dict()
     for feature in featureObjects:
-        print feature
+#        print feature
         individualFeature = dict()
         individualFeature['data'] = featureObjects[feature]
         featureSet['features'][feature] = individualFeature
