@@ -40,7 +40,7 @@ log status OK
 echo ;
 
 log stopping Tomcat
-$CATALINA_BASE/bin/catalina.sh stop
+$CATALINA_BASE/bin/catalina.sh stop -force
 
 log status "Search service and Tomcat stopped"
 echo ;
