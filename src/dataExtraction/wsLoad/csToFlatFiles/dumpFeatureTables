@@ -48,6 +48,7 @@ echo Publications
 time mysql --defaults-extra-file=./my.cnf -e \
  " select ipf.to_link,c.from_link from Concerns c join IsProteinFor ipf on (c.to_link=ipf.from_link) JOIN Feature f ON (ipf.to_link=f.id) $limit " \
   | perl -pi -e 's/"//g' > fids2pubs.tab
+
 # this writes to publications.tab, is probably small enough to
 # fit entirely in memory
 # if not need to join these two files together
