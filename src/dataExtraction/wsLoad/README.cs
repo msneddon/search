@@ -9,6 +9,7 @@ bash csToFlatFiles/dumpFeatureTables
 # limit=' LIMIT 50000 ' bash csToFlatFiles/dumpFeatureTables
 
 # one time only: get publication info from pubmed
+# (after full dump complete)
 cut -f2 fids2pubs.tab | sort -u | python ~/dev_container/modules/search/src/dataExtraction/solrLoad/publications_to_solr.py
 
 ##### load flat files into workspace
@@ -20,10 +21,11 @@ cut -f2 fids2pubs.tab | sort -u | python ~/dev_container/modules/search/src/data
 # --skip-existing to skip Genome objects that already exist (default is to overwrite)
 # (--skip-existing does not look at objects referenced in Genome object! (e.g., FeatureSet, ContigSet)
 
-# example for test run
+# example for test run to dev04 ws
 python search/src/dataExtraction/wsLoad/csFlatFiles_to_ws.py --debug --skip-last --wsname=JunkWS06062014
 
 # example for loading to production ws
+# if gets interrupted, add --skip-existing switch
 # use kbase-login to get credentials
 kbase-login kbasesearch
-python search/src/dataExtraction/wsLoad/csFlatFiles_to_ws.py --wsname=KBaseRichGenomesLoad  > out 2> err
+python search/src/dataExtraction/wsLoad/csFlatFiles_to_ws.py --wsname=KBaseRichGenomesLoad  > loadCsToWs.out.1 2> loadCsToWs.err.1
