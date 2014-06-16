@@ -1,7 +1,12 @@
-#very quick notes
+# very quick notes on getting CS objects into workspace
 
-# no switch yet to set LIMIT or not
+# configure my.cnf file in cwd, example in csToFlatFiles/my.cnf
+# (keep on local storage, not ~ NFS, or nfs will croak and your run will die)
+# this gets full dump
 bash csToFlatFiles/dumpFeatureTables
+# for debugging, can do
+# limit=' LIMIT 5000 ' bash csToFlatFiles/dumpFeatureTables
+
 
 # need to remind myself what switches there are
 # in theory we want switches to ignore or replace existing objects

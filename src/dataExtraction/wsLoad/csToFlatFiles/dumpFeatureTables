@@ -11,7 +11,9 @@
 # all SQL queries relatively short (< 5m) unless noted
 
 # define for debugging purposes
-limit=' LIMIT 50000 '
+# or call script like
+# limit= ' LIMIT 50000 ' bash dumpFeatureTables
+#limit=' LIMIT 50000 '
 
 # might want to split out Feature and protein sequence
 # so that we can leave out protein sequence if it's too big
@@ -31,7 +33,7 @@ time mysql --defaults-extra-file=./my.cnf -e \
 
 # ~18min
 echo HasAliasAssertedFrom
-time mysql --defaults-extra-file=./my.cnf -e 'select haaf.from_link as fid,haaf.alias,haaf.to_link as source_db from HasAliasAssertedFrom haaf JOIN Feature f ON (f.id=haaf.from_link)' \
+time mysql --defaults-extra-file=./my.cnf -e "select haaf.from_link as fid,haaf.alias,haaf.to_link as source_db from HasAliasAssertedFrom haaf JOIN Feature f ON (f.id=haaf.from_link) $limit" \
  | perl -pi -e 's/"//g' > HasAliasAssertedFrom.tab
 
 echo AtomicRegulons
