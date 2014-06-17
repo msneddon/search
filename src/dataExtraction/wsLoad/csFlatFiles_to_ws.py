@@ -17,9 +17,6 @@ import pprint
 import biokbase.workspace.client
 import biokbase.cdmi.client
 
-# use a temp name here; rename later when load complete
-wsname = 'KBasePublicRichGenomesLoad'
-
 pp = pprint.PrettyPrinter(indent=4)
 
 # this will be used to store the pub info from PubMed
@@ -214,7 +211,7 @@ def create_feature_objects(gid,featureData):
 
     return featureObjects
 
-def insert_genome(g,genome_entities,ws,featureData):
+def insert_genome(g,genome_entities,ws,wsname,featureData):
 
     start = time.time()
     numericGid=int(g.split('.')[1])
@@ -431,12 +428,15 @@ if __name__ == "__main__":
     import os.path
 
     parser = argparse.ArgumentParser(description='Create solr tab-delimited import files from flat file dumps from CS.')
-    parser.add_argument('--sorted-file-dir', nargs=1, help='path to sorted dump files to be parsed')
+    parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
+    parser.add_argument('--sorted-file-dir', nargs=1, help='path to sorted dump files to be parsed (default .)')
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
     parser.add_argument('--debug',action='store_true',help='debugging')
     parser.add_argument('--skip-last',action='store_true',help='skip processing last genome (in case input is incomplete)')
 
     args = parser.parse_args()
+
+    wsname = args.wsname[0]
 
     sorted_file_dir = '.'
     if args.sorted_file_dir:
@@ -447,18 +447,19 @@ if __name__ == "__main__":
     # ws public instance
     ws = biokbase.workspace.client.Workspace("https://kbase.us/services/ws")
     # ws team dev instance
-    # is this actually working?  seems like it's adding to prod
     if args.debug:
-        ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
+#        ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
+        ws = biokbase.workspace.client.Workspace("http://dev04.berkeley.kbase.us:7058", user_id='***REMOVED***', password='***REMOVED***')
 
+    print >> sys.stderr, wsname
     try:
         retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
         print >> sys.stderr, 'created workspace ' + wsname
         print >> sys.stderr, retval
     # want this to catch only workspace exists errors
     except biokbase.workspace.client.ServerError, e:
-        pass
 #        print >> sys.stderr, e
+        pass
 
     genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
     genomes = genome_entities
@@ -515,14 +516,14 @@ if __name__ == "__main__":
                         featureData[attribute].append(currentLine[attribute])
                     if (attrGidNumericId < currentNumericGid):
                         print >> sys.stderr, attribute + ' file may have extra data, skipping'
-                        print >> sys.stderr, ' '.join([attrGid, currentNumericGid])
+                        print >> sys.stderr, ' '.join([attrGid, str(currentNumericGid)])
                     if (attrGidNumericId > currentNumericGid):
                         print >> sys.stderr, 'need to skip to next attribute here: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
                         break
                     currentLine[attribute] = fileHandle[attribute].readline()
 #            pp.pprint(featureData)
             # pass featureData to a sub that creates appropriate subobjects
-            insert_genome(currentGid,genome_entities,ws,featureData)
+            insert_genome(currentGid,genome_entities,ws,wsname,featureData)
 
             # make sure Python does gc right away
             featureData = None
@@ -573,7 +574,7 @@ if __name__ == "__main__":
             currentLine[attribute] = fileHandle[attribute].readline()
 #    pp.pprint(featureData)
     # pass featureData to a sub that creates appropriate subobjects
-    insert_genome(currentGid,genome_entities,ws,featureData)
+    insert_genome(currentGid,genome_entities,ws,wsname,featureData)
 
     
 # general arch:

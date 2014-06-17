@@ -11,7 +11,9 @@
 # all SQL queries relatively short (< 5m) unless noted
 
 # define for debugging purposes
-limit=' LIMIT 50000 '
+# or call script like
+# limit= ' LIMIT 50000 ' bash dumpFeatureTables
+#limit=' LIMIT 50000 '
 
 # might want to split out Feature and protein sequence
 # so that we can leave out protein sequence if it's too big
@@ -31,7 +33,7 @@ time mysql --defaults-extra-file=./my.cnf -e \
 
 # ~18min
 echo HasAliasAssertedFrom
-time mysql --defaults-extra-file=./my.cnf -e 'select haaf.from_link as fid,haaf.alias,haaf.to_link as source_db from HasAliasAssertedFrom haaf JOIN Feature f ON (f.id=haaf.from_link)' \
+time mysql --defaults-extra-file=./my.cnf -e "select haaf.from_link as fid,haaf.alias,haaf.to_link as source_db from HasAliasAssertedFrom haaf JOIN Feature f ON (f.id=haaf.from_link) $limit" \
  | perl -pi -e 's/"//g' > HasAliasAssertedFrom.tab
 
 echo AtomicRegulons
@@ -46,6 +48,7 @@ echo Publications
 time mysql --defaults-extra-file=./my.cnf -e \
  " select ipf.to_link,c.from_link from Concerns c join IsProteinFor ipf on (c.to_link=ipf.from_link) JOIN Feature f ON (ipf.to_link=f.id) $limit " \
   | perl -pi -e 's/"//g' > fids2pubs.tab
+
 # this writes to publications.tab, is probably small enough to
 # fit entirely in memory
 # if not need to join these two files together
