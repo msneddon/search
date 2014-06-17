@@ -128,8 +128,9 @@ done
 
 # extra sort for Subsystems to remove dups; is a bit
 # wasteful but not terrible
+# (need extra uniq, or sort -u will take only one line per genome)
 echo sort -u Subsystems
-sort -n -k2 -t '.' -T ./tmp -S 48G -u Subsystems.tab > Subsystems.tab.sorted
+sort -n -k2 -t '.' -T ./tmp -S 48G Subsystems.tab|uniq > Subsystems.tab.sorted
 
 
 # now can open .sorted files and stream through them
