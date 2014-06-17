@@ -29,3 +29,8 @@ python search/src/dataExtraction/wsLoad/csFlatFiles_to_ws.py --debug --skip-last
 # use kbase-login to get credentials
 kbase-login kbasesearch
 python search/src/dataExtraction/wsLoad/csFlatFiles_to_ws.py --wsname=KBaseRichGenomesLoad  > loadCsToWs.out.1 2> loadCsToWs.err.1
+
+# to load just a handful of genomes, use csgenome_to_ws.py, which
+# loads same object directly from cs
+# (will be very slow on genomes with coexpression data)
+python search/src/dataExtraction/wsLoad/csgenome_to_ws.py --wsname KBaseRichGenomesLoad 'kb|g.0'

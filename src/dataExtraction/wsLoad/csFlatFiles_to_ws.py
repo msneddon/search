@@ -454,12 +454,11 @@ if __name__ == "__main__":
     print >> sys.stderr, wsname
     try:
         retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
-        print >> sys.stderr, 'created workspace ' + wsname
+        print >> sys.stderr, 'created workspace ' + wsname + ' at ws url ' + ws.url
         print >> sys.stderr, retval
     # want this to catch only workspace exists errors
     except biokbase.workspace.client.ServerError, e:
-#        print >> sys.stderr, e
-        pass
+        print >> sys.stderr, 'workspace ' + wsname + ' at ws url ' + ws.url + ' may already exist, trying to use'
 
     genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
     genomes = genome_entities
