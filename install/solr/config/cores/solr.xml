@@ -5,6 +5,5 @@
     <core instanceDir="ontology/" name="ontology"/>
     <core instanceDir="metagenomes/" name="metagenomes"/>
     <core instanceDir="gwas/" name="gwas"/>
-    <core instanceDir="expression/" name="expression"/>
   </cores>
 </solr>

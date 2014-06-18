@@ -111,7 +111,7 @@ def load_service_config():
     settings = dict()
 
     config = ConfigParser.ConfigParser()
-    config.read("%KB_DEPLOYMENT%/services/search/config/search_config.ini")
+    config.read("/kb/deployment/services/search/config/search_config.ini")
 
     for section in config.sections():
         settings[section] = dict()

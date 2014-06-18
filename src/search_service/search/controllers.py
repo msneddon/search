@@ -212,6 +212,7 @@ def capture_metrics(request):
 def compute_solr_query(options, config):
     mapping = "search"
     paramString = ""
+    facet_fields = ""
 
     solr_url = config['search']['solr_url']
 
@@ -232,29 +233,40 @@ def compute_solr_query(options, config):
     # limit the output to the set of visible fields defined for this category
     solr_url += "&fl=" + ','.join(config['plugins'][options['category']]['solr']['visible_fields'])
 
-    # add faceting options, if present
-    if len(config['plugins'][options['category']]['solr']['facet_fields']) > 0:
-        solr_url += "&facet=true"
-        for x in config['plugins'][options['category']]['solr']['facet_fields']:
-            solr_url += "&facet.field=" + x
-        
     if options.has_key('sort') and options['sort'] is not None:
         paramString += "&sort=" + options['sort']
 
-    if options.has_key('facets') and options['facets'] is not None:
-        facetDict = dict()
-    
-        for x in options['facets'].split(','):
-            facetKey, facetValue = x.split(":")
-            if not facetDict.has_key(facetKey):
-                facetDict[facetKey] = facetValue
-            else:
-                facetDict[facetKey] += " OR " + facetValue
-        
-        for k in facetDict.keys():    
-            paramString += "&fq=" + k + ":" + facetDict[k]
+    # add faceting options, if present
+    if len(config['plugins'][options['category']]['solr']['facet_fields']) > 0:
+        solr_url += "&facet=true"
 
-    solr_url += options['queryString'] + paramString
+        if options.has_key('facets') and options['facets'] is not None:
+            facetDict = dict()
+            facetOrder = list()
+    
+            for x in options['facets'].split(','):
+                facetKey, facetValue = x.split(":")
+                if not facetDict.has_key(facetKey):
+                    facetDict[facetKey] = facetValue
+                    facetOrder.append(facetKey)
+                else:
+                    facetDict[facetKey] += " OR " + facetValue
+        
+            facet_fields += "&facet.field={!ex=dt}" + facetOrder[0]
+            paramString += "&fq={!tag=dt}" + facetOrder[0] + ":" + facetDict[facetOrder[0]]
+            
+            for k in xrange(1,len(facetOrder)):    
+                facet_fields += "&facet.field=" + facetOrder[k]
+                paramString += "&fq=" + facetOrder[k] + ":" + facetDict[facetOrder[k]]
+
+            for x in config['plugins'][options['category']]['solr']['facet_fields']:
+                if not facetDict.has_key(x):
+                    facet_fields += "&facet.field=" + x
+        else:
+            for x in config['plugins'][options['category']]['solr']['facet_fields']:
+                facet_fields += "&facet.field=" + x
+
+    solr_url += facet_fields + options['queryString'] + paramString
             
 
     if config['plugins'][options['category']]['solr'].has_key('secure') and config['plugins'][options['category']]['solr']['secure'] == True:

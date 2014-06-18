@@ -9,82 +9,51 @@ import sys
 import simplejson
 import time
 import random
+import pprint
 
 import biokbase.cdmi.client
 import biokbase.workspace.client
 
+pp = pprint.PrettyPrinter(indent=4)
+
+skipExistingGenomes = False
+
 # production instance
 cdmi_api = biokbase.cdmi.client.CDMI_API()
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
-ws = biokbase.workspace.client.Workspace()
 # private instance
 #cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
 #cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
-#ws = biokbase.workspace.client.Workspace("http://localhost:7058", user_id='***REMOVED***', password='***REMOVED***')
 
-wsname = 'KBasePublicRichGenomes'
 
-# set up a try block here?
-try:
-    retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
-# want this to catch only workspace exists errors
-except biokbase.workspace.client.ServerError, e:
-    pass
-#    print >> sys.stderr, e
-
-#kbase_sapling_db = MySQLdb.connect('192.168.1.85','kbase_sapselect','oiwn22&dmwWEe','kbase_sapling_v1')
-
-genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
-
-genomes = random.sample(genome_entities,500)
-#genomes = sys.argv[1:]
-# DvH, E.coli
-# takes 4min (total) without dna_seqs, with coexpressed_fids
-# takes 5min (total) with retrieving everything
-#genomes = ['kb|g.3562','kb|g.0']
-# arabidopsis--takes 50m with individual dna_seq calls (coexpressed_fids untested)
-# takes much less time when cached
-#genomes = ['kb|g.3899']
-# more static sets
-#genomes = ['kb|g.9','kb|g.222']
-#genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
-#genomes = ['kb|g.19762','kb|g.1976']
-#genomes = ['kb|g.0']
-#genomes = ['kb|g.3562']
-#genomes = ['kb|g.3562','kb|g.0']
-# DvH, e.coli, multiple versions of arabidopsis
-# what other genomes are essential?
-#genomes = ['kb|g.3562','kb|g.0','kb|g.1105','kb|g.1103','kb|g.26509','kb|g.1104']
-# kb|g.1103 has at least one feature with a bad location
-#genomes = ['kb|g.3562','kb|g.0','kb|g.3899','kb|g.1105','kb|g.26509','kb|g.1104']
-
-#genomeObjects = dict()
-
-for g in genomes:
+def insert_genome(g,genome_entities,ws,wsname):
     print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
 
     try:
         ws.get_object_info([{"workspace":wsname,"name":g}],0)
-#        print >> sys.stderr, 'genome '  + g + ' found, updating'
-        print >> sys.stderr, 'genome '  + g + ' found, skipping'
-        continue
+        if skipExistingGenomes == True:
+            print >> sys.stderr, 'genome '  + g + ' found, skipping'
+            return
+        print >> sys.stderr, 'genome '  + g + ' found, updating'
     except biokbase.workspace.client.ServerError:
         print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
+
+    start = time.time()
+    all_genome_data = cdmi_api.genomes_to_genome_data([g])
+    genome_data = dict()
+    if all_genome_data.has_key(g):
+        genome_data = all_genome_data[g]
+    else:
+        print >> sys.stderr, 'genome ' + g + ' has no entry in cdmi, skipping'
+        return
+
+    end = time.time()
+    print >> sys.stderr, "querying genome_data " + str(end - start)
 
     genomeObject = dict()
     featureSet = dict()
     featureSet['features'] = dict()
 
-    start = time.time()
-
-    # maybe use get_entity_Genome to get additional fields, like source_id and domain?
-    genome_data = cdmi_api.genomes_to_genome_data([g])[g]
-
-    end = time.time()
-    print >> sys.stderr, "querying genome_data " + str(end - start)
-
-###############################################
-    #fill in top level genome object properties
     genomeObject["genome_id"] = g
     genomeObject["scientific_name"] = genome_data["scientific_name"]
     genomeObject["genetic_code"] = int(genome_data["genetic_code"])
@@ -102,18 +71,10 @@ for g in genomes:
 
     genomeObject["contig_lengths"] = dict()
 
-    #genomeObject["contigset_ref"] = 
-    #genomeObject["proteinset_ref"] = 
-    #genomeObject["transcriptset_ref"] = 
+    #genomeObject["contigset_ref"] =
+    #genomeObject["proteinset_ref"] =
+    #genomeObject["transcriptset_ref"] =
 
-    #start = time.time()
-
-    #taxonomy = cdmi_api.genomes_to_taxonomies([g])[g]
-
-    #end = time.time()
-    #print >> sys.stderr, "querying taxonomies " + str(end - start)
-
-##########################
     # build ContigSet and Contig objects
     # ultimately we will want to build ContigSet independent of
     # the Genome object, insert it first, get its workspace path,
@@ -142,11 +103,18 @@ for g in genomes:
 
     start = time.time()
 
-    # this died on kb|g.3907, kb|g.3643 Gallus gallus, kb|g.41 Mouse
-    contig_sequences = cdmi_api.contigs_to_sequences(contig_ids)
+    # retrieving all with one call died on kb|g.3907, kb|g.3643 Gallus gallus, kb|g.41 Mouse
+    # looping over each contig_id still seems slow on chicken
+    # these sequences are too big for ws (250MB), need to refactor
+    contig_sequences = dict()
+    for contig_id in contig_ids:
+#        contig_seq = cdmi_api.contigs_to_sequences([contig_id])
+#        contig_sequences[contig_id] = contig_seq[contig_id]
+        # for debugging, don't get contig seqs
+        contig_sequences[contig_id] = ''
 
     end = time.time()
-    print  >> sys.stderr, "querying contig seqs " + str(end - start)
+    print  >> sys.stderr, "(not) querying contig seqs " + str(end - start)
 
     start = time.time()
 
@@ -168,9 +136,9 @@ for g in genomes:
         contig["length"] = int(contig_lengths[x])
         contig["md5"] = contig_md5s[x]
         contig["sequence"] = contig_sequences[x]
-        
+
         contigSet["contigs"][x]=contig
-        
+
         genomeObject["contig_lengths"][x]=int(contig_lengths[x])
 
     # will need to insert the ContigSet object here, in order to
@@ -178,19 +146,23 @@ for g in genomes:
     # will also need to build a mapping of contig_ids to contigrefs
     # put in existing contigSet?  might get confusing
 
+#    if args.debug:
+#        print >> sys.stderr, '--debug active, not doing anything'
+#        return
+
     start = time.time()
 
     # this will reference a ContigSet object
     #print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
     # another try block here?
-    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
+#    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
 
     end = time.time()
-    print >> sys.stderr, "inserting contigset into ws " + str(end - start)
-    print >> sys.stderr, contigset_info
+    print >> sys.stderr, "(not) inserting contigset into ws " + str(end - start)
+#    print >> sys.stderr, contigset_info
 
-    contigset_ref = wsname + '/' + contigSet['id']
-    genomeObject["contigset_ref"] = contigset_ref
+#    contigset_ref = wsname + '/' + contigSet['id']
+#    genomeObject["contigset_ref"] = contigset_ref
 
 ###########################
     # build Feature objects
@@ -204,12 +176,14 @@ for g in genomes:
     # locations need IsLocatedIn relationship
     isLocatedIn = cdmi_entity_api.get_relationship_IsLocatedIn(fids,[],['from_link','to_link','ordinal','begin','len','dir'],[])
 
+    hasAliasAssertedFrom = cdmi_entity_api.get_relationship_HasAliasAssertedFrom(fids,[],['from_link','to_link','alias'],[])
+
     # feature annotations
     start = time.time()
 
     isAnnotatedBy = cdmi_entity_api.get_relationship_IsAnnotatedBy(fids,[],['from_link','to_link'],[])
     annotation_ids = [ x[1]['to_link'] for x in isAnnotatedBy ]
-    print >> sys.stderr, annotation_ids
+#    print >> sys.stderr, annotation_ids
     cds_annotations = dict()
     if len(annotation_ids) > 0:
         cds_annotations = cdmi_entity_api.get_entity_Annotation(annotation_ids,['annotator','comment','annotation_time'])
@@ -365,6 +339,19 @@ for g in genomes:
     #copy the list of feature ids
     #genomeObject["feature_ids"] = fids[:]
 
+    aliases = dict()
+    for x in hasAliasAssertedFrom:
+        fid = x[1]['from_link']
+
+        if not aliases.has_key(fid):
+            aliases[fid] = dict()
+        if not aliases[fid].has_key(x[1]['to_link']):
+            aliases[fid][x[1]['to_link']] = list()
+
+        aliases[fid][x[1]['to_link']].append(x[1]['alias'])
+        
+    print >> sys.stderr, 'processed hasAliasAssertedFrom'
+
     #copy location info
     locations = dict()
     for x in isLocatedIn:
@@ -386,6 +373,8 @@ for g in genomes:
 #        location['ordinal'] = x[1]['ordinal']
         locations[fid].append(location)
 
+    print >> sys.stderr, 'processed isLocatedIn'
+
     #copy annotation info
     annotations = dict()
     for x in isAnnotatedBy:
@@ -402,6 +391,7 @@ for g in genomes:
         object_annotation.append(int(current_cds_annotation['annotation_time']))
         annotations[fid].append(object_annotation)
 
+    print >> sys.stderr, 'processed isAnnotatedBy'
 
     protein_families = dict()
     for x in isMemberOf:
@@ -423,12 +413,15 @@ for g in genomes:
             family['subject_description'] = this_family['family_function'][0]
         protein_families[fid].append(family)
 
+    print >> sys.stderr, 'processed isMemberOf'
 
     protein_ids = dict()
     proteins = dict()
     for x in produces:
         proteins[x[1]['from_link']] = x[1]['to_link']
         protein_ids[x[1]['to_link']] = x[1]['from_link']
+
+    print >> sys.stderr, 'processed produces'
 
     publications = dict()
     for x in isATopicOf:
@@ -453,6 +446,7 @@ for g in genomes:
         pub.append('')
         publications[fid].append(pub)
 
+    print >> sys.stderr, 'processed isATopicOf'
 
     roles = dict()
     for x in hasFunctional:
@@ -461,13 +455,22 @@ for g in genomes:
             roles[fid] = list()
         roles[fid].append( x[1]['to_link'] )
 
+    print >> sys.stderr, 'processed hasFunctional'
+
     start = time.time()
-    fids_to_insert = list()
+
+    print >> sys.stderr, 'processing features, if lots of coexpression data may take a long time'
+
+    featureObjects = dict()
+# something in this loop is intolerably slow
     for x in fids:
         featureObject = dict()
         featureObject["feature_id"] = x
         featureObject["genome_id"] = g
         featureObject["source"] = 'KBase Central Store'
+        
+        if aliases.has_key(x):
+            featureObject["aliases"] = aliases[x]
         
         if locations.has_key(x):
             featureObject["location"] = locations[x]
@@ -475,6 +478,8 @@ for g in genomes:
         if features.has_key(x):
             featureObject["feature_type"] = features[x]['feature_type']
             featureObject["function"] = features[x]['function']
+            featureObject["dna_sequence_length"] = int(features[x]['sequence_length'])
+            featureObject["feature_source_id"] = features[x]['source_id']
             
             if features[x].has_key('alias'):
                 featureObject["aliases"] = features[x]['alias']
@@ -546,57 +551,29 @@ for g in genomes:
 #        end = time.time()
 #        print  >> sys.stderr, "feature #" + str(x) + " processing, querying dna seqs, coexpressed, elapsed time " + str(end - start)
 
-# ultimately will insert these into workspace
-# need to get workspace ref back to put into the Genome object
-        # e.g.
-        # featureObject = simplejson.dumps(featureObject)
-        # ws.save_objects({'workspace': 'search_workspace',objects=[featureObject]})
-        # (or can batch a list of featureObjects, but don't want to batch
-        # too many or it'll bork)
-        feature_id = featureObject['feature_id']
-
-        # test batching saves
-        fids_to_insert.append( { "type":"KBaseSearch.Feature","data":featureObject,"name":feature_id } )
-        if len(fids_to_insert) > 100:
-            feature_info = ws.save_objects({"workspace":wsname,"objects": fids_to_insert })
-            print >> sys.stderr, feature_info
-            fids_to_insert = list()
-            
-
-        # original code, one save at a time
-#        feature_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.Feature","data":featureObject,"name":feature_id}]})
-
-#        print >> sys.stderr, feature_info
-
-        feature_ref = wsname + '/' + feature_id
-#        print simplejson.dumps(featureObject,sort_keys=True,indent=4 * ' ')
-        if not featureSet['features'].has_key(featureObject['feature_id']):
-            featureSet['features'][featureObject['feature_id']] = dict()
-        featureSet['features'][featureObject['feature_id']] = feature_ref
-
-#        genomeObject['features'].append(featureObject)
-
-#        import sys
-#        sys.exit(0)
-
-    # final fids to insert (batching code)
-    if len(fids_to_insert) > 0:
-        feature_info = ws.save_objects({"workspace":wsname,"objects": fids_to_insert })
-        print >> sys.stderr, feature_info
-            
+        featureObjects[x] = featureObject
 
     end = time.time()
     print  >> sys.stderr, " processing features, queried coexpressed, elapsed time " + str(end - start)
 
-    # insert into workspace, get path
-#    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
-    # another try block here?
+    for feature in featureObjects:
+#        print feature
+        individualFeature = dict()
+        individualFeature['data'] = featureObjects[feature]
+        featureSet['features'][feature] = individualFeature
+
     featureset_id = genomeObject['genome_id'] + '.featureset'
+
+    start  = time.time()
+
     featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.FeatureSet","data":featureSet,"name":featureset_id}]})
+    end = time.time()
+    print  >> sys.stderr, " saving featureset to ws, elapsed time " + str(end - start)
     print >> sys.stderr, featureset_info
 
     featureset_ref = wsname + '/' + featureset_id
     genomeObject['featureset_ref'] = featureset_ref
+
     start = time.time()
 
 #    print simplejson.dumps(genomeObject,sort_keys=True,indent=4 * ' ')
@@ -605,3 +582,73 @@ for g in genomes:
 
     end = time.time()
     print  >> sys.stderr, "insert genome into ws " + str(end - start)
+
+
+if __name__ == "__main__":
+    import argparse
+    import os.path
+
+    parser = argparse.ArgumentParser(description='Create a KBaseSearch.Genome object from the CS.')
+    parser.add_argument('genomes', nargs='*', help='genomes to load (default "kb|g.0")')
+    parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
+    parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
+    parser.add_argument('--debug',action='store_true',help='debugging')
+
+    args = parser.parse_args()
+
+    wsname = args.wsname[0]
+
+    # ws public instance
+    ws = biokbase.workspace.client.Workspace("https://kbase.us/services/ws")
+    # ws team dev instance
+    if args.debug:
+#        ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
+        ws = biokbase.workspace.client.Workspace("http://dev04.berkeley.kbase.us:7058", user_id='***REMOVED***', password='***REMOVED***')
+
+    if args.skip_existing:
+        skipExistingGenomes = True
+
+    print >> sys.stderr, wsname
+    try:
+        retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
+        print >> sys.stderr, 'created workspace ' + wsname + ' at ws url ' + ws.url
+        print >> sys.stderr, retval
+    # want this to catch only workspace exists errors
+    except biokbase.workspace.client.ServerError, e:
+#        print >> sys.stderr, e
+        print >> sys.stderr, 'workspace ' + wsname + ' at ws url ' + ws.url + ' may already exist, trying to use'
+
+    genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
+#    genomes = genome_entities
+
+    genomes = ['kb|g.0']
+#    genomes = random.sample(genome_entities,500)
+    if args.genomes:
+        genomes=args.genomes
+
+#genomes = sys.argv[1:]
+# DvH, E.coli
+# takes 4min (total) without dna_seqs, with coexpressed_fids
+# takes 5min (total) with retrieving everything
+#genomes = ['kb|g.3562','kb|g.0']
+# arabidopsis--takes 50m with individual dna_seq calls (coexpressed_fids untested)
+# takes much less time when cached
+#genomes = ['kb|g.3899']
+# more static sets
+#genomes = ['kb|g.9','kb|g.222']
+#genomes = ['kb|g.3562','kb|g.1494','kb|g.423']
+#genomes = ['kb|g.19762','kb|g.1976']
+#genomes = ['kb|g.0']
+#genomes = ['kb|g.3562']
+#genomes = ['kb|g.3562','kb|g.0']
+# DvH, e.coli, multiple versions of arabidopsis
+# what other genomes are essential?
+#genomes = ['kb|g.3562','kb|g.0','kb|g.1105','kb|g.1103','kb|g.26509','kb|g.1104']
+# kb|g.1103 has at least one feature with a bad location
+#genomes = ['kb|g.3562','kb|g.0','kb|g.3899','kb|g.1105','kb|g.26509','kb|g.1104']
+
+#genomeObjects = dict()
+
+    for g in genomes:
+        insert_genome(g,genome_entities,ws,wsname)
+

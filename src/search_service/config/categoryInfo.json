@@ -5,11 +5,8 @@
                      "label": "Public Data",
                      "children": [
                          {
-                             "label": "Communities",
-                             "category": "metagenomes",
-                             "children": [
-                                 {"label": "Metagenomes", "category": "metagenomes"}
-                             ]                                                      
+                             "label": "Metagenomes",
+                             "category": "metagenomes"
                          },
                          {
                              "label": "Expression",
