@@ -13,6 +13,7 @@ import time
 import random
 import requests
 import pprint
+import codecs
 
 import biokbase.workspace.client
 import biokbase.cdmi.client
@@ -214,7 +215,9 @@ def create_feature_objects(gid,featureData):
 def insert_genome(g,genome_entities,ws,wsname,featureData):
 
     start = time.time()
-    numericGid=int(g.split('.')[1])
+
+    numericGid = int(g.split('.')[1])
+    print >> sys.stderr, g
     print >> sys.stderr, numericGid
     
     try:
@@ -387,7 +390,8 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
     
     featureSet['features'] = dict()
     for feature in featureObjects:
-#        print feature
+        #print >> sys.stderr, feature 
+        #print >> sys.stderr, featureObjects[feature]
         individualFeature = dict()
         individualFeature['data'] = featureObjects[feature]
         featureSet['features'][feature] = individualFeature
@@ -407,7 +411,13 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
 
     start  = time.time()
 
-    featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.FeatureSet","data":featureSet,"name":featureset_id}]})
+#    print >> sys.stderr, simplejson.dumps(featureSet)
+
+    featureset_info = ws.save_objects({"workspace": wsname,
+                                       "objects":[{"type": "KBaseSearch.FeatureSet",
+                                                   "data": featureSet,
+                                                   "name": featureset_id}]
+                                     })
     end = time.time()
     print  >> sys.stderr, " saving featureset to ws, elapsed time " + str(end - start)
     print >> sys.stderr, featureset_info
@@ -449,7 +459,7 @@ if __name__ == "__main__":
     # ws team dev instance
     if args.debug:
 #        ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
-        ws = biokbase.workspace.client.Workspace("http://dev04.berkeley.kbase.us:7058", user_id='***REMOVED***', password='***REMOVED***')
+        ws = biokbase.workspace.client.Workspace("http://dev04:7058", user_id='***REMOVED***', password='***REMOVED***')
 
     print >> sys.stderr, wsname
     try:
@@ -460,7 +470,7 @@ if __name__ == "__main__":
     except biokbase.workspace.client.ServerError, e:
         print >> sys.stderr, 'workspace ' + wsname + ' at ws url ' + ws.url + ' may already exist, trying to use'
 
-    genome_entities = cdmi_entity_api.all_entities_Genome(0,15000,['id','scientific_name','source_id'])
+    genome_entities = cdmi_entity_api.all_entities_Genome(0,25000,['id','scientific_name','source_id'])
     genomes = genome_entities
     
     pubHandle = open ( 'publications.tab.sorted', 'r')
@@ -487,14 +497,21 @@ if __name__ == "__main__":
 
     for file in fileList:
         fileName = sorted_file_dir + '/' + file + '.tab.sorted'
-        fileHandle[file] = open ( fileName, 'r' )
+# want to follow up why this was needed
+        fileHandle[file] = codecs.open ( fileName, mode='r', encoding='ISO-8859-1')
+#        fileHandle[file] = open ( fileName, 'r')
         # seed the first line
         currentLine[file] = fileHandle[file].readline()
 
     while currentLine['Feature']:
-        [fid,cs_id,gid,restOfLine]=currentLine['Feature'].split("\t",3)
+#        print >> sys.stderr, "currentLine['Feature'] ", unicode(currentLine['Feature'])
+
+        [fid,cs_id,gid,restOfLine] = currentLine['Feature'].split("\t",3)
+        #print >> sys.stderr, [fid, cs_id, gid]
+
         [prefix,numericGid] = gid.split('.')
-        numericGid=int(numericGid)
+        numericGid = int(numericGid)
+
         if (currentNumericGid == -1):
             currentGid = gid
             currentNumericGid = numericGid
@@ -502,14 +519,33 @@ if __name__ == "__main__":
             print >> sys.stderr, 'gid is ' + gid
             print >> sys.stderr, 'numericGid is ' + str(numericGid)
             print >> sys.stderr, 'currentNumericGid is ' + str(currentNumericGid)
+            
             # read other files and populate featureData
             for attribute in attributeList:
                 featureData[attribute] = list()
                 while currentLine[attribute]:
-                    [attrFid,attrRestOfLine]=currentLine[attribute].split("\t",1)
+                    if len(currentLine[attribute].split('\t', 1)) == 2:                    
+                        [attrFid,attrRestOfLine] = currentLine[attribute].split("\t",1)
+                    else:
+                        print >> sys.stderr, 'suspect line : ' + currentLine[attribute]
+                        print >> sys.stderr, currentLine[attribute].split(' ', 1)
+
+                        if len(currentLine[attribute].strip()) == 0:
+                            print >> sys.stderr, attribute                      
+                            #[attrFid, attrRestOfLine] = [,""]
+                            #sys.exit(0)
+                            #print >> sys.stderr, "skipping"
+                            #continue
+                        else:
+                            [attrFid,attrRestOfLine] = currentLine[attribute].split(" ",1)              
+                    
+                    print >> sys.stderr, 'currentFid is ' + str(attrFid)
+                    print >> sys.stderr, 'attribute is ' + str(attribute)
+#                    print >> sys.stderr, currentLine[attribute]
                     [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
-                    attrGid=attrGidPrefix+'.'+attrGidNumericId
-                    attrGidNumericId=int(attrGidNumericId)
+                    
+                    attrGid = attrGidPrefix + '.' + attrGidNumericId
+                    attrGidNumericId = int(attrGidNumericId)
 #                    print >> sys.stderr, 'attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
                     if (attrGidNumericId == currentNumericGid):
                         featureData[attribute].append(currentLine[attribute])
@@ -517,7 +553,7 @@ if __name__ == "__main__":
                         print >> sys.stderr, attribute + ' file may have extra data, skipping'
                         print >> sys.stderr, ' '.join([attrGid, str(currentNumericGid)])
                     if (attrGidNumericId > currentNumericGid):
-                        print >> sys.stderr, 'need to skip to next attribute here: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+                        print >> sys.stderr, 'Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
                         break
                     currentLine[attribute] = fileHandle[attribute].readline()
 #            pp.pprint(featureData)

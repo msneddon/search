@@ -72,10 +72,12 @@ time mysql --defaults-extra-file=./my.cnf -e \
  " select iip1.from_link,iip2.from_link,ps.score from IsDeterminedBy idb join PairSet ps ON (ps.id=idb.from_link) join IsInPair iip1 ON (iip1.to_link=idb.to_link) join IsInPair iip2 ON (iip2.to_link=idb.to_link and iip2.from_link!=iip1.from_link) JOIN Feature f ON (iip1.from_link=f.id) $limit" \
   | perl -pi -e 's/"//g' > CoOccurringFids.tab
 
+# there is one annotation which has octal char \205, which for some
+# strange reason is being interpreted as a line delimiter
 echo Annotation
 time mysql --defaults-extra-file=./my.cnf -e \
  " SELECT iab.from_link, a.comment,a.annotator,a.annotation_time FROM Annotation a JOIN IsAnnotatedBy iab ON (iab.to_link=a.id) JOIN Feature f ON (iab.from_link=f.id) $limit " \
-  | perl -pi -e 's/"//g;s/\\n/ /g' > Annotation.tab
+  | perl -pi -e 's/"//g;s/\\n/ /g;s/\\r/ /g;s/\205/ /g;' > Annotation.tab
 
 # ~45m
 echo SubsystemData
@@ -88,31 +90,31 @@ time mysql --defaults-extra-file=./my.cnf -e \
 echo Subsystems
 time mysql --defaults-extra-file=./my.cnf -e \
  " select c.to_link,i.from_link from Contains c join IsRoleOf iro ON (c.from_link=iro.to_link) join Includes i ON (iro.from_link=i.to_link) JOIN Feature f ON (c.to_link=f.id) $limit " \
-  | perl -pi -e 's/"//g;s/\\n/ /g' > Subsystems.tab
+  | perl -pi -e 's/"//g;s/\\n/ /g;s/\\r/ /g;' > Subsystems.tab
 
 # ~5m
 echo Roles
 time mysql --defaults-extra-file=./my.cnf -e \
  " select ifi.to_link,ifi.from_link from IsFunctionalIn ifi JOIN Feature f ON (ifi.to_link=f.id) $limit " \
-  | perl -pi -e 's/"//g;s/\\n/ /g' > Roles.tab
+  | perl -pi -e 's/"//g;s/\\n/ /g;s/\\r/ /g;' > Roles.tab
 
 # not trying to combine these here, but should be able to read both
 # in and combine in code
 echo RegulonData fids
 time mysql --defaults-extra-file=./my.cnf -e \
  " select iri.from_link,iri.to_link from IsRegulatedIn iri JOIN Feature f ON (iri.from_link=f.id) $limit " \
-  | perl -pi -e 's/"//g;s/\\n/ /g' > regulonData.members.tab
+  | perl -pi -e 's/"//g;s/\\n/ /g;s/\\r/ /g;' > regulonData.members.tab
 
 echo RegulonData tfs
 time mysql --defaults-extra-file=./my.cnf -e \
  " select c.from_link,c.to_link from Controls c JOIN Feature f ON (c.from_link=f.id) $limit " \
-  | perl -pi -e 's/"//g;s/\\n/ /g' >  regulonData.tfs.tab
+  | perl -pi -e 's/"//g;s/\\n/ /g;s/\\r/ /g;' >  regulonData.tfs.tab
 
 # ~6m
 echo Locations
 time mysql --defaults-extra-file=./my.cnf -e \
  " select ili.from_link,ili.to_link,ili.begin,ili.dir,ili.len,ili.ordinal from IsLocatedIn ili JOIN Feature f ON (ili.from_link=f.id) $limit " \
-  | perl -pi -e 's/"//g;s/\\n/ /g' > Locations.tab
+  | perl -pi -e 's/"//g;s/\\n/ /g;s/\\r/ /g;' > Locations.tab
 
 
 echo not getting dna sequences
