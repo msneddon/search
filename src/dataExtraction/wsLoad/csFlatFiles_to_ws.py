@@ -539,8 +539,9 @@ if __name__ == "__main__":
                         else:
                             [attrFid,attrRestOfLine] = currentLine[attribute].split(" ",1)              
                     
-                    print >> sys.stderr, 'currentFid is ' + str(attrFid)
-                    print >> sys.stderr, 'attribute is ' + str(attribute)
+# this makes a huge amount of output
+#                    print >> sys.stderr, 'currentFid is ' + str(attrFid)
+#                    print >> sys.stderr, 'attribute is ' + str(attribute)
 #                    print >> sys.stderr, currentLine[attribute]
                     [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
                     
