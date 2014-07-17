@@ -21,7 +21,7 @@ solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_l
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
     # gavin's dev instance
-#    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
+#    ws_client = biokbase.workspace.client.Workspace('http://dev04:7058', user_id='***REMOVED***', password='***REMOVED***')
     # production instance
     ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     
@@ -126,7 +126,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
     
 # solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
 
-                    scalar_keys = ['genome_id','genome_source','taxonomy','genome_source_id','scientific_name', 'domain', 'complete', 'gc_content']
+                    scalar_keys = ['genome_id','genome_source','taxonomy','genome_source_id','scientific_name', 'domain', 'gc_content']
                     for key in scalar_keys:
                         try:
                             genomeObject[key] = str(genome['data'][key])
@@ -134,6 +134,9 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                             genomeObject[key] = ''
     
                     # special keys
+                    # complete is uninformative in cdm
+                    genomeObject['complete'] = ''
+
                     genomeObject['scientific_name_sort'] = "_".join(genomeObject['scientific_name'].lower().split())
 
                     genomeObject['cs_id'] = str(genome['data']['genome_id'])
@@ -221,62 +224,56 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                                featureObject['location_begin'] = str(firstLoc[1])
                                featureObject['location_end'] = str(lastLoc[1]+lastLoc[3]-1)
 
-                        if f.has_key('roles'):
-#                            for role in f['roles']:
-#                                featureObject['roles'] += unicode(role) + ' '
-                            featureObject['roles'] = ' , '.join([str(k) for k in f["roles"]])
-    
-                        if f.has_key('annotations'):
-                            for anno in f['annotations']:
-                                featureObject['annotations'] += anno[0] + ' ' + anno[1] + ' '
-                                re.sub('\n',' ',featureObject['annotations'])
-    
-                        if f.has_key('subsystem_data'):
-                            for ssdata in f['subsystem_data']:
-                                featureObject['subsystem_data'] += str(ssdata[0]) + ' ' + str(ssdata[2])
-    
-                        if f.has_key('feature_publications'):
-                            for pub in f['feature_publications']:
-                                featureObject['feature_publications'] += str(pub[0]) + ' ' + pub[2] + ' ' + pub[3] + ' ' + pub[5] + ' ' + pub[6] + ' '
-    
-                        if f.has_key('atomic_regulons'):
-                            for ar in f['atomic_regulons']:
-                                featureObject['atomic_regulons'] += ar[0] + ' '
-    
-                        if f.has_key('regulon_data'):
-                            for reg in f['regulon_data']:
-                                featureObject['regulon_data'] += reg[0] + ' '
-                                featureObject['regulon_data'] += ' :: '
-                                for member in reg[1]:
-                                    featureObject['regulon_data'] += member + ' '
-                                featureObject['regulon_data'] += ' :: '
-                                for tfs in reg[2]:
-                                    featureObject['regulon_data'] += tfs + ' '
-    
-                        if f.has_key('co_occurring_fids'):
-                            for coo in f['co_occurring_fids']:
-                                featureObject['co_occurring_fids'] += coo[0] + ' '
-    
-                        if f.has_key('coexpressed_fids'):
-                            for coe in f['coexpressed_fids']:
-                                featureObject['coexpressed_fids'] += coe[0] + ' '
-    
-                        if f.has_key('subsystems'):
-#                            for ss in f['subsystems']:
-#                                featureObject['subsystems'] += unicode(ss) + ' '
-                            featureObject['subsystems'] = ' , '.join([str(k) for k in f["subsystems"]])
-    
                         if f.has_key('protein_families'):
-    #                        protein_families = unicode(f["protein_families"][0]['id'] + f['protein_families'][0]['subject_description'])
                             for pf in f['protein_families']:
                                 subj_desc = ''
                                 if pf.has_key('subject_description'):
                                     subj_desc = pf['subject_description']
                                 featureObject['protein_families'] += unicode(pf['id']) + ' : ' + unicode(subj_desc) + ' :: '
-    #                        protein_families = unicode(f["protein_families"])
     
                         if f.has_key('aliases'):
                             featureObject['aliases'] = ' :: '.join([ (str(k) + ' : ' + ' '.join(f['aliases'][k]) ) for k in f["aliases"]])
+    
+                        if f.has_key('feature_publications'):
+                            for pub in f['feature_publications']:
+                                featureObject['feature_publications'] += str(pub[0]) + ' ' + pub[2] + ' ' + pub[3] + ' ' + pub[5] + ' ' + pub[6] + ' '
+    
+                        if f.has_key('roles'):
+                            featureObject['roles'] = ' , '.join([str(k) for k in f["roles"]])
+    
+#                        if f.has_key('annotations'):
+#                            for anno in f['annotations']:
+#                                featureObject['annotations'] += anno[0] + ' ' + anno[1] + ' '
+#                                re.sub('\n',' ',featureObject['annotations'])
+    
+#                        if f.has_key('subsystem_data'):
+#                            for ssdata in f['subsystem_data']:
+#                                featureObject['subsystem_data'] += str(ssdata[0]) + ' ' + str(ssdata[2])
+    
+#                        if f.has_key('atomic_regulons'):
+#                            for ar in f['atomic_regulons']:
+#                                featureObject['atomic_regulons'] += ar[0] + ' '
+    
+#                        if f.has_key('regulon_data'):
+#                            for reg in f['regulon_data']:
+#                                featureObject['regulon_data'] += reg[0] + ' '
+#                                featureObject['regulon_data'] += ' :: '
+#                                for member in reg[1]:
+#                                    featureObject['regulon_data'] += member + ' '
+#                                featureObject['regulon_data'] += ' :: '
+#                                for tfs in reg[2]:
+#                                    featureObject['regulon_data'] += tfs + ' '
+    
+#                        if f.has_key('co_occurring_fids'):
+#                            for coo in f['co_occurring_fids']:
+#                                featureObject['co_occurring_fids'] += coo[0] + ' '
+    
+#                        if f.has_key('coexpressed_fids'):
+#                            for coe in f['coexpressed_fids']:
+#                                featureObject['coexpressed_fids'] += coe[0] + ' '
+    
+#                        if f.has_key('subsystems'):
+#                            featureObject['subsystems'] = ' , '.join([str(k) for k in f["subsystems"]])
     
                         outBuffer = StringIO.StringIO()
                 

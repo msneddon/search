@@ -99,6 +99,8 @@
    <field name="subsystems" type="text_general" indexed="true" stored="true"/>
    <field name="subsystem_data" type="text_general" indexed="true" stored="true"/>
    <field name="protein_families" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="go_ontology_domain" type="string" indexed="true" stored="true"/>
+   <field name="go_ontology_description" type="text_ws_general" indexed="true" stored="true"/>
    <field name="annotations" type="text_general" indexed="true" stored="true"/>
    <field name="regulon_data" type="text_ws_general" indexed="true" stored="true"/>
    <field name="atomic_regulons" type="text_ws_general" indexed="true" stored="true"/>
@@ -139,6 +141,9 @@
    <copyField source="domain" dest="text"/>
    <copyField source="taxonomy" dest="text"/>
    <copyField source="gc_content" dest="text"/>
+   <copyField source="protein_families" dest="text"/>
+   <copyField source="go_ontology_domain" dest="text"/>
+   <copyField source="go_ontology_description" dest="text"/>
    <copyField source="roles" dest="text"/>
    <copyField source="location_contig" dest="text"/>
    <copyField source="subsystems" dest="text"/>
