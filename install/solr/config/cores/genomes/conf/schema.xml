@@ -86,7 +86,7 @@
    <field name="num_contigs" type="int" indexed="true" stored="true"/>
    <field name="complete" type="boolean" indexed="true" stored="true"/>
    <field name="domain" type="string" indexed="true" stored="true"/>
-   <field name="taxonomy" type="text_general" indexed="true" stored="true"/>
+   <field name="taxonomy" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="gc_content" type="float" indexed="true" stored="true"/>
    <field name="genome_publications" type="text_ws_general" indexed="true" stored="true"/>
    <field name="feature_publications" type="text_ws_general" indexed="true" stored="true"/>
@@ -99,8 +99,8 @@
    <field name="subsystems" type="text_general" indexed="true" stored="true"/>
    <field name="subsystem_data" type="text_general" indexed="true" stored="true"/>
    <field name="protein_families" type="text_ws_general" indexed="true" stored="true"/>
-   <field name="go_ontology_domain" type="string" indexed="true" stored="true"/>
-   <field name="go_ontology_description" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="go_ontology_domain" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="go_ontology_description" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="annotations" type="text_general" indexed="true" stored="true"/>
    <field name="regulon_data" type="text_ws_general" indexed="true" stored="true"/>
    <field name="atomic_regulons" type="text_ws_general" indexed="true" stored="true"/>
