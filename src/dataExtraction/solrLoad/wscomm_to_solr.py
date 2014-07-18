@@ -54,7 +54,19 @@ def export_comm_from_ws(maxNumObjects):
         workspace_id = n[0]
         workspace_name = n[1]
     
-        objects_list = ws_client.list_objects({"ids": [workspace_id]})
+# need to iterate over list_objects to get all of them
+#        objects_list = ws_client.list_objects({"ids": [workspace_id]})
+
+        objects_list = []
+        object_count = 1
+        skipNum = 0
+        limitNum = 5000
+        while object_count != 0:
+            this_list = ws_client.list_objects({"ids": [workspace_id],"limit":limitNum,"skip":skipNum})
+            object_count=len(this_list)
+            skipNum += limitNum
+            objects_list.extend(this_list)
+
         if len(objects_list) > 0:
             print "\tWorkspace %s has %d objects" % (workspace_name, len(objects_list))
             object_counter = 0
