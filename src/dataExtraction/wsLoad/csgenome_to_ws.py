@@ -566,7 +566,7 @@ def insert_genome(g,genome_entities,ws,wsname):
 
     start  = time.time()
 
-    featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.FeatureSet","data":featureSet,"name":featureset_id}]})
+    featureset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.SearchFeatureSet","data":featureSet,"name":featureset_id}]})
     end = time.time()
     print  >> sys.stderr, " saving featureset to ws, elapsed time " + str(end - start)
     print >> sys.stderr, featureset_info

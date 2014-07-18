@@ -414,7 +414,7 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
 #    print >> sys.stderr, simplejson.dumps(featureSet)
 
     featureset_info = ws.save_objects({"workspace": wsname,
-                                       "objects":[{"type": "KBaseSearch.FeatureSet",
+                                       "objects":[{"type": "KBaseSearch.SearchFeatureSet",
                                                    "data": featureSet,
                                                    "name": featureset_id}]
                                      })
