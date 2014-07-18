@@ -85,6 +85,7 @@
    <field name="scientific_name_sort" type="string" indexed="true" stored="true"/>
    <field name="genome_dna_size" type="long" indexed="true" stored="true"/>
    <field name="num_contigs" type="int" indexed="true" stored="true"/>
+   <field name="num_cds" type="int" indexed="true" stored="true"/>
    <field name="complete" type="boolean" indexed="true" stored="true"/>
    <field name="domain" type="string" indexed="true" stored="true"/>
    <field name="taxonomy" type="string" indexed="true" stored="true" multiValued="true" />
@@ -139,11 +140,8 @@
    <copyField source="function" dest="text"/>
    <copyField source="aliases" dest="text"/>
    <copyField source="scientific_name" dest="text"/>
-   <copyField source="genome_dna_size" dest="text"/>
-   <copyField source="num_contigs" dest="text"/>
    <copyField source="domain" dest="text"/>
    <copyField source="taxonomy" dest="text"/>
-   <copyField source="gc_content" dest="text"/>
    <copyField source="protein_families" dest="text"/>
    <copyField source="go_ontology_domain" dest="text"/>
    <copyField source="go_ontology_description" dest="text"/>
