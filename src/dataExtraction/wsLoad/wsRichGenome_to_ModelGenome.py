@@ -13,8 +13,8 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
-wsinput = 'KBasePublicRichGenomesLoad'
-wsoutput = 'KBasePublicGenomesLoad'
+wsinput = 'KBasePublicRichGenomes'
+wsoutput = 'KBasePublicGenomesLoadJul2014'
 #wsoutput = '***REMOVED***:home'
 
 def export_genomes_from_ws(maxNumObjects,genome_list):

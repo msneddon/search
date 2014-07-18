@@ -78,6 +78,7 @@
    <field name="protein_translation_length" type="int" indexed="true" stored="true"/>
    <field name="dna_sequence_length" type="int" indexed="true" stored="true"/>
    <field name="feature_type" type="string" indexed="true" stored="true"/>
+   <field name="gene_name" type="string" indexed="true" stored="true"/>
    <field name="function" type="text_general" indexed="true" stored="true"/>
    <field name="aliases" type="text_ws_general" indexed="true" stored="true" omitNorms="true"/>
    <field name="scientific_name" type="text_general" indexed="true" stored="true"/>
@@ -129,6 +130,8 @@
    <copyField source="genome_id" dest="text_boost"/>
    <copyField source="feature_id" dest="text"/>
    <copyField source="feature_id" dest="text_boost"/>
+   <copyField source="gene_name" dest="text"/>
+   <copyField source="gene_name" dest="text_boost"/>
    <copyField source="genome_source" dest="text"/>
    <copyField source="genome_source_id" dest="text"/>
    <copyField source="feature_source_id" dest="text"/>

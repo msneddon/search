@@ -12,11 +12,11 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
-wsname = 'KBasePublicRichGenomesLoad'
+wsname = 'KBasePublicRichGenomes'
 
-solr_keys = ['cs_id', "object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
+solr_keys = ['cs_id', "object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
-solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "aliases" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
+solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 
 
 def export_genomes_from_ws(maxNumObjects,genome_list):
@@ -61,7 +61,16 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                 names_list.append({'workspace':wsname,'name':genome})
             objects_list = [x['info'] for x in ws_client.get_objects(names_list)]
         else:
-            objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"})
+# to do: need to make a few calls to list_objects to capture all of them
+#            objects_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"})
+            object_count = 1
+            skipNum = 0
+            limitNum = 5000
+            while object_count != 0:
+                this_list = ws_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome","limit":limitNum,"skip":skipNum})
+                object_count=len(this_list)
+                skipNum += limitNum
+                objects_list.extend(this_list)
     
         if len(objects_list) > 0:
             print "\tWorkspace %s has %d matching objects" % (workspace_name, len(objects_list))
@@ -126,7 +135,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
     
 # solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
 
-                    scalar_keys = ['genome_id','genome_source','taxonomy','genome_source_id','scientific_name', 'domain', 'gc_content']
+                    scalar_keys = ['genome_id','genome_source','genome_source_id','scientific_name', 'domain', 'gc_content']
                     for key in scalar_keys:
                         try:
                             genomeObject[key] = str(genome['data'][key])
@@ -136,6 +145,11 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                     # special keys
                     # complete is uninformative in cdm
                     genomeObject['complete'] = ''
+
+                    genomeObject['taxonomy'] = ''
+                    if genome['data'].has_key('taxonomy'):
+                        genomeObject['taxonomy'] = re.sub('; ',';',str(genome['data']['taxonomy']))
+#                                re.sub('\n',' ',featureObject['annotations'])
 
                     genomeObject['scientific_name_sort'] = "_".join(genomeObject['scientific_name'].lower().split())
 
@@ -193,7 +207,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 # special keys
                         featureObject['cs_id'] = str(f['feature_id'])
 
-                        prepopulate_keys = ['location_contig', 'location_begin', 'location_end', 'location_strand', 'locations', 'roles','annotations','subsystem_data','subsystems','feature_publications', 'atomic_regulons', 'regulon_data', 'coexpressed_fids', 'co_occurring_fids', 'protein_families', 'aliases']
+                        prepopulate_keys = ['location_contig', 'location_begin', 'location_end', 'location_strand', 'locations', 'roles','annotations','subsystem_data','subsystems','feature_publications', 'atomic_regulons', 'regulon_data', 'coexpressed_fids', 'co_occurring_fids', 'protein_families', 'gene_name', 'aliases']
                         for key in prepopulate_keys:
                             featureObject[key] = ''
 
@@ -233,6 +247,8 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
     
                         if f.has_key('aliases'):
                             featureObject['aliases'] = ' :: '.join([ (str(k) + ' : ' + ' '.join(f['aliases'][k]) ) for k in f["aliases"]])
+                            if f['aliases'].has_key('genbank_gene'):
+                                featureObject['gene_name'] = ' :: '.join(f['aliases']['genbank_gene'])
     
                         if f.has_key('feature_publications'):
                             for pub in f['feature_publications']:
