@@ -18,8 +18,6 @@ alert() {
 }
 
 
-log stopping "search service"
-
 SERVICE="search"
 
 DEPLOYMENT=${KB_TOP-/kb/deployment}
@@ -33,16 +31,34 @@ PATH=$JAVA_PATH/bin:$PATH
 
 export CATALINA_BASE CATALINA_PID PATH
 
-log stopping "Search service"
-uwsgi --stop $DEPLOYMENT/services/$SERVICE/service.pid
+stop_service() {
 
-log status OK
-echo ;
+    log stopping "Search service"
+    uwsgi --stop $DEPLOYMENT/services/$SERVICE/service.pid
 
-log stopping Tomcat
-$CATALINA_BASE/bin/catalina.sh stop -force
+    log status "Search service stopped"
+    echo ;
+}
 
-log status "Search service and Tomcat stopped"
-echo ;
+stop_tomcat() {
+    log stopping Tomcat
+    $CATALINA_BASE/bin/catalina.sh stop -force
+
+    log status "Tomcat stopped"
+    echo ;
+}
+
+case "$1" in
+    tomcat)
+        stop_tomcat
+    ;;
+    service)
+        stop_service
+    ;;
+    *)
+        stop_service
+        stop_tomcat
+    ;;
+esac
 
 
