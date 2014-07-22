@@ -196,7 +196,10 @@ def validate_inputs(query, config):
 
     # check for the presence of a query string
     if query.has_key('q') and query['q'] is not None:
-        validatedParams['queryString'] = "&q=text:" + query['q']
+        if query['q'] == '*':
+            validatedParams['queryString'] = "&q=*:*"
+        else:
+            validatedParams['queryString'] = "&q=text:" + query['q']
     else:
         validatedParams['queryString'] = "&q=''"
 
@@ -234,7 +237,9 @@ def compute_solr_query(options, config):
     solr_url += "&fl=" + ','.join(config['plugins'][options['category']]['solr']['visible_fields'])
 
     if options.has_key('sort') and options['sort'] is not None:
-        paramString += "&sort=" + options['sort']
+        paramString += "&sort=" + options['sort'] + ", score desc"
+    else:
+        paramString += "&sort=score desc"
 
     # add faceting options, if present
     if len(config['plugins'][options['category']]['solr']['facet_fields']) > 0:
@@ -252,16 +257,16 @@ def compute_solr_query(options, config):
                 else:
                     facetDict[facetKey] += " OR " + facetValue
         
-            facet_fields += "&facet.field={!ex=dt}" + facetOrder[0]
-            paramString += "&fq={!tag=dt}" + facetOrder[0] + ":" + facetDict[facetOrder[0]]
-            
-            for k in xrange(1,len(facetOrder)):    
-                facet_fields += "&facet.field=" + facetOrder[k]
-                paramString += "&fq=" + facetOrder[k] + ":" + facetDict[facetOrder[k]]
+            if facetDict[facetKey].find(" OR ") > -1:
+                facetDict[facetKey] = "(" + facetDict[facetKey] + ")"
+
+            for k in xrange(len(facetOrder)):    
+                facet_fields += "&facet.field={!ex=" + facetOrder[k] + "}" + facetOrder[k]
+                paramString += "&fq={!tag=" + facetOrder[k] + "}" + facetOrder[k] + ":" + facetDict[facetOrder[k]]
 
             for x in config['plugins'][options['category']]['solr']['facet_fields']:
                 if not facetDict.has_key(x):
-                    facet_fields += "&facet.field=" + x
+                    facet_fields += "&facet.field={!ex=" + x + "}" + x
         else:
             for x in config['plugins'][options['category']]['solr']['facet_fields']:
                 facet_fields += "&facet.field=" + x
