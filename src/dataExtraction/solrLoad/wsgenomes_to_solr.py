@@ -70,6 +70,8 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
                 skipNum += limitNum
                 objects_list.extend(this_list)
     
+        objects_list.sort()
+
         if len(objects_list) > 0:
             print "\tWorkspace %s has %d matching objects" % (workspace_name, len(objects_list))
             object_counter = 0
@@ -80,6 +82,12 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
             for x in objects_list:
                 print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
     
+#                numeric_id = (x[1].split('.'))[1]
+#                print >> sys.stderr, numeric_id
+#                if numeric_id < 475:
+#                    print >> sys.stderr, 'skipping ' + x[1] + ' for now'
+#                    continue
+
                 if "Genome" in x[2]:
                     done = False
     #                sys.stderr.write(str(x)+"\n")
