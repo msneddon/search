@@ -12,14 +12,12 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
-wsname = 'KBasePublicRichGenomes'
-
 solr_keys = ["object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
 solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 
 
-def export_genomes_from_ws(maxNumObjects,genome_list):
+def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
     # gavin's dev instance
 #    ws_client = biokbase.workspace.client.Workspace('http://dev04:7058', user_id='***REMOVED***', password='***REMOVED***')
     # production instance
@@ -315,11 +313,14 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Create import files from workspace objects')
     parser.add_argument('--count', action="store", dest="maxNumObjects", type=int)
+    parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
     parser.add_argument('genomes', action="store", nargs='*')
     args = parser.parse_args()
     maxNumObjects = sys.maxint
     if args.maxNumObjects:
         maxNumObjects = args.maxNumObjects
     
+    wsname = args.wsname[0]
+
     print args.genomes
-    export_genomes_from_ws(maxNumObjects,args.genomes)
+    export_genomes_from_ws(maxNumObjects,args.genomes,wsname)
