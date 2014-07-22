@@ -18,7 +18,6 @@ alert() {
 }
 
 
-log starting "search service"
 log setting environment
 
 SERVICE="search"
@@ -35,21 +34,40 @@ source $DEPLOYMENT/user-env.sh
 
 export CATALINA_BASE CATALINA_PID PATH
 
-log starting Tomcat
-kill -0 $(cat $CATALINA_PID) > /dev/null 2> /dev/null
-if [ $? -gt 0 ]
-then
-    $CATALINA_BASE/bin/catalina.sh start
-else
-    echo -n 'tomcat already running on pid: '
-    cat $CATALINA_PID
-fi
+start_tomcat() {
+    log starting Tomcat
+    kill -0 $(cat $CATALINA_PID) > /dev/null 2> /dev/null
+    if [ $? -gt 0 ]
+    then
+        $CATALINA_BASE/bin/catalina.sh start
+    else
+        echo -n 'tomcat already running on pid: '
+        cat $CATALINA_PID
+    fi
+    log status "Tomcat successfully started"
+    echo ;
+}
 
-echo ;
-log starting "Search service"
-uwsgi --ini $DEPLOYMENT/services/$SERVICE/config/uwsgi_search.ini
+start_service() {
+    log starting "Search service"
+    uwsgi --ini $DEPLOYMENT/services/$SERVICE/config/uwsgi_search.ini
 
-log status "Service and Tomcat successfully started"
-echo ;
+    log status "Service successfully started"
+    echo ;
+}
+
+case "$1" in
+    tomcat)
+        start_tomcat
+    ;;
+    service)
+        start_service
+    ;;
+    *)
+        start_tomcat
+        start_service
+    ;;
+esac
+
 
 
