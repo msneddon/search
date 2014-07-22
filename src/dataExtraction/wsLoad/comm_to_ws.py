@@ -253,17 +253,22 @@ def load_ws_metagenomes(mg_list,ws,wsname):
                         dateString = dateString[:dateString.find("UTC") + 3]
 
                     print >> sys.stderr, offsetHours, offsetMinutes, dateString
+                    print >> sys.stderr, dateParts
     
                     # choose the correct timeFormatString
                     timeFormatString = ""
                     # a time was found
                     if len(dateParts) == 3:                    
                         timeFormatString = "%Y-%m-%d %H:%M:%S %Z"
+                    if len(dateParts) == 2:                    
+                        timeFormatString = "%Y-%m-%d %H:%M:%S %Z"
+                        if (dateParts[-1] == 'UTC'):
+                            timeFormatString = "%Y-%m-%d %Z"
                     # neither a time nor a UTC offset was found
-                    elif len(dateParts) == 2:
+                    elif len(dateParts) == 1:
                         timeFormatString = "%Y-%m-%d %Z"
                     # no time was found, but a real UTC offset was
-                    elif len(dateParts) == 1:
+                    elif len(dateParts) == 0:
                         timeFormatString = "%Y-%m-%d %Z"
 #                        if 'UTC-' in dateParts[-1] or 'UTC+' in dateParts[-1]:
 #                            timeFormatString = "%Y-%m-%d %Z%z"
