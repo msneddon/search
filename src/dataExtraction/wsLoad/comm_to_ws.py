@@ -55,7 +55,8 @@ def load_ws_metagenomes(mg_list,ws,wsname):
     mg_counter = 0
     mg_valid = 0
     
-    while content.has_key('next'):        
+#    while content.has_key('next'):
+    while content.has_key('next') and content['next'] != None:
         #print >> sys.stderr, mg_list.status_code
         #print >> sys.stderr, mg_list.headers
     
@@ -413,22 +414,28 @@ def load_ws_metagenomes(mg_list,ws,wsname):
             print "examined at least " + str(max_num_metagenomes) + ", all done"
             return True
         
+        print >> sys.stderr, content['next']
+
         mg_list = requests.get(content['next'])
         content = mg_list.json()
     
         print "Valid mg : " + str(mg_valid)
+
+    print 'done processing metagenomes'
 
 if __name__ == "__main__":
     import argparse
     import os.path
 
     batch_size = 100
+    start_offset = 0
 
     parser = argparse.ArgumentParser(description='Create workspace objects from metagenomics API.')
     parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
     parser.add_argument('--skip-existing',action='store_true',help='skip processing metagenomes which already exist in ws')
     parser.add_argument('--debug',action='store_true',help='debugging (currently use dev workspace instead of pub)')
     parser.add_argument('--max-num',nargs=1,type=int,help='maximum number of objects to attempt to load (default ' + str(max_num_metagenomes) + ')')
+    parser.add_argument('--start-offset',nargs=1,type=int,help='offset at which to start (default ' + str(start_offset) + ')')
     parser.add_argument('--batch-size',nargs=1,type=int,help='number of metagenomes to fetch at a time (default ' + str(batch_size) + ')')
     parser.add_argument('metagenomes', nargs='*', help='metagenomes to load (default all, currently only one arg works) (currently not working)')
 
@@ -451,6 +458,9 @@ if __name__ == "__main__":
     if args.skip_existing:
         skip_existing = True
 
+    if args.start_offset:
+        start_offset = args.start_offset[0]
+
     wsdesc = 'Workspace for communities objects for searching'
 
     try:
@@ -470,6 +480,6 @@ if __name__ == "__main__":
         mg_list = requests.get(communities_api_url + 'metagenome/' + args.metagenomes[0])
         max_num_metagenomes = 1
     else:
-        mg_list = requests.get(communities_api_url + 'metagenome?verbosity=metadata&limit=' + str(batch_size) )
+        mg_list = requests.get(communities_api_url + 'metagenome?verbosity=metadata&limit=' + str(batch_size) + '&offset=' + str(start_offset))
 
     load_ws_metagenomes(mg_list,ws,wsname)
