@@ -14,7 +14,7 @@ import biokbase.workspace.client
 
 wsname = 'KBasePublicRichGenomes'
 
-solr_keys = ['cs_id', "object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
+solr_keys = ["object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications"]
 solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids"]
 
@@ -153,7 +153,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
 
                     genomeObject['scientific_name_sort'] = "_".join(genomeObject['scientific_name'].lower().split())
 
-                    genomeObject['cs_id'] = str(genome['data']['genome_id'])
+#                    genomeObject['cs_id'] = str(genome['data']['genome_id'])
                     genomeObject['genome_dna_size'] = str(genome['data']['dna_size'])
                     genomeObject['genome_publications'] = ''
 
@@ -168,7 +168,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                         outBuffer.write(solr_line + "\n")
                     except Exception, e:
                         print str(e)
-                        print "Failed trying to write to string buffer for genome " + genomeObject['cs_id']
+                        print "Failed trying to write to string buffer for genome " + genomeObject['object_id']
                 
                     outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
                     outBuffer.close()
@@ -205,7 +205,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list):
                         featureObject['object_name'] = featureset_info[0]['info'][1] + '/features/' + feature
     
 # special keys
-                        featureObject['cs_id'] = str(f['feature_id'])
+#                        featureObject['cs_id'] = str(f['feature_id'])
 
                         prepopulate_keys = ['location_contig', 'location_begin', 'location_end', 'location_strand', 'locations', 'roles','annotations','subsystem_data','subsystems','feature_publications', 'atomic_regulons', 'regulon_data', 'coexpressed_fids', 'co_occurring_fids', 'protein_families', 'gene_name', 'aliases']
                         for key in prepopulate_keys:

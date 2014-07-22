@@ -65,49 +65,51 @@
 
  <fields>
         
-   <field name="cs_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
+<!-- not sure why we have both cs_id and feature_id
+   <field name="cs_id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
+ -->
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="genome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="workspace_name" type="string" indexed="false" stored="true" multiValued="false" /> 
+   <field name="object_type" type="string" indexed="false" stored="true" multiValued="false" /> 
+   <field name="object_name" type="string" indexed="false" stored="true" multiValued="false" /> 
+   <field name="genome_id" type="string" indexed="false" stored="true" required="true" multiValued="false" /> 
    <field name="feature_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="genome_source" type="text_general" indexed="true" stored="true"/>
-   <field name="genome_source_id" type="string" indexed="true" stored="true"/>
-   <field name="feature_source_id" type="string" indexed="true" stored="true"/>
+   <field name="genome_source" type="text_general" indexed="false" stored="true"/>
+   <field name="genome_source_id" type="string" indexed="false" stored="true"/>
+   <field name="feature_source_id" type="string" indexed="false" stored="true"/>
    <field name="protein_translation_length" type="int" indexed="true" stored="true"/>
    <field name="dna_sequence_length" type="int" indexed="true" stored="true"/>
    <field name="feature_type" type="string" indexed="true" stored="true"/>
-   <field name="gene_name" type="string" indexed="true" stored="true"/>
+   <field name="gene_name" type="string" indexed="false" stored="true"/>
    <field name="function" type="text_general" indexed="true" stored="true"/>
-   <field name="aliases" type="text_ws_general" indexed="true" stored="true" omitNorms="true"/>
+   <field name="aliases" type="text_ws_general" indexed="false" stored="true" omitNorms="true"/>
    <field name="scientific_name" type="text_general" indexed="true" stored="true"/>
-   <field name="scientific_name_sort" type="string" indexed="true" stored="true"/>
+   <field name="scientific_name_sort" type="string" indexed="true" stored="false"/>
    <field name="genome_dna_size" type="long" indexed="true" stored="true"/>
    <field name="num_contigs" type="int" indexed="true" stored="true"/>
    <field name="num_cds" type="int" indexed="true" stored="true"/>
-   <field name="complete" type="boolean" indexed="true" stored="true"/>
+   <field name="complete" type="boolean" indexed="false" stored="false"/>
    <field name="domain" type="string" indexed="true" stored="true"/>
    <field name="taxonomy" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="gc_content" type="float" indexed="true" stored="true"/>
-   <field name="genome_publications" type="text_ws_general" indexed="true" stored="true"/>
-   <field name="feature_publications" type="text_ws_general" indexed="true" stored="true"/>
-   <field name="roles" type="text_general" indexed="true" stored="true"/>
-   <field name="location_contig" type="string" indexed="true" stored="true"/>
-   <field name="location_begin" type="int" indexed="true" stored="true"/>
-   <field name="location_end" type="int" indexed="true" stored="true"/>
-   <field name="location_strand" type="string" indexed="true" stored="true"/>
-   <field name="locations" type="string" indexed="true" stored="true"/>
-   <field name="subsystems" type="text_general" indexed="true" stored="true"/>
-   <field name="subsystem_data" type="text_general" indexed="true" stored="true"/>
-   <field name="protein_families" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="genome_publications" type="text_ws_general" indexed="false" stored="true"/>
+   <field name="feature_publications" type="text_ws_general" indexed="false" stored="true"/>
+   <field name="roles" type="text_general" indexed="false" stored="true"/>
+   <field name="location_contig" type="string" indexed="false" stored="true"/>
+   <field name="location_begin" type="int" indexed="false" stored="true"/>
+   <field name="location_end" type="int" indexed="false" stored="true"/>
+   <field name="location_strand" type="string" indexed="false" stored="true"/>
+   <field name="locations" type="string" indexed="false" stored="true"/>
+   <field name="subsystems" type="text_general" indexed="false" stored="false"/>
+   <field name="subsystem_data" type="text_general" indexed="false" stored="false"/>
+   <field name="protein_families" type="text_ws_general" indexed="false" stored="true"/>
    <field name="go_ontology_domain" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="go_ontology_description" type="string" indexed="true" stored="true" multiValued="true" />
-   <field name="annotations" type="text_general" indexed="true" stored="true"/>
-   <field name="regulon_data" type="text_ws_general" indexed="true" stored="true"/>
-   <field name="atomic_regulons" type="text_ws_general" indexed="true" stored="true"/>
-   <field name="coexpressed_fids" type="text_ws_general" indexed="true" stored="true"/>
-   <field name="co_occurring_fids" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="annotations" type="text_general" indexed="false" stored="true"/>
+   <field name="regulon_data" type="text_ws_general" indexed="false" stored="false"/>
+   <field name="atomic_regulons" type="text_ws_general" indexed="false" stored="false"/>
+   <field name="coexpressed_fids" type="text_ws_general" indexed="false" stored="false"/>
+   <field name="co_occurring_fids" type="text_ws_general" indexed="false" stored="false"/>
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
@@ -117,14 +119,14 @@
 
  </fields>
 
- <uniqueKey>cs_id</uniqueKey>
+<!-- used to be cs_id -->
+ <uniqueKey>object_id</uniqueKey>
 
   <!-- copyField commands copy one field to another at the time a document
         is added to the index.  It's used either to index the same field differently,
         or to add multiple fields to the same field for easier/faster searching.  -->
 
    <copyField source="object_id" dest="text"/>
-   <copyField source="cs_id" dest="text"/>
    <copyField source="workspace_name" dest="text"/>
    <copyField source="object_type" dest="text"/>
    <copyField source="genome_id" dest="text"/>
