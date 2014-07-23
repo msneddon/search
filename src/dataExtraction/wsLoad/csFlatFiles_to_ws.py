@@ -24,19 +24,17 @@ pp = pprint.PrettyPrinter(indent=4)
 # use that with the fids2pubs mapping to stuff pub info into a feature
 publications = dict()
 
+# this will store the moral equivalent of genomes_to_genome_data
+all_genome_data = dict()
+
 skipExistingGenomes = False
+
 
 # production CDMI instance
 cdmi_api = biokbase.cdmi.client.CDMI_API()
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
     
-# berkeley private instance
-#cdmi_api = biokbase.cdmi.client.CDMI_API('http://192.168.1.163:7032')
-#cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://192.168.1.163:7032')
-# v3 instance
-#cdmi_api = biokbase.cdmi.client.CDMI_API('http://140.221.84.182:7032')
-#cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI('http://140.221.84.182:7032')
-    
+
 def create_feature_objects(gid,featureData):
 
     featureObjects = dict()
@@ -230,7 +228,7 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
         print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
 
     # maybe use get_entity_Genome to get additional fields, like source_id and domain?
-    all_genome_data = cdmi_api.genomes_to_genome_data([g])
+#    all_genome_data = cdmi_api.genomes_to_genome_data([g])
     genome_data = dict()
     if all_genome_data.has_key(g):
         genome_data = all_genome_data[g]
