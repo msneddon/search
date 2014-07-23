@@ -17,7 +17,7 @@
 
 echo Genome
 time mysql --defaults-extra-file=./my.cnf -e \
- " SELECT g.id,g.complete,g.contigs,g.dna_size,g.genetic_code,g.pegs,g.rnas,g.domain,g.md5,g.scientific_name,g.source_id FROM Genome g $limit " \
+ " SELECT g.id,g.complete,g.contigs,g.dna_size,g.gc_content,g.genetic_code,g.pegs,g.rnas,g.domain,g.md5,g.scientific_name,g.source_id,ito.from_link FROM Genome g left join IsTaxonomyOf ito on (g.id=ito.to_link) $limit " \
   | perl -pi -e 's/"//g' > Genome.tab
 
 echo TaxonomicGrouping
