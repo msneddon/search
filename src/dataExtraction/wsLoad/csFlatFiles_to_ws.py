@@ -213,6 +213,8 @@ def create_feature_objects(gid,featureData):
     return featureObjects
 
 def compute_taxonomy_lineage(taxonomy_id):
+    if not all_taxonomy_data.has_key(taxonomy_id):
+        return ''
     if int(all_taxonomy_data[taxonomy_id]['domain']) == 1:
         return all_taxonomy_data[taxonomy_id]['description']
 
@@ -280,7 +282,7 @@ def insert_genome(g,ws,wsname,featureData):
     genomeObject["contig_lengths"] = dict()
 
     # to do: get taxonomy data from flat files
-    if genome_data.has_key('taxonomy_id'):
+    if genome_data.has_key('taxonomy_id') and all_taxonomy_data.has_key(genome_data['taxonomy_id']):
         genomeObject["taxonomy"] = '; '.join( [ compute_taxonomy_lineage(genome_data["taxonomy_id"]) , all_taxonomy_data[genome_data['taxonomy_id']]['description'] ] )
         # get domain from here?
 #        genomeObject["domain"] = genome_data['taxonomy'].split(';')[0]
