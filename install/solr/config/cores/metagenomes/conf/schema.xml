@@ -102,9 +102,9 @@
    <field name="sample_name_sort" type="string" indexed="true" stored="true"/>
    <field name="sample_created" type="text_general" indexed="true" stored="true"/>
    <field name="collection_date" type="text_general" indexed="true" stored="true"/>
-   <field name="env_package_type" type="text_general" indexed="true" stored="true"/>
+   <field name="env_package_type" type="string" indexed="true" stored="true"/>
    <field name="feature" type="text_general" indexed="true" stored="true"/>
-   <field name="biome" type="text_general" indexed="true" stored="true"/>
+   <field name="biome" type="biome" indexed="true" stored="true"/>
    <field name="material" type="text_general" indexed="true" stored="true"/>
    <field name="location" type="text_general" indexed="true" stored="true"/>
    <field name="country" type="text_general" indexed="true" stored="true"/>
