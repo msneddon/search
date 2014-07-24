@@ -176,7 +176,7 @@ def insert_genome(g,genome_entities,ws,wsname):
     # locations need IsLocatedIn relationship
     isLocatedIn = cdmi_entity_api.get_relationship_IsLocatedIn(fids,[],['from_link','to_link','ordinal','begin','len','dir'],[])
 
-    hasAliasAssertedFrom = cdmi_entity_api.get_relationship_HasAliasAssertedFrom(fids,[],['from_link','to_link','alias'],[])
+#    hasAliasAssertedFrom = cdmi_entity_api.get_relationship_HasAliasAssertedFrom(fids,[],['from_link','to_link','alias'],[])
 
     # feature annotations
     start = time.time()
@@ -340,17 +340,17 @@ def insert_genome(g,genome_entities,ws,wsname):
     #genomeObject["feature_ids"] = fids[:]
 
     aliases = dict()
-    for x in hasAliasAssertedFrom:
-        fid = x[1]['from_link']
+#    for x in hasAliasAssertedFrom:
+#        fid = x[1]['from_link']
 
-        if not aliases.has_key(fid):
-            aliases[fid] = dict()
-        if not aliases[fid].has_key(x[1]['to_link']):
-            aliases[fid][x[1]['to_link']] = list()
+#        if not aliases.has_key(fid):
+#            aliases[fid] = dict()
+#        if not aliases[fid].has_key(x[1]['to_link']):
+#            aliases[fid][x[1]['to_link']] = list()
 
-        aliases[fid][x[1]['to_link']].append(x[1]['alias'])
+#        aliases[fid][x[1]['to_link']].append(x[1]['alias'])
         
-    print >> sys.stderr, 'processed hasAliasAssertedFrom'
+#    print >> sys.stderr, 'processed hasAliasAssertedFrom'
 
     #copy location info
     locations = dict()

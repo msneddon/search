@@ -104,7 +104,7 @@
    <field name="collection_date" type="text_general" indexed="true" stored="true"/>
    <field name="env_package_type" type="string" indexed="true" stored="true"/>
    <field name="feature" type="text_general" indexed="true" stored="true"/>
-   <field name="biome" type="biome" indexed="true" stored="true"/>
+   <field name="biome" type="string" indexed="true" stored="true"/>
    <field name="material" type="text_general" indexed="true" stored="true"/>
    <field name="location" type="text_general" indexed="true" stored="true"/>
    <field name="country" type="text_general" indexed="true" stored="true"/>

@@ -26,6 +26,8 @@ publications = dict()
 
 # this will store the moral equivalent of genomes_to_genome_data
 all_genome_data = dict()
+all_contig_data = dict()
+all_taxonomy_data = dict()
 
 skipExistingGenomes = False
 
@@ -210,7 +212,16 @@ def create_feature_objects(gid,featureData):
 
     return featureObjects
 
-def insert_genome(g,genome_entities,ws,wsname,featureData):
+def compute_taxonomy_lineage(taxonomy_id):
+    if int(all_taxonomy_data[taxonomy_id]['domain']) == 1:
+        return all_taxonomy_data[taxonomy_id]['description']
+
+    if int(all_taxonomy_data[taxonomy_id]['hidden']) == 0:
+        return '; '.join([ compute_taxonomy_lineage(all_taxonomy_data[taxonomy_id]['parent_taxonomy_id']) , all_taxonomy_data[taxonomy_id]['description'] ])
+    else:
+        return compute_taxonomy_lineage(all_taxonomy_data[taxonomy_id]['parent_taxonomy_id'])
+
+def insert_genome(g,ws,wsname,featureData):
 
     start = time.time()
 
@@ -227,13 +238,12 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
     except biokbase.workspace.client.ServerError:
         print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
 
-    # maybe use get_entity_Genome to get additional fields, like source_id and domain?
 #    all_genome_data = cdmi_api.genomes_to_genome_data([g])
     genome_data = dict()
     if all_genome_data.has_key(g):
         genome_data = all_genome_data[g]
     else:
-        print >> sys.stderr, 'genome ' + g + ' has no entry in cdmi, skipping'
+        print >> sys.stderr, 'genome ' + g + ' has no entry in genome data, skipping'
         return
 
     end = time.time()
@@ -243,9 +253,9 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
     # sloppy hack to pick up where it crashed
 #    if numericGid < 2207:
 #    if numericGid < 28878:
-#        print >> sys.stderr, "skipping genome " + g + ' ' + genome_entities[g]['scientific_name']
+#        print >> sys.stderr, "skipping genome " + g + ' ' + genome_data['scientific_name']
 #        return
-    print >> sys.stderr, "processing genome " + g + ' ' + genome_entities[g]['scientific_name']
+    print >> sys.stderr, "processing genome " + g + ' ' + genome_data['scientific_name']
 
     genomeObject = dict()
     featureSet = dict()
@@ -260,26 +270,24 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
     genomeObject["num_contigs"] = int(genome_data["contigs"])
     genomeObject["genome_source"] = 'KBase Central Store'
     genomeObject["md5"] = genome_data["genome_md5"]
-    if genome_data.has_key('taxonomy'):
-        genomeObject["taxonomy"] = genome_data["taxonomy"]
-        genomeObject["domain"] = genome_data['taxonomy'].split(';')[0]
+    genomeObject["domain"] = genome_data["domain"]
     genomeObject["gc_content"] = float(genome_data["gc_content"])
     genomeObject["complete"] = int(genome_data["complete"])
+    genomeObject["num_cds"] = int(genome_data["pegs"])
 
-    genomeObject["genome_source_id"] = genome_entities[g]['source_id']
+    genomeObject["genome_source_id"] = genome_data['source_id']
 
     genomeObject["contig_lengths"] = dict()
+
+    # to do: get taxonomy data from flat files
+    if genome_data.has_key('taxonomy_id'):
+        genomeObject["taxonomy"] = '; '.join( [ compute_taxonomy_lineage(genome_data["taxonomy_id"]) , all_taxonomy_data[genome_data['taxonomy_id']]['description'] ] )
+        # get domain from here?
+#        genomeObject["domain"] = genome_data['taxonomy'].split(';')[0]
 
     #genomeObject["contigset_ref"] = 
     #genomeObject["proteinset_ref"] = 
     #genomeObject["transcriptset_ref"] = 
-
-    #start = time.time()
-
-    #taxonomy = cdmi_api.genomes_to_taxonomies([g])[g]
-
-    #end = time.time()
-    #print >> sys.stderr, "querying taxonomies " + str(end - start)
 
 ##########################
     # build ContigSet and Contig objects
@@ -289,7 +297,7 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
 
     contigSet = dict()
 
-    contigSet["id"] = g+".contigset.0"
+    contigSet["id"] = g+".contigset"
     contigSet["name"] = "contigset for " + g
     contigSet["md5"] = genomeObject["md5"]
 #    contigSet["source_id"] = ""
@@ -299,54 +307,43 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
 #    contigSet["fasta_ref"] = None
     contigSet["contigs"] = dict()
 
-    start = time.time()
+#    contig_ids = cdmi_api.genomes_to_contigs([g])[g]
+    contigs = all_contig_data[g]
 
-    contig_ids = cdmi_api.genomes_to_contigs([g])[g]
-
-    genomeObject['contig_ids'] = contig_ids
-
-    end = time.time()
-    print  >> sys.stderr, "querying contig ids " + str(end - start)
+    genomeObject['contig_ids'] = [ x['id'] for x in contigs ]
 
     start = time.time()
+
+    print  >> sys.stderr, "start querying contig seqs"
 
     # retrieving all with one call died on kb|g.3907, kb|g.3643 Gallus gallus, kb|g.41 Mouse
     # looping over each contig_id still seems slow on chicken
     # these sequences are too big for ws (250MB), need to refactor
+
+    # loop over contigs method
     contig_sequences = dict()
-    for contig_id in contig_ids:
+    for contig_id in genomeObject['contig_ids']:
 #        contig_seq = cdmi_api.contigs_to_sequences([contig_id])
 #        contig_sequences[contig_id] = contig_seq[contig_id]
         # for debugging, don't get contig seqs
         contig_sequences[contig_id] = ''
 
-    end = time.time()
-    print  >> sys.stderr, "(not) querying contig seqs " + str(end - start)
-
-    start = time.time()
-
-    contig_lengths = cdmi_api.contigs_to_lengths(contig_ids)
+    # all in one call
+    contig_sequences = cdmi_api.contigs_to_sequences(genomeObject['contig_ids'])
 
     end = time.time()
-    print  >> sys.stderr, "querying contig lengths " + str(end - start)
+    print  >> sys.stderr, "done querying contig seqs " + str(end - start)
 
-    start = time.time()
-
-    contig_md5s = cdmi_api.contigs_to_md5s(contig_ids)
-
-    end = time.time()
-    print  >> sys.stderr, "querying contig md5s " + str(end - start)
-
-    for x in contig_ids:
+    for x in contigs:
         contig = dict()
-        contig["id"] = x
-        contig["length"] = int(contig_lengths[x])
-        contig["md5"] = contig_md5s[x]
-        contig["sequence"] = contig_sequences[x]
+        contig["id"] = x['id']
+        contig["length"] = int(x['length'])
+        contig["md5"] = x['contig_md5']
+        contig["sequence"] = contig_sequences[x['id']]
         
-        contigSet["contigs"][x]=contig
+        contigSet["contigs"][x['id']]=contig
         
-        genomeObject["contig_lengths"][x]=int(contig_lengths[x])
+        genomeObject["contig_lengths"][x['id']]=int(x['length'])
 
     # will need to insert the ContigSet object here, in order to
     # be able to use the ref in Feature.location
@@ -367,15 +364,18 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
         #print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
         # another try block here?
 
-#    contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
+    try:
+        contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
+        print >> sys.stderr, contigset_info
+    except biokbase.workspace.client.ServerError, e:
+        print >> sys.stderr, e
 
     end = time.time()
-    print >> sys.stderr, "(not) inserting contigset into ws " + str(end - start)
+    print >> sys.stderr, "inserting contigset into ws " + str(end - start)
 #    print >> sys.stderr, contigset_info
 
     contigset_ref = wsname + '/' + contigSet['id']
-#    genomeObject["contigset_ref"] = contigset_ref
-#    genomeObject["contigset_ref"] = contigset_ref
+    genomeObject["contigset_ref"] = contigset_ref
 
 ###########################
     # build Feature objects
@@ -412,7 +412,7 @@ def insert_genome(g,genome_entities,ws,wsname,featureData):
 #    print >> sys.stderr, simplejson.dumps(featureSet)
 
     featureset_info = ws.save_objects({"workspace": wsname,
-                                       "objects":[{"type": "KBaseSearch.SearchFeatureSet",
+                                       "objects":[{"type": "KBaseSearch.FeatureSet",
                                                    "data": featureSet,
                                                    "name": featureset_id}]
                                      })
@@ -468,9 +468,39 @@ if __name__ == "__main__":
     except biokbase.workspace.client.ServerError, e:
         print >> sys.stderr, 'workspace ' + wsname + ' at ws url ' + ws.url + ' may already exist, trying to use'
 
-    genome_entities = cdmi_entity_api.all_entities_Genome(0,25000,['id','scientific_name','source_id'])
-    genomes = genome_entities
-    
+    genomeDataHandle = open ('Genome.tab','r')
+    for line in genomeDataHandle:
+        line=line.rstrip()
+        thisGenome = dict()
+        columns = line.split("\t")
+        if len(columns) == 12:
+            [ thisGenome['id'] , thisGenome['complete'] , thisGenome['contigs'] , thisGenome['dna_size'] , thisGenome['gc_content'] , thisGenome['genetic_code'] , thisGenome['pegs'] , thisGenome['rnas'], thisGenome['domain'], thisGenome['genome_md5'], thisGenome['scientific_name'], thisGenome['source_id']  ] = columns
+        if len(columns) == 13:
+            [ thisGenome['id'] , thisGenome['complete'] , thisGenome['contigs'] , thisGenome['dna_size'] , thisGenome['gc_content'] , thisGenome['genetic_code'] , thisGenome['pegs'] , thisGenome['rnas'], thisGenome['domain'], thisGenome['genome_md5'], thisGenome['scientific_name'], thisGenome['source_id'] ,thisGenome['taxonomy_id'] ] = columns
+        all_genome_data[thisGenome['id']] = thisGenome
+
+    print >> sys.stderr, 'loading contig data into memory'
+    contigDataHandle = open ('ContigSequence.tab','r')
+    for line in contigDataHandle:
+        line=line.rstrip()
+        thisContig = dict()
+        columns = line.split("\t")
+        [ thisContig['genome_id'] , thisContig['id'] , thisContig['contig_md5'] , thisContig['length'] ] = columns
+        if (not all_contig_data.has_key(thisContig['genome_id'])):
+            all_contig_data[thisContig['genome_id']] = list()
+        all_contig_data[thisContig['genome_id']].append(thisContig)
+    print >> sys.stderr, 'done loading contig data into memory'
+
+    print >> sys.stderr, 'loading taxonomy data into memory'
+    taxonomyDataHandle = open ('TaxonomicGrouping.tab','r')
+    for line in taxonomyDataHandle:
+        line=line.rstrip()
+        thisTaxonomy = dict()
+        columns = line.split("\t")
+        [ thisTaxonomy['taxonomy_id'] , thisTaxonomy['description'] , thisTaxonomy['parent_taxonomy_id'] , thisTaxonomy['hidden'], thisTaxonomy['domain'], thisTaxonomy['type'] ] = columns
+        all_taxonomy_data[thisTaxonomy['taxonomy_id']] = thisTaxonomy
+    print >> sys.stderr, 'done loading taxonomy data into memory'
+
     pubHandle = open ( 'publications.tab.sorted', 'r')
     for line in pubHandle:
         line=line.rstrip()
@@ -557,7 +587,7 @@ if __name__ == "__main__":
                     currentLine[attribute] = fileHandle[attribute].readline()
 #            pp.pprint(featureData)
             # pass featureData to a sub that creates appropriate subobjects
-            insert_genome(currentGid,genome_entities,ws,wsname,featureData)
+            insert_genome(currentGid,ws,wsname,featureData)
 
             # make sure Python does gc right away
             featureData = None
@@ -608,7 +638,7 @@ if __name__ == "__main__":
             currentLine[attribute] = fileHandle[attribute].readline()
 #    pp.pprint(featureData)
     # pass featureData to a sub that creates appropriate subobjects
-    insert_genome(currentGid,genome_entities,ws,wsname,featureData)
+    insert_genome(currentGid,ws,wsname,featureData)
 
     
 # general arch:
