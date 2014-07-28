@@ -236,7 +236,7 @@ def insert_genome(g,ws,wsname,featureData):
         if skipExistingGenomes == True:
             print >> sys.stderr, 'genome '  + g + ' found, skipping'
             return
-        print >> sys.stderr, 'genome '  + g + ' found, updating'
+        print >> sys.stderr, 'genome '  + g + ' found, replacing'
     except biokbase.workspace.client.ServerError:
         print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
 
