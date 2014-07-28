@@ -20,8 +20,8 @@
 # ~ 90m for query with protein sequences
 echo Feature
 time mysql --defaults-extra-file=./my.cnf -e \
- " SELECT f.id,f.id,ioo.from_link,f.sequence_length,f.feature_type,f.source_id,f.function,ps.id,length(ps.sequence),ps.sequence from Feature f left join IsOwnerOf ioo ON (ioo.to_link=f.id) left join IsProteinFor ipf ON (ipf.to_link=f.id) left join ProteinSequence ps ON (ipf.from_link = ps.id) $limit " \
-  | perl -pi -e 's/"//g' > Feature.tab
+ " SELECT f.id,f.id,ioo.from_link,f.sequence_length,f.feature_type,f.source_id,f.function,ps.id,length(ps.sequence),ps.sequence from Feature f left join IsOwnerOf ioo ON (ioo.to_link=f.id) left join IsProteinFor ipf ON (ipf.to_link=f.id) left join ProteinSequence ps ON (ipf.from_link = ps.id) $limit " > Feature.tab
+perl -pi -e 's/"//g' Feature.tab
 
 # we're going to add a join to Feature to make sure all outputs
 # are valid features
