@@ -357,7 +357,7 @@ def insert_genome(g,ws,wsname,featureData):
 # first see if object already exists
     try:
         contigset_info=ws.get_object_info([{"workspace":wsname,"name":contigSet['id']}],0)
-        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' found, updating'
+        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' found, replacing'
 #        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' found, skipping'
 #        continue
     except biokbase.workspace.client.ServerError:
