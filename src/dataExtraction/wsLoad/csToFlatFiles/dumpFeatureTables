@@ -77,7 +77,7 @@ time mysql --defaults-extra-file=./my.cnf -e \
 echo Annotation
 time mysql --defaults-extra-file=./my.cnf -e \
  " SELECT iab.from_link, a.comment,a.annotator,a.annotation_time FROM Annotation a JOIN IsAnnotatedBy iab ON (iab.to_link=a.id) JOIN Feature f ON (iab.from_link=f.id) $limit " \
-  | perl -pi -e 's/"//g;s/\\n/ /g;s/\\r/ /g;s/\205/ /g;' > Annotation.tab
+  | perl -pi -e 's/"//g;s/\\n/ /g;s/\r/ /g;s/\205/ /g;' > Annotation.tab
 
 # ~45m
 echo SubsystemData
