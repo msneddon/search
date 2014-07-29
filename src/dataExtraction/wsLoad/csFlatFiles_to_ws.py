@@ -187,8 +187,10 @@ def create_feature_objects(gid,featureData):
         try:
             [fid,role]=roles_line.split("\t")
         except Exception, e:
+            print >> sys.stderr, 'missing data found in Role line'
             print >> sys.stderr, e
             print >> sys.stderr, roles_line
+            print >> sys.stderr, 'skipping line'
             continue
         if not featureObjects[fid].has_key("roles"):
             featureObjects[fid]['roles']=list()
