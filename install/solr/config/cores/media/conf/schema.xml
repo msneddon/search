@@ -65,62 +65,41 @@
 
  <fields>
         
-   <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
-   <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
+<!--
+these fields are for any workspace object
+-->
 
-<!-- GwasPopulation -->
-   <field name="kbase_genome_name" type="text_general" indexed="true" stored="true" /> 
-   <field name="kbase_genome_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="source_genome_name" type="text_general" indexed="true" stored="true" /> 
-   <field name="source" type="text_general" indexed="true" stored="true" /> 
-   <field name="GwasPopulation_description" type="text_general" indexed="true" stored="true" /> 
-   <field name="ecotype_details" type="text_general" indexed="true" stored="true" /> 
+   <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
+   <field name="object_version" type="int" indexed="false" stored="true" multiValued="false" required="false" />
+   <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="object_workspace" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" />
 
-<!-- GwasPopulationVariation -->
-   <field name="GwasPopulation_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="filetype" type="text_general" indexed="true" stored="true" /> 
-   <field name="comment" type="text_general" indexed="true" stored="true" /> 
-   <field name="assay" type="text_general" indexed="true" stored="true" /> 
-   <field name="originator" type="text_general" indexed="true" stored="true" /> 
-<!-- genome uses above fields -->
-   <field name="GwasPopulationVariation_parent_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+<!--
+these are for the top level media object
+-->
 
-<!-- GwasPopulationTrait -->
-<!-- genome,GwasPopulation_obj_id,originator,comment use above fields -->
-   <field name="trait_ontology_id" type="string" indexed="true" stored="true" /> 
-   <field name="trait_name" type="text_general" indexed="true" stored="true" /> 
-   <field name="unit_of_measure" type="text_general" indexed="true" stored="true" /> 
-   <field name="protocol" type="text_general" indexed="true" stored="true" /> 
+   <field name="media_id" type="string" indexed="true" stored="true" multiValued="false"  />
+   <field name="media_source_id" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="media_isDefined" type="boolean" indexed="true" stored="true" multiValued="false" />
+   <field name="media_isMinimal" type="boolean" indexed="true" stored="true" multiValued="false" />
+   <field name="media_name" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="media_type" type="string" indexed="true" stored="true" multiValued="false" />
 
-<!-- GwasPopulationKinship -->
-<!-- genome,GwasPopulationVariation_obj_id use above fields -->
-<!-- no other fields to be indexed -->
+<!--
+these fields are for media compounds
+-->
 
-<!-- GwasTopVariations -->
-<!-- source, protocol, genome, unit_of_measure, assay, trait_ontology_id,
-     trait_name, originator, GwasPopulationVariation_obj_id,
-     GwasPopulation_obj_id, comment use above fields -->
-   <field name="num_population" type="string" indexed="true" stored="true" /> 
-   <field name="GwasPopulationStructure_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="GwasPopulationKinship_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="pvaluecutoff" type="float" indexed="true" stored="true" /> 
+   <field name="compound_ref" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="compound_concentration" type="float" indexed="true" stored="true" multiValued="false" />
+   <field name="compound_maxFlux" type="float" indexed="true" stored="true" multiValued="false" />
+   <field name="compound_minFlux" type="float" indexed="true" stored="true" multiValued="false" />
 
-<!-- GwasGeneList -->
-<!-- need more info from ranjan on this type -->
-   <field name="GwasTopVariations_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="distance_cutoff" type="int" indexed="true" stored="true" /> 
-   <field name="gene_count" type="int" indexed="true" stored="true" /> 
-   <field name="genes" type="text_ws_general" indexed="true" stored="true" /> 
-   <field name="genes_snp_list" type="text_ws_general" indexed="true" stored="true" /> 
-
-
-   <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
+   <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
 
+   <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
    <field name="_version_" type="long" indexed="true" stored="true"/>
-
 
  </fields>
 
@@ -131,35 +110,14 @@
         or to add multiple fields to the same field for easier/faster searching.  -->
 
    <copyField source="object_id" dest="text"/>
-   <copyField source="workspace_name" dest="text"/>
+   <copyField source="object_id" dest="text_boost"/>
    <copyField source="object_type" dest="text"/>
-   <copyField source="object_name" dest="text"/>
+   <copyField source="media_id" dest="text"/>
+   <copyField source="media_id" dest="text_boost"/>
+   <copyField source="media_name" dest="text"/>
+   <copyField source="media_type" dest="text"/>
 
-   <copyField source="kbase_genome_name" dest="text"/>
-   <copyField source="kbase_genome_id" dest="text"/>
-   <copyField source="source_genome_name" dest="text"/>
-   <copyField source="source" dest="text"/>
-   <copyField source="GwasPopulation_description" dest="text"/>
-   <copyField source="ecotype_details" dest="text"/>
-   <copyField source="GwasPopulation_obj_id" dest="text"/>
-   <copyField source="filetype" dest="text"/>
-   <copyField source="comment" dest="text"/>
-   <copyField source="assay" dest="text"/>
-   <copyField source="originator" dest="text"/>
-   <copyField source="GwasPopulationVariation_parent_obj_id" dest="text"/>
-   <copyField source="trait_ontology_id" dest="text"/>
-   <copyField source="trait_name" dest="text"/>
-   <copyField source="unit_of_measure" dest="text"/>
-   <copyField source="protocol" dest="text"/>
-   <copyField source="num_population" dest="text"/>
-   <copyField source="GwasPopulationStructure_obj_id" dest="text"/>
-   <copyField source="GwasPopulationKinship_obj_id" dest="text"/>
-   <copyField source="pvaluecutoff" dest="text"/>
-   <copyField source="GwasTopVariations_obj_id" dest="text"/>
-   <copyField source="distance_cutoff" dest="text"/>
-   <copyField source="genes" dest="text"/>
-   <copyField source="genes_snp_list" dest="text"/>
-
+   <copyField source="compound_ref" dest="text"/>
  
   <types>
     <!-- field type definitions. The "name" attribute is
@@ -304,7 +262,7 @@
     <!-- A text field that tries to combine text_general with whitespace
          tokenization, to preserve punctuation in identifiers
     -->
-    <fieldType name="text_ws_general" class="solr.TextField" positionIncrementGap="100">
+    <fieldType name="text_ws_general" class="solr.TextField" positionIncrementGap="100" >
       <analyzer type="index">
         <tokenizer class="solr.WhitespaceTokenizerFactory"/>
         <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
@@ -320,6 +278,28 @@
         <filter class="solr.LowerCaseFilterFactory"/>
       </analyzer>
     </fieldType>
+
+
+    <!-- A text field that tries to combine text_general with whitespace
+         tokenization, to preserve punctuation in identifiers
+    -->
+    <fieldType name="text_semicolon_general" class="solr.TextField" positionIncrementGap="100" >
+      <analyzer type="index">
+        <tokenizer class="solr.WhitespaceTokenizerFactory"/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <!-- in this example, we will only use synonyms at query time
+        <filter class="solr.SynonymFilterFactory" synonyms="index_synonyms.txt" ignoreCase="true" expand="false"/>
+        -->
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+      <analyzer type="query">
+        <tokenizer class="solr.PatternTokenizerFactory" pattern="; "/>
+        <filter class="solr.StopFilterFactory" ignoreCase="true" words="stopwords.txt" enablePositionIncrements="true" />
+        <filter class="solr.SynonymFilterFactory" synonyms="synonyms.txt" ignoreCase="true" expand="true"/>
+        <filter class="solr.LowerCaseFilterFactory"/>
+      </analyzer>
+    </fieldType>
+
 
     <!-- A general text field that has reasonable, generic
          cross-language defaults: it tokenizes with StandardTokenizer,

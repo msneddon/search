@@ -12,9 +12,7 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
-wsname = 'KBasePublicGwasData'
-
-def export_gwas_from_ws(maxNumObjects):
+def export_gwas_from_ws(maxNumObjects,wsname):
     #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
     # ranjan's Gwas objects are currently in Gavin's dev workspace
 #    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
@@ -30,7 +28,7 @@ def export_gwas_from_ws(maxNumObjects):
     # print out a header file
     # data fields must be printed in same order
     solr_ws_keys = ['object_id','workspace_name','object_type', 'object_name']
-    solr_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'source', 'GwasPopulation_description', 'ecotype_details', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_parent_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id','distance_cutoff','genes','genes_snp_list']
+    solr_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'source', 'GwasPopulation_description', 'ecotype_details', 'GwasPopulation_obj_id', 'filetype', 'comment', 'assay', 'originator', 'GwasPopulationVariation_parent_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id','distance_cutoff','genes','gene_count','genes_snp_list']
     headerOutFile = open('gwasToSolr.tab.headers', 'w')
     print >> headerOutFile, "\t".join(solr_ws_keys + solr_keys)
     #print >> headerOutFile, "\n"
@@ -53,7 +51,7 @@ def export_gwas_from_ws(maxNumObjects):
                 objects_list = random.sample(objects_list,maxNumObjects)
     
             for x in objects_list:
-                print "\t\tFinished checking %s, done with %s of all objects in %s" % (x[0], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
+                print "\t\tFinished checking %s (type %s), done with %s of all objects in %s" % (x[0], x[2], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
     
                 if "Gwas" in x[2]:
     
@@ -112,12 +110,17 @@ def export_gwas_from_ws(maxNumObjects):
     
                     if gwas['data'].has_key('genes'):
                         search_values['genes'] = ' '.join( [ gene[1] + ' ' + gene[2] + ' ' + gene[3] + ' '  for gene in gwas['data']['genes'] ] )
+                        search_values['gene_count'] = len(gwas['data']['genes'])
                     if gwas['data'].has_key('genes_snp_list'):
                         search_values['genes_snp_list'] = ' '.join([ gene[1] + ' ' + gene[2] + ' ' + gene[4] + ' '  for gene in gwas['data']['genes_snp_list'] ])
     
                    # need to embed GwasTopVariations data in the GwasGeneList object
                     if gwas['data'].has_key('GwasTopVariations_obj_id'):
-                        gwasTopVariation = ws_client.get_objects([{"wsid": str(workspace_id), "name": gwas['data']['GwasTopVariations_obj_id']}])
+# the structure of this may have changed
+# (it's only a bare string, so who knows if it's a valid reference or not)
+                        [topVarWsName,topVarObjName] = gwas['data']["GwasTopVariations_obj_id"].split('/')
+#                        gwasTopVariation = ws_client.get_objects([{"wsid": str(workspace_id), "name": gwas['data']['GwasTopVariations_obj_id']}])
+                        gwasTopVariation = ws_client.get_objects([{"workspace": topVarWsName, "name": topVarObjName}])
                         # only retrieving one object
                         gwasTopVariation = gwasTopVariation[0]
                         topVariation_scalar_keys = [ 'comment', 'assay', 'originator', 'trait_ontology_id', 'trait_name','protocol']
@@ -162,10 +165,11 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Create import files from workspace objects')
     parser.add_argument('--count', action="store", dest="maxNumObjects", type=int)
+    parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
     args = parser.parse_args()
 
     maxNumObjects = sys.maxint
     if args.maxNumObjects:
         maxNumObjects = args.maxNumObjects
     
-    export_gwas_from_ws(maxNumObjects)
+    export_gwas_from_ws(maxNumObjects,args.wsname[0])
