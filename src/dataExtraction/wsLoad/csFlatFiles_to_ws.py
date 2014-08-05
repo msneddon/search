@@ -14,6 +14,8 @@ import random
 import requests
 import pprint
 import codecs
+import Bio.SeqIO
+import Bio.SeqFeature
 
 import biokbase.workspace.client
 import biokbase.cdmi.client
@@ -30,14 +32,49 @@ all_contig_data = dict()
 all_taxonomy_data = dict()
 
 skipExistingGenomes = False
+contigseq_file_dir = ''
 
 
 # production CDMI instance
 cdmi_api = biokbase.cdmi.client.CDMI_API()
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
-    
 
-def create_feature_objects(gid,featureData):
+# mimic the CDMI FormatLocations function:
+# check that consecutive Locations are on same contig and strand
+# check that end of N is same as begin of N+1
+# if so, join them up (properly)
+def join_contiguous_locations(featureLocations):
+    newFeatureLocations = list()
+    lastLoc = list()
+    for index,loc in enumerate(featureLocations):
+#        print >> sys.stderr, 'start loop'
+#        print >> sys.stderr, lastLoc
+#        print >> sys.stderr, loc
+        if len(lastLoc) > 0 and lastLoc[0] == loc[0] and lastLoc[2] == loc[2]:
+            if loc[2] == '-':
+                if (lastLoc[1] - lastLoc[3]) == loc[1]:
+                    lastLoc[3] += loc[3]
+                else:
+                    newFeatureLocations.append(lastLoc)
+                    lastLoc=loc
+            else:
+            # assume + strand
+                if (lastLoc[1] + lastLoc[3]) == loc[1]:
+                    lastLoc[3] += loc[3]
+                else:
+                    newFeatureLocations.append(lastLoc)
+                    lastLoc=loc
+        else:
+            if len(lastLoc) > 0:
+                newFeatureLocations.append(lastLoc)
+            lastLoc=loc
+#        print >> sys.stderr, 'end loop'
+#        print >> sys.stderr, lastLoc
+    # append the last location
+    newFeatureLocations.append(lastLoc)
+    return newFeatureLocations
+
+def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
 
     featureObjects = dict()
 
@@ -128,18 +165,73 @@ def create_feature_objects(gid,featureData):
             featureObjects[fid]['aliases'][source_db]=list()
         featureObjects[fid]['aliases'][source_db].append(alias)
 
+    featureLocations = dict()
     for location_line in featureData['Locations']:
         location_line=location_line.rstrip()
         [fid,contig,begin,strand,length,ordinal]=location_line.split("\t")
-        # should fix this for strandedness (to be same as CDMI)
+        if not featureLocations.has_key(fid):
+            featureLocations[fid] = list()
         if strand == '-':
             start = int(begin) + int(length) - 1
             location = [contig,int(start),strand,int(length),int(ordinal)]
-            featureObjects[fid]['location'].append(location)
+            featureLocations[fid].append(location)
         else:
             location = [contig,int(begin),strand,int(length),int(ordinal)]
-            featureObjects[fid]['location'].append(location)
-#        featureObjects[fid]['location'].append(location)
+            featureLocations[fid].append(location)
+        # force the location list to be sorted by ordinal
+        featureLocations[fid].sort( key = lambda loc: loc[4] )
+
+    for fid in featureLocations:
+#        print >> sys.stderr, featureLocations[fid]
+        featureObjects[fid]['location'] = join_contiguous_locations(featureLocations[fid])
+#        print >> sys.stderr, featureObjects[fid]['location']
+        if len(featureObjects[fid]['location']) > 0:
+#            print >> sys.stderr, 'making feature_dna for ' + fid + ' on contig ' + featureObjects[fid]['location'][0][0]
+            if not featureObjects[fid].has_key('dna_sequence'):
+                featureObjects[fid]['dna_sequence'] = ''
+
+            # should probably check every location for - strand
+            # no idea what to do if a feature has locations on both strands
+            locations = featureObjects[fid]['location']
+            if featureObjects[fid]['location'][0][2] == '-':
+                locations = reversed(featureObjects[fid]['location'])
+
+            for loc in locations:
+                if loc[2] == '-':
+                    featSeqFeature = Bio.SeqFeature.SeqFeature(Bio.SeqFeature.FeatureLocation( loc[1] - loc[3], loc[1], strand=-1 ), id=fid+'/data/location/'+str(loc[4]))
+                else: # assume + strand
+                    featSeqFeature = Bio.SeqFeature.SeqFeature(Bio.SeqFeature.FeatureLocation( (loc[1]-1), (loc[1]-1) + loc[3], strand=+1 ), id=fid+'/data/location/'+str(loc[4]))
+#                    print >> sys.stderr, featSeqFeature
+#                    print >> sys.stderr, featSeqFeature.extract( contigSeqObjects[loc[0]])
+                featureObjects[fid]['dna_sequence'] += str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq)
+
+#            print >> sys.stderr, 'genetic_code is ' + str(genetic_code)
+#            print >> sys.stderr, fid
+
+            # to override problems in the biopython start codons in the
+            # standard table: the ensembl plants annotation of Arabidopsis
+            # has at least one CDS with GUG as start codon
+            # drawback is that translate() won't use M as first amino acid,
+            # so there will be some false positives
+            # (use bacterial table instead?)
+            # there are also issues with frameshifts and other
+            # modifications, which no check can verify
+            complete_cds = False
+            stop_codon = '*'
+            if genetic_code==11:
+                complete_cds = True
+                stop_codon = ''
+            if featureObjects[fid]['feature_type'] == 'CDS' and (featureObjects[fid]['protein_translation'] + stop_codon != Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code) ) :
+                print >> sys.stderr, 'warning: computed translation does not match translation in db for ' + fid
+                print >> sys.stderr, featureObjects[fid]['protein_translation'] + stop_codon
+                print >> sys.stderr, cdmi_api.fids_to_dna_sequences([fid])
+                print >> sys.stderr, cdmi_api.fids_to_locations([fid])
+                print >> sys.stderr, featureObjects[fid]['location']
+                print >> sys.stderr, Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code)
+                print >> sys.stderr, featureObjects[fid]['dna_sequence']
+#                print >> sys.stderr, str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq.translate(table=genetic_code, cds=complete_cds) )
+        else:
+            print >> sys.stderr, 'no locations for ' + fid + ', not making feature_dna'
 
     for protein_families_line in featureData['ProteinFamilies']:
         protein_families_line=protein_families_line.rstrip()
@@ -187,8 +279,10 @@ def create_feature_objects(gid,featureData):
         try:
             [fid,role]=roles_line.split("\t")
         except Exception, e:
+            print >> sys.stderr, 'missing data found in Role line'
             print >> sys.stderr, e
             print >> sys.stderr, roles_line
+            print >> sys.stderr, 'skipping line'
             continue
         if not featureObjects[fid].has_key("roles"):
             featureObjects[fid]['roles']=list()
@@ -208,7 +302,6 @@ def create_feature_objects(gid,featureData):
             featureObjects[fid]['subsystem_data']=list()
         ssdata = [subsystem,variant,role]
         featureObjects[fid]['subsystem_data'].append(ssdata)
-
 
     return featureObjects
 
@@ -281,11 +374,13 @@ def insert_genome(g,ws,wsname,featureData):
 
     genomeObject["contig_lengths"] = dict()
 
-    # to do: get taxonomy data from flat files
     if genome_data.has_key('taxonomy_id') and all_taxonomy_data.has_key(genome_data['taxonomy_id']):
         genomeObject["taxonomy"] = '; '.join( [ compute_taxonomy_lineage(genome_data["taxonomy_id"]) , all_taxonomy_data[genome_data['taxonomy_id']]['description'] ] )
-        # get domain from here?
-#        genomeObject["domain"] = genome_data['taxonomy'].split(';')[0]
+
+    # this is a temporary measure
+    if genomeObject.has_key('taxonomy') and 'Eukaryota' in genomeObject['taxonomy']:
+        print >> sys.stderr, 'skipping Eukaryota genome ' + g
+        return
 
     #genomeObject["contigset_ref"] = 
     #genomeObject["proteinset_ref"] = 
@@ -309,7 +404,6 @@ def insert_genome(g,ws,wsname,featureData):
 #    contigSet["fasta_ref"] = None
     contigSet["contigs"] = dict()
 
-#    contig_ids = cdmi_api.genomes_to_contigs([g])[g]
     contigs = all_contig_data[g]
 
     genomeObject['contig_ids'] = [ x['id'] for x in contigs ]
@@ -322,16 +416,39 @@ def insert_genome(g,ws,wsname,featureData):
     # looping over each contig_id still seems slow on chicken
     # these sequences are too big for ws (250MB), need to refactor
 
-    # loop over contigs method
     contig_sequences = dict()
-    for contig_id in genomeObject['contig_ids']:
-#        contig_seq = cdmi_api.contigs_to_sequences([contig_id])
-#        contig_sequences[contig_id] = contig_seq[contig_id]
-        # for debugging, don't get contig seqs
-        contig_sequences[contig_id] = ''
+    contigSeqObjects = dict()
 
-    # all in one call
-    contig_sequences = cdmi_api.contigs_to_sequences(genomeObject['contig_ids'])
+    if contigseq_file_dir == '':
+        print >> sys.stderr, 'no contig path defined, using CDMI'
+
+        # loop over contigs method
+        for contig_id in genomeObject['contig_ids']:
+#            contig_seq = cdmi_api.contigs_to_sequences([contig_id])
+#            contig_sequences[contig_id] = contig_seq[contig_id]
+            # for debugging, don't get contig seqs
+            contig_sequences[contig_id] = ''
+
+        # all in one call (has been working so far)
+        contig_sequences = cdmi_api.contigs_to_sequences(genomeObject['contig_ids'])
+
+    else:
+        print >> sys.stderr, 'contig path defined, attempting to read file in ' + contigseq_file_dir
+        try:
+            contig_handle = open (contigseq_file_dir + '/' + g + '.fa', 'rU')
+            contigSeqObjects = Bio.SeqIO.to_dict( Bio.SeqIO.parse(contig_handle,'fasta') )
+            for contigseq in contigSeqObjects:
+#                print >> sys.stderr, contigseq
+                contig_sequences[contigseq] = str(contigSeqObjects[contigseq].seq)
+            contig_handle.close()
+            print >> sys.stderr, 'reading contig file succeeded'
+        except Exception, e:
+            print >> sys.stderr, 'problem reading contig file for ' + g
+            print >> sys.stderr, e
+            print >> sys.stderr, 'attempting to use CDMI instead'
+            contig_sequences = cdmi_api.contigs_to_sequences(genomeObject['contig_ids'])
+            # need to make contigSeqObjects here
+
 
     end = time.time()
     print  >> sys.stderr, "done querying contig seqs " + str(end - start)
@@ -385,7 +502,7 @@ def insert_genome(g,ws,wsname,featureData):
     start  = time.time()
 
     # with any luck this can be used directly when saving a FeatureSet
-    featureObjects = create_feature_objects(gid,featureData)
+    featureObjects = create_feature_objects(gid,genomeObject['genetic_code'],featureData,contigSeqObjects)
 
     
     featureSet['features'] = dict()
@@ -440,6 +557,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Create solr tab-delimited import files from flat file dumps from CS.')
     parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
     parser.add_argument('--sorted-file-dir', nargs=1, help='path to sorted dump files to be parsed (default .)')
+    parser.add_argument('--contigseq-file-dir', nargs=1, help='path to FASTA contig sequence files (filenames must correspond to KBase genome ids e.g., kb|g.0.fa) (default: use CDMI to get sequences)')
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
     parser.add_argument('--debug',action='store_true',help='debugging')
     parser.add_argument('--skip-last',action='store_true',help='skip processing last genome (in case input is incomplete)')
@@ -453,6 +571,8 @@ if __name__ == "__main__":
         sorted_file_dir = args.sorted_file_dir[0]
     if args.skip_existing:
         skipExistingGenomes = True
+    if args.contigseq_file_dir:
+        contigseq_file_dir = args.contigseq_file_dir[0]
 
     # ws public instance
     ws = biokbase.workspace.client.Workspace("https://kbase.us/services/ws")

@@ -12,8 +12,8 @@ sys.setdefaultencoding("utf-8")
 
 import biokbase.workspace.client
 
-solr_keys = ["object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids" , "has_publications" , "has_protein_families" ]
-solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications", "has_publications"]
+solr_keys = ["object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "num_cds", "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids" , "has_publications" , "has_protein_families" ]
+solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "num_cds", "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications", "has_publications"]
 solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids" , "has_protein_families" ]
 
 
@@ -112,6 +112,11 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
                     genomeObject['workspace_name'] = genome['info'][7]
                     genomeObject['object_type'] = genome['info'][2]
                     genomeObject['object_name'] = genome['info'][1]
+
+                    if genome['data'].has_key('num_cds'):
+                        genomeObject['num_cds'] = str(genome['data']['num_cds'])
+                    else:
+                        genomeObject['num_cds'] = ''
 
     		# want this undefined unless there actually are contigs
                     genomeObject['num_contigs'] = ""

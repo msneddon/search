@@ -70,7 +70,7 @@
  -->
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="workspace_name" type="string" indexed="false" stored="true" multiValued="false" /> 
-   <field name="object_type" type="string" indexed="false" stored="true" multiValued="false" /> 
+   <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_name" type="string" indexed="false" stored="true" multiValued="false" /> 
    <field name="genome_id" type="string" indexed="false" stored="true" required="true" multiValued="false" /> 
    <field name="feature_id" type="string" indexed="true" stored="true" multiValued="false" /> 
