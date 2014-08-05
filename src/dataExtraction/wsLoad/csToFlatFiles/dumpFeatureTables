@@ -53,7 +53,7 @@ time mysql --defaults-extra-file=./my.cnf -e \
 # fit entirely in memory
 # if not need to join these two files together
 # this actually takes a little while, ~30m?
-#cut -f2 fids2pubs.tab | sort -u | python ~/dev_container/modules/search/src/dataExtraction/solrLoad/publications_to_solr.py
+cut -f2 fids2pubs.tab | sort -u | python ~/dev_container/modules/search/src/dataExtraction/solrLoad/publications_to_solr.py
 
 echo Family
 time mysql --defaults-extra-file=./my.cnf -e \

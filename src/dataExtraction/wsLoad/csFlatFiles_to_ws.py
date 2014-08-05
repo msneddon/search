@@ -94,6 +94,9 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
             featureObjects[fid]['md5']=md5
         if protein_translation_length != 'NULL':
             featureObjects[fid]['protein_translation_length']=int(protein_translation_length)
+        # make sure to initialize
+        if feature_type=='CDS':
+            featureObjects[fid]['protein_translation']=''
         if protein_translation != 'NULL':
             featureObjects[fid]['protein_translation']=protein_translation
         # all features need a location
@@ -190,20 +193,26 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
             if not featureObjects[fid].has_key('dna_sequence'):
                 featureObjects[fid]['dna_sequence'] = ''
 
-            # should probably check every location for - strand
-            # no idea what to do if a feature has locations on both strands
             locations = featureObjects[fid]['location']
-            if featureObjects[fid]['location'][0][2] == '-':
-                locations = reversed(featureObjects[fid]['location'])
+            # some genomes have the list of locations in reverse order
+            # jkbaumohl is researching
+            # if featureObjects[fid]['location'][0][2] == '-':
+            #     locations = reversed(featureObjects[fid]['location'])
 
             for loc in locations:
+#                if loc[3] > 100000 and (featureObjects[fid]['feature_type'] != 'CDS' or len(featureObjects[fid]['protein_sequence']) < 30000 ) :
+                if loc[3] > 100000 and len(featureObjects[fid]['protein_translation']) < 30000 :
+                    print >> sys.stderr, 'warning: dna sequence for feature ' + fid + ' is much too long (compared to CS protein sequence if a CDS), skipping'
+                    featureObjects[fid]['dna_sequence'] = ''
+                    break
                 if loc[2] == '-':
                     featSeqFeature = Bio.SeqFeature.SeqFeature(Bio.SeqFeature.FeatureLocation( loc[1] - loc[3], loc[1], strand=-1 ), id=fid+'/data/location/'+str(loc[4]))
                 else: # assume + strand
                     featSeqFeature = Bio.SeqFeature.SeqFeature(Bio.SeqFeature.FeatureLocation( (loc[1]-1), (loc[1]-1) + loc[3], strand=+1 ), id=fid+'/data/location/'+str(loc[4]))
 #                    print >> sys.stderr, featSeqFeature
 #                    print >> sys.stderr, featSeqFeature.extract( contigSeqObjects[loc[0]])
-                featureObjects[fid]['dna_sequence'] += str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq)
+                if contigSeqObjects.has_key(loc[0]):
+                    featureObjects[fid]['dna_sequence'] += str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq)
 
 #            print >> sys.stderr, 'genetic_code is ' + str(genetic_code)
 #            print >> sys.stderr, fid
@@ -218,18 +227,31 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
             # modifications, which no check can verify
             complete_cds = False
             stop_codon = '*'
-            if genetic_code==11:
+            if genetic_code in [4,11]:
                 complete_cds = True
                 stop_codon = ''
-            if featureObjects[fid]['feature_type'] == 'CDS' and (featureObjects[fid]['protein_translation'] + stop_codon != Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code) ) :
-                print >> sys.stderr, 'warning: computed translation does not match translation in db for ' + fid
-                print >> sys.stderr, featureObjects[fid]['protein_translation'] + stop_codon
-                print >> sys.stderr, cdmi_api.fids_to_dna_sequences([fid])
-                print >> sys.stderr, cdmi_api.fids_to_locations([fid])
-                print >> sys.stderr, featureObjects[fid]['location']
-                print >> sys.stderr, Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code)
-                print >> sys.stderr, featureObjects[fid]['dna_sequence']
-#                print >> sys.stderr, str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq.translate(table=genetic_code, cds=complete_cds) )
+
+#            print >> sys.stderr, genetic_code
+#            print >> sys.stderr, fid
+
+            try:
+                if featureObjects[fid]['feature_type'] == 'CDS' and (featureObjects[fid]['protein_translation'] + stop_codon != Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code) ) :
+                    print >> sys.stderr, 'warning: computed translation does not match translation in db for ' + fid
+                    if featureObjects[fid]['protein_translation'].find('X'):
+                        print >> sys.stderr, 'X found in CS translation, not worrying about'
+                    else:
+                        print >> sys.stderr, featureObjects[fid]['protein_translation'] + stop_codon
+                        print >> sys.stderr, cdmi_api.fids_to_dna_sequences([fid])
+                        print >> sys.stderr, cdmi_api.fids_to_locations([fid])
+                        print >> sys.stderr, featureObjects[fid]['location']
+                        print >> sys.stderr, Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code)
+                        print >> sys.stderr, featureObjects[fid]['dna_sequence']
+#                        print >> sys.stderr, str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq.translate(table=genetic_code, cds=complete_cds) )
+            except Bio.Data.CodonTable.TranslationError, e:
+                print >> sys.stderr, 'possible problem with translation of fid ' + fid
+                print >> sys.stderr, str(e)
+                print >> sys.stderr, featureObjects[fid]['function']
+
         else:
             print >> sys.stderr, 'no locations for ' + fid + ', not making feature_dna'
 
@@ -378,9 +400,10 @@ def insert_genome(g,ws,wsname,featureData):
         genomeObject["taxonomy"] = '; '.join( [ compute_taxonomy_lineage(genome_data["taxonomy_id"]) , all_taxonomy_data[genome_data['taxonomy_id']]['description'] ] )
 
     # this is a temporary measure
-    if genomeObject.has_key('taxonomy') and 'Eukaryota' in genomeObject['taxonomy']:
-        print >> sys.stderr, 'skipping Eukaryota genome ' + g
-        return
+#    if genomeObject.has_key('taxonomy') and 'Eukaryota' in genomeObject['taxonomy']:
+#    if g == 'kb|g.2646':
+#        print >> sys.stderr, 'skipping Eukaryota genome ' + g
+#        return
 
     #genomeObject["contigset_ref"] = 
     #genomeObject["proteinset_ref"] = 
@@ -458,7 +481,11 @@ def insert_genome(g,ws,wsname,featureData):
         contig["id"] = x['id']
         contig["length"] = int(x['length'])
         contig["md5"] = x['contig_md5']
-        contig["sequence"] = contig_sequences[x['id']]
+        if contig_sequences.has_key(x['id']):
+            contig["sequence"] = contig_sequences[x['id']]
+        else:
+            print >> sys.stderr, 'contig ' + x['id'] + ' does not have sequence defined, setting to empty'
+            contig["sequence"] = ''
         
         contigSet["contigs"][x['id']]=contig
         
@@ -530,8 +557,13 @@ def insert_genome(g,ws,wsname,featureData):
 
 #    print >> sys.stderr, simplejson.dumps(featureSet)
 
+    featureSetType='KBaseSearch.SearchFeatureSet'
+    if args.debug:
+        featureSetType='KBaseSearch.FeatureSet'
     featureset_info = ws.save_objects({"workspace": wsname,
-                                       "objects":[{"type": "KBaseSearch.FeatureSet",
+#                                       "objects":[{"type": "KBaseSearch.FeatureSet",
+#                                       "objects":[{"type": "KBaseSearch.SearchFeatureSet",
+                                       "objects":[{"type": featureSetType,
                                                    "data": featureSet,
                                                    "name": featureset_id}]
                                      })
