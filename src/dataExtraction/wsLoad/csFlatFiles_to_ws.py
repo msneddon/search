@@ -201,7 +201,7 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
 
             for loc in locations:
 #                if loc[3] > 100000 and (featureObjects[fid]['feature_type'] != 'CDS' or len(featureObjects[fid]['protein_sequence']) < 30000 ) :
-                if loc[3] > 100000 and len(featureObjects[fid]['protein_translation']) < 30000 :
+                if loc[3] > 100000 and (featureObjects[fid]['feature_type'] != 'CDS' or len(featureObjects[fid]['protein_translation']) < 30000) :
                     print >> sys.stderr, 'warning: dna sequence for feature ' + fid + ' is much too long (compared to CS protein sequence if a CDS), skipping'
                     featureObjects[fid]['dna_sequence'] = ''
                     break

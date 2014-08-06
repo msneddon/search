@@ -70,22 +70,26 @@
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
 
-<!-- GwasPopulation -->
+<!-- GwasPopulation, fields for all types -->
    <field name="kbase_genome_name" type="text_general" indexed="true" stored="true" /> 
    <field name="kbase_genome_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="source_genome_name" type="text_general" indexed="true" stored="true" /> 
+<!-- the genome_source is for the source in the genome key -->
+   <field name="genome_source" type="text_general" indexed="true" stored="true" /> 
+<!-- the "source" field is for the top-level source -->
    <field name="source" type="text_general" indexed="true" stored="true" /> 
    <field name="GwasPopulation_description" type="text_general" indexed="true" stored="true" /> 
-   <field name="ecotype_details" type="text_general" indexed="true" stored="true" /> 
+   <field name="observation_unit_details" type="text_general" indexed="true" stored="true" /> 
+   <field name="pubmed_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="originator" type="text_general" indexed="true" stored="true" multiValued="false" /> 
+   <field name="comment" type="text_general" indexed="true" stored="true" multiValued="false" /> 
 
 <!-- GwasPopulationVariation -->
    <field name="GwasPopulation_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="filetype" type="text_general" indexed="true" stored="true" /> 
-   <field name="comment" type="text_general" indexed="true" stored="true" /> 
    <field name="assay" type="text_general" indexed="true" stored="true" /> 
-   <field name="originator" type="text_general" indexed="true" stored="true" /> 
 <!-- genome uses above fields -->
-   <field name="GwasPopulationVariation_parent_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="parent_variation_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
 
 <!-- GwasPopulationTrait -->
 <!-- genome,GwasPopulation_obj_id,originator,comment use above fields -->
@@ -96,7 +100,7 @@
 
 <!-- GwasPopulationKinship -->
 <!-- genome,GwasPopulationVariation_obj_id use above fields -->
-<!-- no other fields to be indexed -->
+   <field name="GwasPopulationVariation_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
 
 <!-- GwasTopVariations -->
 <!-- source, protocol, genome, unit_of_measure, assay, trait_ontology_id,
@@ -104,6 +108,7 @@
      GwasPopulation_obj_id, comment use above fields -->
    <field name="num_population" type="string" indexed="true" stored="true" /> 
    <field name="GwasPopulationStructure_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="GwasPopulationTrait_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="GwasPopulationKinship_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="pvaluecutoff" type="float" indexed="true" stored="true" /> 
 
@@ -138,15 +143,16 @@
    <copyField source="kbase_genome_name" dest="text"/>
    <copyField source="kbase_genome_id" dest="text"/>
    <copyField source="source_genome_name" dest="text"/>
-   <copyField source="source" dest="text"/>
+   <copyField source="genome_source" dest="text"/>
    <copyField source="GwasPopulation_description" dest="text"/>
-   <copyField source="ecotype_details" dest="text"/>
+   <copyField source="observation_unit_details" dest="text"/>
    <copyField source="GwasPopulation_obj_id" dest="text"/>
    <copyField source="filetype" dest="text"/>
    <copyField source="comment" dest="text"/>
    <copyField source="assay" dest="text"/>
    <copyField source="originator" dest="text"/>
-   <copyField source="GwasPopulationVariation_parent_obj_id" dest="text"/>
+   <copyField source="parent_variation_obj_id" dest="text"/>
+   <copyField source="GwasPopulationVariation_obj_id" dest="text"/>
    <copyField source="trait_ontology_id" dest="text"/>
    <copyField source="trait_name" dest="text"/>
    <copyField source="unit_of_measure" dest="text"/>
