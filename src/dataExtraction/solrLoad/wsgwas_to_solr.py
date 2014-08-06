@@ -80,7 +80,7 @@ def export_gwas_from_ws(maxNumObjects,wsname):
                     for key in solr_keys:
                         search_values[key] = ''
     
-                    scalar_keys = [ 'GwasPopulation_description', 'GwasPopulation_obj_id', 'filetype', 'comment', 'pubmed_id', 'assay', 'originator', 'parent_variation_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','GwasPopulationTrait_obj_id','GwasPopulationVariation_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id','distance_cutoff']
+                    scalar_keys = [ 'GwasPopulation_description', 'GwasPopulation_obj_id', 'filetype', 'comment', 'pubmed_id', 'source','assay', 'originator', 'parent_variation_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','GwasPopulationTrait_obj_id','GwasPopulationVariation_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id','distance_cutoff']
     
                     # handle generic scalar keys
                     for key in scalar_keys:

@@ -144,28 +144,22 @@
    <copyField source="kbase_genome_id" dest="text"/>
    <copyField source="source_genome_name" dest="text"/>
    <copyField source="genome_source" dest="text"/>
+   <copyField source="source" dest="text"/>
    <copyField source="GwasPopulation_description" dest="text"/>
    <copyField source="observation_unit_details" dest="text"/>
-   <copyField source="GwasPopulation_obj_id" dest="text"/>
    <copyField source="filetype" dest="text"/>
    <copyField source="comment" dest="text"/>
    <copyField source="assay" dest="text"/>
    <copyField source="originator" dest="text"/>
    <copyField source="parent_variation_obj_id" dest="text"/>
-   <copyField source="GwasPopulationVariation_obj_id" dest="text"/>
    <copyField source="trait_ontology_id" dest="text"/>
    <copyField source="trait_name" dest="text"/>
    <copyField source="unit_of_measure" dest="text"/>
    <copyField source="protocol" dest="text"/>
    <copyField source="num_population" dest="text"/>
-   <copyField source="GwasPopulationStructure_obj_id" dest="text"/>
-   <copyField source="GwasPopulationKinship_obj_id" dest="text"/>
-   <copyField source="pvaluecutoff" dest="text"/>
-   <copyField source="GwasTopVariations_obj_id" dest="text"/>
-   <copyField source="distance_cutoff" dest="text"/>
    <copyField source="genes" dest="text"/>
    <copyField source="genes_snp_list" dest="text"/>
-
+   <copyField source="pubmed_id" dest="text" /> 
  
   <types>
     <!-- field type definitions. The "name" attribute is
