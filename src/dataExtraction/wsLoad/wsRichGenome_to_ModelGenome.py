@@ -68,9 +68,6 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
             
             if "Genome" in x[2]:
 
-                start = time.time()
-                print >> sys.stderr, 'starting genome processing for ' + x[1]
-
                 try:
                     ws_prod_client.get_object_info([{"workspace":wsoutput,"name":x[1]}],0)
                     object_counter += 1
@@ -80,6 +77,9 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
                     print >> sys.stderr, 'object '  + x[1] + ' found, replacing'
                 except biokbase.workspace.client.ServerError, e:
                     print >> sys.stderr, 'object '  + x[1] + ' not found, adding to ws ' + wsoutput
+
+                start = time.time()
+                print >> sys.stderr, 'starting genome processing for ' + x[1]
 
                 done = False
                 while not done:
@@ -242,9 +242,11 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
                         genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
                         print >> sys.stderr,genome_info
                     else:
+                        contig_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1]}]})
                         fbaGenomeObject['contigset_ref'] = wsoutput + '/' + contigref[0]['info'][1]
-                        saved_object_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1]}, { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
-                        print >> sys.stderr,saved_object_info
+                        print >> sys.stderr,contig_info
+                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                        print >> sys.stderr,genome_info
                 except biokbase.workspace.client.ServerError as err:
                     rematch = re.search('subdata size \d+ exceeds limit', str(err))
                     if rematch != None:
