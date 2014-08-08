@@ -248,7 +248,7 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
                         genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
                         print >> sys.stderr,genome_info
                 except biokbase.workspace.client.ServerError as err:
-                    rematch = re.search('subdata size \d+ exceeds limit', str(err))
+                    rematch = re.search('subdata size exceeds limit', str(err))
                     if rematch != None:
                         print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, skipping for now'
                         continue
