@@ -162,20 +162,16 @@ def validate_inputs(query, config):
             except:
                 raise InvalidSearchRequestError(x + " is not in the format of 'sort_field sort_order'!")
 
+            if not field in config['plugins'][validatedParams['category']]['solr']['sort_fields']:
+                raise InvalidSearchRequestError(field + " is not a valid sorting field!")
+
             if not order in ['asc', 'desc']:
                 raise InvalidSearchRequestError(order + " is not a valid sorting order!")                                                            
             
-            if not field in config['plugins'][validatedParams['category']]['solr']['sort_fields']:
-                if not config['plugins'][validatedParams['category']]['solr'].has_key('mapped_sort_fields'):
-                    raise InvalidSearchRequestError(field + " is not a valid sorting field!")                
-                elif not field in config['plugins'][validatedParams['category']]['solr']['mapped_sort_fields'].keys():
-                    raise InvalidSearchRequestError(field + " is not a valid sorting field!")
-                else:
-                    outFields.append(config['plugins'][validatedParams['category']]['solr']['mapped_sort_fields'][field] + " " + order)
-                    continue
-            
-            outFields.append(field + " " + order)
-            
+            if config['plugins'][validatedParams['category']]['solr'].has_key('mapped_sort_fields') and field in config['plugins'][validatedParams['category']]['solr']['mapped_sort_fields'].keys():
+                outFields.append(config['plugins'][validatedParams['category']]['solr']['mapped_sort_fields'][field] + " " + order)
+            else:
+                outFields.append(field + " " + order)            
         
         validatedParams['sort'] = ",".join(outFields)
 
@@ -199,7 +195,7 @@ def validate_inputs(query, config):
         if query['q'] == '*':
             validatedParams['queryString'] = "&q=*:*"
         else:
-            validatedParams['queryString'] = "&q=text:" + query['q']
+            validatedParams['queryString'] = "&q=text:" + query['q'] + "&q=text_boost:" + query['q']
     else:
         validatedParams['queryString'] = "&q=''"
 
@@ -252,10 +248,10 @@ def compute_solr_query(options, config):
             for x in options['facets'].split(','):
                 facetKey, facetValue = x.split(":")
                 if not facetDict.has_key(facetKey):
-                    facetDict[facetKey] = facetValue
+                    facetDict[facetKey] = facetValue.replace("*",",")
                     facetOrder.append(facetKey)
                 else:
-                    facetDict[facetKey] += " OR " + facetValue
+                    facetDict[facetKey] += " OR " + facetValue.replace("*",",")
         
             if facetDict[facetKey].find(" OR ") > -1:
                 facetDict[facetKey] = "(" + facetDict[facetKey] + ")"

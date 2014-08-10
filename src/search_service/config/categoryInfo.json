@@ -18,7 +18,7 @@
                              ]
                          },
                          {
-                             "label": "Features",
+                             "label": "Genome Features",
                              "category": "features"
                          },
                          {
@@ -26,14 +26,13 @@
                              "category": "genomes"                             
                          },
                          {
-                             "label": "Genotype-Phenotype",
+                             "label": "Genome-Wide Association Analysis",
                              "category": "gwas",
                              "children": [
                                  {"label": "GWAS Populations", "category": "gwas_populations"},
                                  {"label": "GWAS Population Variations", "category": "gwas_population_variations"},
                                  {"label": "GWAS Top Variations", "category": "gwas_top_variations"},
                                  {"label": "GWAS Population Traits", "category": "gwas_population_traits"},
-                                 {"label": "GWAS Population Kinships", "category": "gwas_population_kinships"},
                                  {"label": "GWAS Gene Lists", "category": "gwas_gene_lists"}                             
                              ]
                          },
@@ -72,10 +71,6 @@
                                      ]
                                  }
                              ]
-                         },
-                         {
-                             "label": "Ontologies",
-                             "category": "ontologies"                             
                          }
                      ]
                  }
