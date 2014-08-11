@@ -30,6 +30,7 @@
                              "category": "gwas",
                              "children": [
                                  {"label": "GWAS Populations", "category": "gwas_populations"},
+                                 {"label": "GWAS Population Kinships", "category": "gwas_population_kinships"},
                                  {"label": "GWAS Population Variations", "category": "gwas_population_variations"},
                                  {"label": "GWAS Top Variations", "category": "gwas_top_variations"},
                                  {"label": "GWAS Population Traits", "category": "gwas_population_traits"},
