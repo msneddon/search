@@ -117,6 +117,7 @@
    <field name="GwasTopVariations_obj_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="distance_cutoff" type="int" indexed="true" stored="true" /> 
    <field name="gene_count" type="int" indexed="true" stored="true" /> 
+   <field name="gene_snp_count" type="int" indexed="true" stored="true" /> 
    <field name="genes" type="text_ws_general" indexed="true" stored="true" /> 
    <field name="genes_snp_list" type="text_ws_general" indexed="true" stored="true" /> 
 

@@ -28,7 +28,7 @@ def export_gwas_from_ws(maxNumObjects,wsname):
     # print out a header file
     # data fields must be printed in same order
     solr_ws_keys = ['object_id','workspace_name','object_type', 'object_name']
-    solr_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'genome_source', 'GwasPopulation_description', 'observation_unit_details', 'GwasPopulation_obj_id', 'GwasPopulationVariation_obj_id','filetype', 'source', 'comment', 'pubmed_id', 'assay', 'originator', 'parent_variation_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id', 'GwasPopulationTrait_obj_id','distance_cutoff','genes','gene_count','genes_snp_list']
+    solr_keys = [ 'kbase_genome_name', 'kbase_genome_id', 'source_genome_name', 'genome_source', 'GwasPopulation_description', 'observation_unit_details', 'GwasPopulation_obj_id', 'GwasPopulationVariation_obj_id','filetype', 'source', 'comment', 'pubmed_id', 'assay', 'originator', 'parent_variation_obj_id', 'trait_ontology_id', 'trait_name','unit_of_measure','protocol','num_population','GwasPopulationStructure_obj_id','GwasPopulationKinship_obj_id','pvaluecutoff', 'GwasTopVariations_obj_id', 'GwasPopulationTrait_obj_id','distance_cutoff','genes','gene_count','gene_snp_count','genes_snp_list']
     headerOutFile = open('gwasToSolr.tab.headers', 'w')
     print >> headerOutFile, "\t".join(solr_ws_keys + solr_keys)
     #print >> headerOutFile, "\n"
@@ -112,6 +112,7 @@ def export_gwas_from_ws(maxNumObjects,wsname):
                         search_values['gene_count'] = len(gwas['data']['genes'])
                     if gwas['data'].has_key('genes_snp_list'):
                         search_values['genes_snp_list'] = ' '.join([ gene[1] + ' ' + gene[2] + ' ' + gene[4] + ' '  for gene in gwas['data']['genes_snp_list'] ])
+                        search_values['gene_snp_count'] = len(gwas['data']['genes_snp_list'])
     
                    # need to embed GwasTopVariations data in the GwasGeneList object
                     if gwas['data'].has_key('GwasTopVariations_obj_id'):
