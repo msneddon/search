@@ -2,8 +2,8 @@
     "category": "gwas_gene_lists",
     "solr": {
         "core": "gwas",
-        "visible_fields": ["object_id", "object_type", "object_name", "workspace_name", "GwasTopVariations_obj_id", "distance_cutoff", "genes", "genes_snp_list"],
-        "sort_fields": ["object_id","object_type","object_name","workspace_name"],
+        "visible_fields": ["object_id", "object_type", "object_name", "workspace_name", "GwasTopVariations_obj_id", "distance_cutoff", "genes", "genes_snp_list","gene_count","gene_snp_count"],
+        "sort_fields": ["object_id","object_type","object_name","workspace_name","gene_count","gene_snp_count"],
         "facet_fields": ["distance_cutoff"],
         "query_string": "&fq=object_type:*GwasGeneList*"
     }
