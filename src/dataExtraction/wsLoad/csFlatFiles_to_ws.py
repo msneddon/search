@@ -402,10 +402,10 @@ def insert_genome(g,ws,wsname,featureData):
 
     # this is a temporary measure
 #    if genomeObject.has_key('taxonomy') and 'Eukaryota' in genomeObject['taxonomy'] and 'Viridiplantae' not in genomeObject['taxonomy']:
-    if genomeObject.has_key('taxonomy') and 'Eukaryota' in genomeObject['taxonomy']:
+#    if genomeObject.has_key('taxonomy') and 'Eukaryota' in genomeObject['taxonomy']:
 #    if g == 'kb|g.2646':
-        print >> sys.stderr, 'skipping Eukaryota genome ' + g
-        return
+#        print >> sys.stderr, 'skipping Eukaryota genome ' + g
+#        return
 
     #genomeObject["contigset_ref"] = 
     #genomeObject["proteinset_ref"] = 
