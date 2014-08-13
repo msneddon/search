@@ -6,6 +6,7 @@ import sys
 import random
 import simplejson
 import re
+import time
 
 # found at https://pythonadventures.wordpress.com/tag/unicodeencodeerror/
 reload(sys)
@@ -17,11 +18,11 @@ import biokbase.workspace.client
 #wsoutput = 'KBasePublicGenomesV3LoadJul2014'
 #wsoutput = '***REMOVED***:home'
 
-def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
+def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
     #ws_prod_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
-    #ws_prod_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
+    ws_prod_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
     # gavin's dev instance
-    ws_prod_client = biokbase.workspace.client.Workspace('http://dev04:7058', user_id='***REMOVED***', password='***REMOVED***')
+#    ws_prod_client = biokbase.workspace.client.Workspace('http://dev04:7058', user_id='***REMOVED***', password='***REMOVED***')
     #ws_dev_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
     
     workspace_object = ws_prod_client.get_workspace_info({'workspace':wsinput})
@@ -52,6 +53,9 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
 #    print len(objects_list)
 #    exit(0)
 
+    objects_list.sort(key=lambda object: object[1])
+#    print >> sys.stderr, objects_list
+
     if len(objects_list) > 0:
         print "\tWorkspace %s has %d matching objects" % (workspace_name, len(objects_list))
         object_counter = 0
@@ -61,15 +65,21 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
 
         for x in objects_list:
             print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
-
+            
             if "Genome" in x[2]:
+
                 try:
                     ws_prod_client.get_object_info([{"workspace":wsoutput,"name":x[1]}],0)
-#                    print >> sys.stderr, 'object '  + x[1] + ' found, replacing'
-                    print >> sys.stderr, 'object '  + x[1] + ' found in ws ' + wsoutput + ' , skipping'
-                    continue
+                    object_counter += 1
+                    if args.skip_existing == True:
+                        print >> sys.stderr, 'object '  + x[1] + ' found in ws ' + wsoutput + ' , skipping'
+                        continue
+                    print >> sys.stderr, 'object '  + x[1] + ' found, replacing'
                 except biokbase.workspace.client.ServerError, e:
                     print >> sys.stderr, 'object '  + x[1] + ' not found, adding to ws ' + wsoutput
+
+                start = time.time()
+                print >> sys.stderr, 'starting genome processing for ' + x[1]
 
                 done = False
                 while not done:
@@ -79,6 +89,10 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
                     except Exception, e:
                         print str(e)
                         print "Having trouble getting " + str(x[0]) + " from workspace " + str(workspace_id)
+
+                end = time.time()
+                print >> sys.stderr, "retrieved genome object for %s %s" % ( x[1], str(end - start))
+                start = time.time()
 
                 #print json.dumps(genome['data'], sort_keys=True, indent=4, separators=(',',': '))
                 genome = genome[0]
@@ -119,10 +133,14 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
                 fbaGenomeObject['contig_lengths'] = list()
                 fbaGenomeObject['contig_ids'] = list()
                 if genome['data'].has_key('contig_lengths'):
-                    fbaGenomeObject['contig_lengths'] = [ genome['data']['contig_lengths'][x] for x in genome['data']['contig_lengths'] ]
-                    fbaGenomeObject['contig_ids'] = [ x for x in genome['data']['contig_lengths'] ]
+                    fbaGenomeObject['contig_lengths'] = [ genome['data']['contig_lengths'][y] for y in genome['data']['contig_lengths'] ]
+                    fbaGenomeObject['contig_ids'] = [ y for y in genome['data']['contig_lengths'] ]
 
-                if genome['data'].has_key('contigset_ref'):
+                end = time.time()
+                print >> sys.stderr, "compiled genome object for %s %s" % ( x[1], str(end - start))
+                start = time.time()
+
+                if genome['data'].has_key('contigset_ref') and not args.skip_dna_sequences:
 #                    contigs = ws_prod_client.get_objects([{"wsid": str(workspace_id), "objid": genome['data']['contigset_ref']}])
 #                    print >> sys.stderr, genome['data']['contigset_ref']
                     wsstuff = genome['data']['contigset_ref'].split('/')
@@ -140,19 +158,23 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
                         else:
                             fbaContig[key] = ''
                     if contig.has_key('contigs'):
-                        fbaContig['contigs'] = [ contig['contigs'][x] for x in contig['contigs']]
+                        fbaContig['contigs'] = [ contig['contigs'][y] for y in contig['contigs']]
 
-                    contig_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1]}]})
-#                    print >> sys.stderr, contig_info
 #                    print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
 
 #                print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
 
-
+                end = time.time()
+                print >> sys.stderr, "retrieved contigset object for %s %s" % ( x[1], str(end - start))
+                start = time.time()
 
                 fbaGenomeObject['features'] = list()
 
                 featureset_info = ws_prod_client.get_objects([{"ref": genome['data']['featureset_ref']}])
+                end = time.time()
+                print >> sys.stderr, "retrieved featureset object for %s %s" % ( x[1], str(end - start))
+                start = time.time()
+
                 features = featureset_info[0]['data']['features']
 
                 for feature in features:
@@ -164,7 +186,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
 
                     # these keys should have same name and structure in both object types
                     # fbagenome does not have roles
-                    structure_keys = ['function','md5','protein_translation','dna_sequence','protein_translation_length','dna_sequence_length','subsystems', 'protein_families', 'annotations','subsystem_data','regulon_data','atomic_regulons','coexpressed_fids','co_occurring_fids']
+                    structure_keys = ['function','md5','protein_translation','protein_translation_length','dna_sequence_length','subsystems', 'protein_families', 'annotations','subsystem_data','regulon_data','atomic_regulons','coexpressed_fids','co_occurring_fids']
                     for key in structure_keys:
                         if f.has_key(key):
                             fbaFeature[key]=f[key]
@@ -172,6 +194,9 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
 # special keys
                     if f.has_key('feature_id'):
                         fbaFeature['id'] = f['feature_id']
+
+                    if f.has_key('dna_sequence') and not args.skip_dna_sequences:
+                        fbaFeature['dna_sequence'] = f['dna_sequence']
 
                     if f.has_key('feature_type'):
                         fbaFeature['type'] = f['feature_type']
@@ -203,15 +228,27 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
 
                     fbaGenomeObject['features'].append(fbaFeature)
 
+                end = time.time()
+                print >> sys.stderr, "compiled features for %s %s" % ( x[1], str(end - start))
+                start = time.time()
+
 #                print >> sys.stderr, simplejson.dumps(fbaGenomeObject, sort_keys=True, indent=4 * ' ')
 
 # would like a try block here
 # if the save fails because subdata is too big, try to re-save as a genome-like object that doesn't
 # have as many searchable fields
                 try:
-                    genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                    if args.skip_dna_sequences:
+                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                        print >> sys.stderr,genome_info
+                    else:
+                        contig_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1]}]})
+                        fbaGenomeObject['contigset_ref'] = wsoutput + '/' + contigref[0]['info'][1]
+                        print >> sys.stderr,contig_info
+                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                        print >> sys.stderr,genome_info
                 except biokbase.workspace.client.ServerError as err:
-                    rematch = re.search('subdata size \d+ exceeds limit', str(err))
+                    rematch = re.search('subdata size exceeds limit', str(err))
                     if rematch != None:
                         print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, skipping for now'
                         continue
@@ -219,7 +256,10 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsinput,wsoutput):
 #                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"kkellerKBaseGenomes.BasicGenome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
                     else:
                         raise
-                print >> sys.stderr,genome_info
+
+                end = time.time()
+                print >> sys.stderr, "saved KBaseGenome.Genome objects for %s %s" % ( x[1], str(end - start))
+                start = time.time()
 
             else:
                 print '            skipping %s, is a %s' % (x[0], x[2])
@@ -232,6 +272,8 @@ if __name__ == "__main__":
     parser.add_argument('--count', action="store", dest="maxNumObjects", type=int)
     parser.add_argument('--wsinput', nargs=1, help='workspace name to load from', required=True)
     parser.add_argument('--wsoutput', nargs=1, help='workspace name to load to', required=True)
+    parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
+    parser.add_argument('--skip-dna-sequences',action='store_true',help='skip storing contigset object and feature DNA sequences')
     parser.add_argument('genomes', action="store", nargs='*')
     args = parser.parse_args()
 
@@ -240,4 +282,4 @@ if __name__ == "__main__":
         maxNumObjects = args.maxNumObjects
     
     print args.genomes
-    export_genomes_from_ws(maxNumObjects,args.genomes,args.wsinput[0],args.wsoutput[0])
+    copy_richGenome_to_genome(maxNumObjects,args.genomes,args.wsinput[0],args.wsoutput[0])

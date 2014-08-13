@@ -248,10 +248,10 @@ def compute_solr_query(options, config):
             for x in options['facets'].split(','):
                 facetKey, facetValue = x.split(":")
                 if not facetDict.has_key(facetKey):
-                    facetDict[facetKey] = facetValue
+                    facetDict[facetKey] = facetValue.replace("*",",").replace("^",":")
                     facetOrder.append(facetKey)
                 else:
-                    facetDict[facetKey] += " OR " + facetValue
+                    facetDict[facetKey] += " OR " + facetValue.replace("*",",").replace("^",":")
         
             if facetDict[facetKey].find(" OR ") > -1:
                 facetDict[facetKey] = "(" + facetDict[facetKey] + ")"
