@@ -25,7 +25,7 @@ try:
 
         start = datetime.datetime.now()
 
-        r = requests.get(shockURL + "node/" + node + "?download", auth=('***REMOVED***', '***REMOVED***'))
+        r = requests.get(shockURL + "node/" + node + "?download", auth=(username, password))
         data = r.json        
 
         downloadTime = datetime.datetime.now() - start

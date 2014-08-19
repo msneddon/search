@@ -13,7 +13,7 @@ shockURL = "http://localhost:7044/"
 def fetch_data(node):
     start = datetime.datetime.now()
 
-    r = requests.get(shockURL + "node/" + node + "?download", auth=('***REMOVED***', '***REMOVED***'))
+    r = requests.get(shockURL + "node/" + node + "?download", auth=(username, password))
     data = simplejson.loads(r.content)
 
     downloadTime = datetime.datetime.now() - start
