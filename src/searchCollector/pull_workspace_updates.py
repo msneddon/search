@@ -32,7 +32,7 @@ def get_updated_object(mongoClient, mongoObject):
 
 def flatten_genome_object(meta,nodeid):
 
-    req = requests.get(shockBaseURL + "/node/" + nodeid + "?download", auth=('***REMOVED***', '***REMOVED***'))
+    req = requests.get(shockBaseURL + "/node/" + nodeid + "?download", auth=(username, password))
 
     object = json.loads(req.content)
 
