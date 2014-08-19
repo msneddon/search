@@ -446,8 +446,8 @@ if __name__ == "__main__":
     ws = biokbase.workspace.client.Workspace("https://kbase.us/services/ws")
     # ws team dev instance
     if args.debug:
-#        ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058", user_id='***REMOVED***', password='***REMOVED***')
-        ws = biokbase.workspace.client.Workspace("http://dev04:7058", user_id='***REMOVED***', password='***REMOVED***')
+#        ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058")
+        ws = biokbase.workspace.client.Workspace("http://dev04:7058")
 
     if args.max_num:
         max_num_metagenomes=args.max_num[0]

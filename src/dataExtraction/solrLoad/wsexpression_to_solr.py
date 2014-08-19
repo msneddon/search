@@ -17,8 +17,8 @@ import biokbase.cdmi.client
 wsname = 'KBasePublicExpression'
 
 def export_expression_from_ws(maxNumObjects,expObjIds):
-    #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
-#    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058', user_id='***REMOVED***', password='***REMOVED***')
+    #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058')
+#    ws_client = biokbase.workspace.client.Workspace('http://140.221.84.209:7058')
     ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
 
     # production instance

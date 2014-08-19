@@ -250,7 +250,7 @@ if __name__ == "__main__":
         maxNumObjects = args.maxNumObjects
     
     # gavin's dev instance
-#    ws_client = biokbase.workspace.client.Workspace('http://dev04:7058', user_id='***REMOVED***', password='***REMOVED***')
+#    ws_client = biokbase.workspace.client.Workspace('http://dev04:7058')
     # production instance
     ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     wsname = args.wsname[0]

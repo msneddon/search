@@ -4,7 +4,7 @@ import random
 
 import biokbase.workspace.client
 
-ws = biokbase.workspace.client.Workspace("http://localhost:7058", user_id='***REMOVED***', password='***REMOVED***')
+ws = biokbase.workspace.client.Workspace("http://localhost:7058")
 
 #ws.create_workspace({'workspace':'test_2','globalread':'n','description':'blah blah blah!'})
 

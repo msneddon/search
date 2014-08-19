@@ -19,10 +19,10 @@ import biokbase.workspace.client
 #wsoutput = '***REMOVED***:home'
 
 def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
-    #ws_prod_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
+    #ws_prod_client = biokbase.workspace.client.Workspace('http://localhost:7058')
     ws_prod_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
     # gavin's dev instance
-#    ws_prod_client = biokbase.workspace.client.Workspace('http://dev04:7058', user_id='***REMOVED***', password='***REMOVED***')
+#    ws_prod_client = biokbase.workspace.client.Workspace('http://dev04:7058')
     #ws_dev_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
     
     workspace_object = ws_prod_client.get_workspace_info({'workspace':wsinput})

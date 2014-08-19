@@ -276,9 +276,6 @@ def push_to_solr(data):
     solr_url = "http://localhost:7077/search/wsGenomeFeatures/update?wt=json&separator=%09"
     commit_url = "http://localhost:7077/search/admin/cores?wt=json&action=RELOAD&core=wsGenomeFeatures"
 
-    username = "admin"
-    password = "***REMOVED***"
-
     outFile = open('testUpdate.tab', 'w')
     outFile.write(data)
     outFile.close()
@@ -301,7 +298,6 @@ if __name__ == "__main__":
     pr.enable()
 
     mongoServer = 'localhost'
-    #mongoServer = '198.128.58.84'
     
     mongoClient = pymongo.MongoClient(host=mongoServer,slaveOk=True)
 

@@ -15,7 +15,7 @@ import biokbase.workspace.client
 wsname = 'KBasePublicMetagenomes'
 
 def export_comm_from_ws(maxNumObjects):
-    #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
+    #ws_client = biokbase.workspace.client.Workspace('http://localhost:7058')
     ws_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws')
     
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})

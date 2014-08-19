@@ -13,8 +13,7 @@ import string
 #import biokbase.cdmi.client
 import biokbase.workspace.client
 
-#ws = biokbase.workspace.client.Workspace("http://localhost:7058", user_id='***REMOVED***', password='***REMOVED***')
-# need to use kbase-login to obtain a proper token for the kbasesearch user
+#ws = biokbase.workspace.client.Workspace("http://localhost:7058")
 ws = biokbase.workspace.client.Workspace("https://kbase.us/services/ws")
 
 wsname = 'KBasePublicOntologies'

@@ -5,8 +5,7 @@ import json
 
 import biokbase.workspace.client
 
-#auth_token = biokbase.auth.Token(user_id='***REMOVED***', password='***REMOVED***')
-ws_client = biokbase.workspace.client.Workspace('http://localhost:7058', user_id='***REMOVED***', password='***REMOVED***')
+ws_client = biokbase.workspace.client.Workspace('http://localhost:7058')
 
 
 progress = 0.0
