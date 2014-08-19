@@ -16,7 +16,7 @@ cut -f2 fids2pubs.tab | sort -u | python ~/dev_container/modules/search/src/data
 # switches:
 # --sorted-file-dir=. path to where above dump is (defaults to .)
 # --skip-last for handling a partial dump
-# --debug uses ***REMOVED*** against dev04.berkeley; no switch uses production
+# --debug uses kbasetest against dev04.berkeley; no switch uses production
 # --wsname to specify name of workspace (required)
 # --skip-existing to skip Genome objects that already exist (default is to overwrite)
 # (--skip-existing does not look at objects referenced in Genome object! (e.g., FeatureSet, ContigSet)

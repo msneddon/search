@@ -16,7 +16,7 @@ import biokbase.workspace.client
 
 #wsinput = 'KBasePublicRichGenomesV3'
 #wsoutput = 'KBasePublicGenomesV3LoadJul2014'
-#wsoutput = '***REMOVED***:home'
+#wsoutput = 'kbasetest:home'
 
 def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
     #ws_prod_client = biokbase.workspace.client.Workspace('http://localhost:7058')
