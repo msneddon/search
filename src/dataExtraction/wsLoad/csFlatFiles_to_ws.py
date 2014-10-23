@@ -17,6 +17,7 @@ import codecs
 import os
 import Bio.SeqIO
 import Bio.SeqFeature
+import urllib2
 
 import biokbase.workspace.client
 import biokbase.cdmi.client
@@ -528,6 +529,8 @@ def insert_genome(g,ws,wsname,featureData):
     except biokbase.workspace.client.ServerError, e:
         print >> sys.stderr, 'possible error loading contigset for ' + g
         print >> sys.stderr, e
+        print >> sys.stderr, 'contigset was unable to be created in the WS (likely too large). As a result the feature set and genome will not be made in the WS for ' + g
+        return    
     # this is completely untested
     except urllib2.URLError, e:
         print >> sys.stderr, e
@@ -617,7 +620,7 @@ if __name__ == "__main__":
     import argparse
     import os.path
 
-    parser = argparse.ArgumentParser(description='Create solr tab-delimited import files from flat file dumps from CS.')
+    parser = argparse.ArgumentParser(description='Create KBasePublicRichGenome ws objects from flat file dumps from CS.')
     parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
     parser.add_argument('--sorted-file-dir', nargs=1, help='path to sorted dump files to be parsed (default .)')
     parser.add_argument('--contigseq-file-dir', nargs=1, help='path to FASTA contig sequence files (filenames must correspond to KBase genome ids e.g., kb|g.0.fa) (default: use CDMI to get sequences)')
