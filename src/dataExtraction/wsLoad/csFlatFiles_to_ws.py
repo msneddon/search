@@ -523,19 +523,20 @@ def insert_genome(g,ws,wsname,featureData):
     # this will reference a ContigSet object
     #print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
 
+    contig_set_made_flag = True
     try:
         contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
         print >> sys.stderr, contigset_info
     except biokbase.workspace.client.ServerError, e:
         print >> sys.stderr, 'possible error loading contigset for ' + g
         print >> sys.stderr, e
-        print >> sys.stderr, 'contigset was unable to be created in the WS (likely too large). As a result the feature set and genome will not be made in the WS for ' + g
-        return    
+        print >> sys.stderr, 'contigset was unable to be created in the WS (likely too large) for ' + g
+        contig_set_made_flag = False
     # this is completely untested
     except urllib2.URLError, e:
         print >> sys.stderr, e
-        print >> sys.stderr, 'possible problem with genome ' + g + ' contigset may be too large, skipping'
-        return
+        print >> sys.stderr, 'possible problem with genome ' + g + ' contigset may be too large, not making contigset'
+        contig_set_made_flag = False
     # want to check for urllib2.URLError: <urlopen error [Errno 5] _ssl.c:1242: Some I/O error occurred>
     # skip genome and warn if it occurs
 
@@ -543,8 +544,10 @@ def insert_genome(g,ws,wsname,featureData):
     print >> sys.stderr, "inserting contigset into ws " + str(end - start)
 #    print >> sys.stderr, contigset_info
 
-    contigset_ref = wsname + '/' + contigSet['id']
-    genomeObject["contigset_ref"] = contigset_ref
+    #contigset reference is optional.  If could not make contig set it will be empty
+    if contig_set_made_flag:
+        contigset_ref = wsname + '/' + contigSet['id']
+        genomeObject["contigset_ref"] = contigset_ref
 
 ###########################
     # build Feature objects
