@@ -103,7 +103,7 @@
        replication is in use, this should match the replication
        configuration.
     -->
-  <dataDir>/kb/deployment/services/search/solr/data/media</dataDir>
+  <dataDir>%KB_DEPLOYMENT%/services/search/solr/data/media</dataDir>
 
 
   <!-- The DirectoryFactory to use for indexes.
