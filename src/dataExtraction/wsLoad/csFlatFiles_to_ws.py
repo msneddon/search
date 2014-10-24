@@ -489,6 +489,10 @@ def insert_genome(g,ws,wsname,featureData):
     end = time.time()
     print  >> sys.stderr, "done querying contig seqs " + str(end - start)
 
+    if len(contig_sequences.keys()) != len(contigs):
+        #WARNING LOG
+        print >> sys.stderr, 'The number of CS contigs (' + str(len(contigs)) + ') is not equal to the number of contig sequences retrieved (' + str(len(contig_sequences.keys())) + ') for genome ' + g
+
     for x in contigs:
         contig = dict()
         contig["id"] = x['id']
