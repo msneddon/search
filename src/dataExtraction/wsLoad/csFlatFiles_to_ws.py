@@ -444,6 +444,7 @@ def insert_genome(g,ws,wsname,featureData):
 
     contig_sequences = dict()
     contigSeqObjects = dict()
+    contig_set_made_flag = True
 
     if contigseq_file_dir == '':
         print >> sys.stderr, 'no contig path defined, using CDMI'
@@ -466,9 +467,12 @@ def insert_genome(g,ws,wsname,featureData):
             contig_filename = contigseq_file_dir + '/' + g + '.fa'
             contig_filesize = os.stat(contig_filename).st_size
             if contig_filesize > 1000000000:
-#            if False:
-                print >> sys.stderr, 'contig file ' + contig_filename + ' may be too big, skipping genome ' + g
-                return
+#           Contigs file too large.  Can't save to WS but need to make objects so can do the dna sequence in the feature set.
+#WARNING LOG
+#                print >> sys.stderr, 'contig file ' + contig_filename + ' may be too big, skipping genome ' + g
+                print >> sys.stderr, 'contig file ' + contig_filename + ' may be too big, contigset will not be made for genome ' + g
+                contig_set_made_flag = False
+#                return
             contig_handle = open (contig_filename, 'rU')
             contigSeqObjects = Bio.SeqIO.to_dict( Bio.SeqIO.parse(contig_handle,'fasta') )
             for contigseq in contigSeqObjects:
@@ -490,7 +494,7 @@ def insert_genome(g,ws,wsname,featureData):
     print  >> sys.stderr, "done querying contig seqs " + str(end - start)
 
     if len(contig_sequences.keys()) != len(contigs):
-        #WARNING LOG
+        #WARNING HIGH LEVEL LOG  -ERROR?
         print >> sys.stderr, 'The number of CS contigs (' + str(len(contigs)) + ') is not equal to the number of contig sequences retrieved (' + str(len(contig_sequences.keys())) + ') for genome ' + g
 
     for x in contigs:
@@ -527,22 +531,22 @@ def insert_genome(g,ws,wsname,featureData):
     # this will reference a ContigSet object
     #print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
 
-    contig_set_made_flag = True
-    try:
-        contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
-        print >> sys.stderr, contigset_info
-    except biokbase.workspace.client.ServerError, e:
-        print >> sys.stderr, 'possible error loading contigset for ' + g
-        print >> sys.stderr, e
-        print >> sys.stderr, 'contigset was unable to be created in the WS (likely too large) for ' + g
-        contig_set_made_flag = False
-    # this is completely untested
-    except urllib2.URLError, e:
-        print >> sys.stderr, e
-        print >> sys.stderr, 'possible problem with genome ' + g + ' contigset may be too large, not making contigset'
-        contig_set_made_flag = False
-    # want to check for urllib2.URLError: <urlopen error [Errno 5] _ssl.c:1242: Some I/O error occurred>
-    # skip genome and warn if it occurs
+    if contig_set_made_flag:
+        try:
+            contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
+            print >> sys.stderr, contigset_info
+        except biokbase.workspace.client.ServerError, e:
+            print >> sys.stderr, 'possible error loading contigset for ' + g
+            print >> sys.stderr, e
+            print >> sys.stderr, 'contigset was unable to be created in the WS (likely too large) for ' + g
+            contig_set_made_flag = False
+        # this is completely untested
+        except urllib2.URLError, e:
+            print >> sys.stderr, e
+            print >> sys.stderr, 'possible problem with genome ' + g + ' contigset may be too large, not making contigset'
+            contig_set_made_flag = False
+        # want to check for urllib2.URLError: <urlopen error [Errno 5] _ssl.c:1242: Some I/O error occurred>
+        # skip genome and warn if it occurs
 
     end = time.time()
     print >> sys.stderr, "inserting contigset into ws " + str(end - start)
