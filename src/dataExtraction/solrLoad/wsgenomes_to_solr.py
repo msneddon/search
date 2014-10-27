@@ -50,7 +50,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
     
         workspace_id = n[0]
         workspace_name = n[1]
-    
+#Info Log    
         print genome_list
         objects_list = list()
         if len(genome_list) > 0:
@@ -73,6 +73,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
         objects_list.sort()
 
         if len(objects_list) > 0:
+#Info Log
             print "\tWorkspace %s has %d matching objects" % (workspace_name, len(objects_list))
             object_counter = 0
     
@@ -80,6 +81,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
                 objects_list = random.sample(objects_list,maxNumObjects)
     
             for x in objects_list:
+#Info log
                 print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
     
 #                numeric_id = (x[1].split('.'))[1]
@@ -96,6 +98,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
                             genome = ws_client.get_objects([{"wsid": str(workspace_id), "objid": x[0]}])
                             done = True
                         except Exception, e:
+#Warning Log
                             print str(e)
                             print "Having trouble getting " + str(x[0]) + " from workspace " + str(workspace_id)
     
@@ -133,6 +136,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
                                 genomeObject['contigs'] = ws_client.get_object_by_ref({"reference": genome['data']['contigs_uuid'], "asHash": True})
                                 done = True
                             except:
+#Warning Log
                                 print "Having trouble getting contigs_uuid " + genome['data']['contigs_uuid'] + " from workspace " + workspace_id
                                 done = True
                                 skip = True
@@ -179,6 +183,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
                         solr_line = "\t".join(solr_strings)
                         outBuffer.write(solr_line + "\n")
                     except Exception, e:
+#Warning Log
                         print str(e)
                         print "Failed trying to write to string buffer for genome " + genomeObject['object_id']
                 
@@ -313,6 +318,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
                             solr_line = "\t".join(solr_strings)
                             outBuffer.write(solr_line + "\n")
                         except Exception, e:
+#Warning or error log?
                             print str(e)
                             print "Failed trying to write to string buffer for feature " + f['feature_id']
                 
@@ -338,6 +344,6 @@ if __name__ == "__main__":
         maxNumObjects = args.maxNumObjects
     
     wsname = args.wsname[0]
-
+#Info Log
     print args.genomes
     export_genomes_from_ws(maxNumObjects,args.genomes,wsname)
