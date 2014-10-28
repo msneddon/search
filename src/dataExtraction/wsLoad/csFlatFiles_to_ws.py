@@ -18,10 +18,13 @@ import os
 import Bio.SeqIO
 import Bio.SeqFeature
 import urllib2
+import logging
 
 import biokbase.workspace.client
 import biokbase.cdmi.client
 
+
+logger = None
 pp = pprint.PrettyPrinter(indent=4)
 
 # this will be used to store the pub info from PubMed
@@ -36,7 +39,6 @@ all_taxonomy_data = dict()
 skipExistingGenomes = False
 contigseq_file_dir = ''
 
-
 # production CDMI instance
 cdmi_api = biokbase.cdmi.client.CDMI_API()
 cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
@@ -50,9 +52,9 @@ def join_contiguous_locations(featureLocations):
     lastLoc = list()
     for index,loc in enumerate(featureLocations):
 #Debug Log
-#        print >> sys.stderr, 'start loop'
-#        print >> sys.stderr, lastLoc
-#        print >> sys.stderr, loc
+#        logger.debug('start loop')
+#        logger.debug(lastLoc)
+#        logger.debug(loc)
         if len(lastLoc) > 0 and lastLoc[0] == loc[0] and lastLoc[2] == loc[2]:
             if loc[2] == '-':
                 if (lastLoc[1] - lastLoc[3]) == loc[1]:
@@ -72,8 +74,8 @@ def join_contiguous_locations(featureLocations):
                 newFeatureLocations.append(lastLoc)
             lastLoc=loc
 #Debug Log
-#        print >> sys.stderr, 'end loop'
-#        print >> sys.stderr, lastLoc
+#        logger.debug('end loop')
+#        logger.debug(lastLoc)
     # append the last location
     newFeatureLocations.append(lastLoc)
     return newFeatureLocations
@@ -127,8 +129,7 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
     # the featureset object too big
     # skip for now, try to figure out how to handle later
     if len(featureData['CoexpressedFids']) > 2000000:
-#Warning Log
-        print >> sys.stderr, 'too many lines of coexpressedfids for ' + genome_id + ', skipping'
+        logger.warning('too many lines of coexpressedfids for ' + genome_id + ', skipping')
     else:
         for coexpressed_fid_line in featureData['CoexpressedFids']:
             coexpressed_fid_line=coexpressed_fid_line.rstrip()
@@ -190,13 +191,11 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
         featureLocations[fid].sort( key = lambda loc: loc[4] )
 
     for fid in featureLocations:
-#Debug Log
-#        print >> sys.stderr, featureLocations[fid]
+#       logger.debug(featureLocations[fid])
         featureObjects[fid]['location'] = join_contiguous_locations(featureLocations[fid])
-#Debug Log
-#        print >> sys.stderr, featureObjects[fid]['location']
+#       logger.debug(featureObjects[fid]['location'])
         if len(featureObjects[fid]['location']) > 0:
-#            print >> sys.stderr, 'making feature_dna for ' + fid + ' on contig ' + featureObjects[fid]['location'][0][0]
+#           logger.debug('making feature_dna for ' + fid + ' on contig ' + featureObjects[fid]['location'][0][0])
             if not featureObjects[fid].has_key('dna_sequence'):
                 featureObjects[fid]['dna_sequence'] = ''
 
@@ -209,22 +208,19 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
             for loc in locations:
 #                if loc[3] > 100000 and (featureObjects[fid]['feature_type'] != 'CDS' or len(featureObjects[fid]['protein_sequence']) < 30000 ) :
                 if loc[3] > 100000 and (featureObjects[fid]['feature_type'] != 'CDS' or len(featureObjects[fid]['protein_translation']) < 30000) :
-#Warning Log
-                    print >> sys.stderr, 'warning: dna sequence for feature ' + fid + ' is much too long (compared to CS protein sequence if a CDS), skipping'
+                    logger.warning('dna sequence for feature ' + fid + ' is much too long (compared to CS protein sequence if a CDS), skipping')
                     featureObjects[fid]['dna_sequence'] = ''
                     break
                 if loc[2] == '-':
                     featSeqFeature = Bio.SeqFeature.SeqFeature(Bio.SeqFeature.FeatureLocation( loc[1] - loc[3], loc[1], strand=-1 ), id=fid+'/data/location/'+str(loc[4]))
                 else: # assume + strand
                     featSeqFeature = Bio.SeqFeature.SeqFeature(Bio.SeqFeature.FeatureLocation( (loc[1]-1), (loc[1]-1) + loc[3], strand=+1 ), id=fid+'/data/location/'+str(loc[4]))
-#Debug Log
-#                    print >> sys.stderr, featSeqFeature
-#                    print >> sys.stderr, featSeqFeature.extract( contigSeqObjects[loc[0]])
+#                    logger.debug(featSeqFeature)
+#                    logger.debug(featSeqFeature.extract( contigSeqObjects[loc[0]]))
                 if contigSeqObjects.has_key(loc[0]):
                     featureObjects[fid]['dna_sequence'] += str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq)
-#Debug Log
-#            print >> sys.stderr, 'genetic_code is ' + str(genetic_code)
-#            print >> sys.stderr, fid
+#            logger.debug('genetic_code is ' + str(genetic_code))
+#            logger.debug(fid)
 
             # to override problems in the biopython start codons in the
             # standard table: the ensembl plants annotation of Arabidopsis
@@ -239,33 +235,28 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
             if genetic_code in [4,11]:
                 complete_cds = True
                 stop_codon = ''
-#Debug Log
-#            print >> sys.stderr, genetic_code
-#            print >> sys.stderr, fid
+#            logger.debug(genetic_code)
+#            logger.debug(fid)
 
             try:
                 if featureObjects[fid]['feature_type'] == 'CDS' and (featureObjects[fid]['protein_translation'] + stop_codon != Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code) ) :
-                    print >> sys.stderr, 'warning: computed translation does not match translation in db for ' + fid
+                    logger.warning('warning: computed translation does not match translation in db for ' + fid)
                     if featureObjects[fid]['protein_translation'].find('X'):
-#Warning Log
-                        print >> sys.stderr, 'X found in CS translation, not worrying about for feature ' + fid 
+                        logger.debug('X found in CS translation, not worrying about for feature ' + fid)
                     else:
-#Debug Log?
-                        print >> sys.stderr, featureObjects[fid]['protein_translation'] + stop_codon
-                        print >> sys.stderr, cdmi_api.fids_to_dna_sequences([fid])
-                        print >> sys.stderr, cdmi_api.fids_to_locations([fid])
-                        print >> sys.stderr, featureObjects[fid]['location']
-                        print >> sys.stderr, Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code)
-                        print >> sys.stderr, featureObjects[fid]['dna_sequence']
+                        logger.debug(featureObjects[fid]['protein_translation'] + stop_codon)
+                        logger.debug(cdmi_api.fids_to_dna_sequences([fid]))
+                        logger.debug(cdmi_api.fids_to_locations([fid]))
+                        logger.debug(featureObjects[fid]['location'])
+                        logger.debug(Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code))
+                        logger.debug(featureObjects[fid]['dna_sequence'])
 #                        print >> sys.stderr, str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq.translate(table=genetic_code, cds=complete_cds) )
             except Bio.Data.CodonTable.TranslationError, e:
-                print >> sys.stderr, 'possible problem with translation of fid ' + fid
-                print >> sys.stderr, str(e)
-                print >> sys.stderr, featureObjects[fid]['function']
-
+                logger.warning('possible problem with translation of fid ' + fid)
+                logger.warning(str(e))
+                logger.warning(featureObjects[fid]['function'])
         else:
-#Warning Log
-            print >> sys.stderr, 'no locations for ' + fid + ', not making feature_dna'
+            logger.warning('no locations for ' + fid + ', not making feature_dna')
 
     for protein_families_line in featureData['ProteinFamilies']:
         protein_families_line=protein_families_line.rstrip()
@@ -313,11 +304,10 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
         try:
             [fid,role]=roles_line.split("\t")
         except Exception, e:
-#Warning Log
-            print >> sys.stderr, 'missing data found in Role line'
-            print >> sys.stderr, e
-            print >> sys.stderr, roles_line
-            print >> sys.stderr, 'skipping line'
+            logger.warning('missing data found in Role line')
+            logger.warning(e)
+            logger.warning(roles_line)
+            logger.warning('skipping line')
             continue
         if not featureObjects[fid].has_key("roles"):
             featureObjects[fid]['roles']=list()
@@ -352,48 +342,42 @@ def compute_taxonomy_lineage(taxonomy_id):
         return compute_taxonomy_lineage(all_taxonomy_data[taxonomy_id]['parent_taxonomy_id'])
 
 def insert_genome(g,ws,wsname,featureData):
+    logger.debug("THIS IS A TEST2")
+    sys.exit(0)
 
     start = time.time()
 
     numericGid = int(g.split('.')[1])
-#Info Log
-    print >> sys.stderr, g
-    print >> sys.stderr, numericGid
+    logger.info(g)
+    logger.info(numericGid)
     
     try:
         ws.get_object_info([{"workspace":wsname,"name":g}],0)
         if skipExistingGenomes == True:
-#Info Log
-            print >> sys.stderr, 'genome '  + g + ' found, skipping'
+            logger.info('genome '  + g + ' found, skipping')
             return
-#Info Log
-        print >> sys.stderr, 'genome '  + g + ' found, replacing'
+        logger.info('genome '  + g + ' found, replacing')
     except biokbase.workspace.client.ServerError:
-#Info Log
-        print >> sys.stderr, 'genome '  + g + ' not found, adding to ws'
+        logger.info('genome '  + g + ' not found, adding to ws')
 
 #    all_genome_data = cdmi_api.genomes_to_genome_data([g])
     genome_data = dict()
     if all_genome_data.has_key(g):
         genome_data = all_genome_data[g]
     else:
-#Warning Log and Info Log
-        print >> sys.stderr, 'genome ' + g + ' has no entry in genome data, skipping'
+        logger.info('genome ' + g + ' has no entry in genome data, skipping')
+        logger.warning('genome ' + g + ' has no entry in genome data, skipping')
         return
 
     end = time.time()
-#Info Log
-    print >> sys.stderr, "querying genome_data " + str(end - start)
-
+    logger.info("querying genome_data " + str(end - start))
 #    if 'P' not in genome_data['scientific_name']:
     # sloppy hack to pick up where it crashed
 #    if numericGid < 2207:
 #    if numericGid < 28878:
 #        print >> sys.stderr, "skipping genome " + g + ' ' + genome_data['scientific_name']
 #        return
-#Info Log
-    print >> sys.stderr, "processing genome " + g + ' ' + genome_data['scientific_name']
-
+    logger.info("processing genome " + g + ' ' + genome_data['scientific_name'])
     genomeObject = dict()
     featureSet = dict()
     featureSet['features'] = dict()
@@ -453,8 +437,7 @@ def insert_genome(g,ws,wsname,featureData):
     genomeObject['contig_ids'] = [ x['id'] for x in contigs ]
 
     start = time.time()
-#Info Log
-    print  >> sys.stderr, "start querying contig seqs"
+    logger.info("start querying contig seqs")
 
     # retrieving all with one call died on kb|g.3907, kb|g.3643 Gallus gallus, kb|g.41 Mouse
     # looping over each contig_id still seems slow on chicken
@@ -465,8 +448,7 @@ def insert_genome(g,ws,wsname,featureData):
     contig_set_made_flag = True
 
     if contigseq_file_dir == '':
-#Info Log 
-        print >> sys.stderr, 'no contig path defined, using CDMI'
+        logger.info('no contig path defined, using CDMI')
 
         # loop over contigs method
         for contig_id in genomeObject['contig_ids']:
@@ -480,33 +462,27 @@ def insert_genome(g,ws,wsname,featureData):
         # need to make contigSeqObjects here to pass to create_feature_objects
 
     else:
-#Info Log
-        print >> sys.stderr, 'contig path defined, attempting to read file in ' + contigseq_file_dir
+        logger.info('contig path defined, attempting to read file in ' + contigseq_file_dir)
         try:
- 
             contig_filename = contigseq_file_dir + '/' + g + '.fa'
             contig_filesize = os.stat(contig_filename).st_size
             if contig_filesize > 1000000000:
 #           Contigs file too large.  Can't save to WS but need to make objects so can do the dna sequence in the feature set.
-#WARNING LOG
-#                print >> sys.stderr, 'contig file ' + contig_filename + ' may be too big, skipping genome ' + g
-#Info and Warning Log
-                print >> sys.stderr, 'contig file ' + contig_filename + ' may be too big, contigset will not be made for genome ' + g
+                logger.info('contig file ' + contig_filename + ' may be too big, contigset will not be made for genome ' + g)
+                logger.warning('contig file ' + contig_filename + ' may be too big, contigset will not be made for genome ' + g)
                 contig_set_made_flag = False
 #                return
             contig_handle = open (contig_filename, 'rU')
             contigSeqObjects = Bio.SeqIO.to_dict( Bio.SeqIO.parse(contig_handle,'fasta') )
             for contigseq in contigSeqObjects:
-#                print >> sys.stderr, contigseq
+#                logger.debug(contigseq)
                 contig_sequences[contigseq] = str(contigSeqObjects[contigseq].seq)
             contig_handle.close()
-#Info Log
-            print >> sys.stderr, 'reading contig file ' + contig_filename + ' succeeded'
+            logger.info('reading contig file ' + contig_filename + ' succeeded')
         except Exception, e:
-#Warning log
-            print >> sys.stderr, 'problem reading contig file ' + contig_filename + ' for ' + g
-            print >> sys.stderr, e
-            print >> sys.stderr, 'attempting to use CDMI instead'
+            logger.warning('problem reading contig file ' + contig_filename + ' for ' + g)
+            logger.warning(e)
+            logger.warning('attempting to use CDMI instead')
             contig_sequences = cdmi_api.contigs_to_sequences(genomeObject['contig_ids'])
             # need to make contigSeqObjects here to pass to create_feature_objects
 
@@ -514,12 +490,11 @@ def insert_genome(g,ws,wsname,featureData):
 ### if too large, skip genome (with warning to stderr)
 
     end = time.time()
-#Info Log
-    print  >> sys.stderr, "done querying contig seqs " + str(end - start)
+    logger.info("done querying contig seqs " + str(end - start))
 
     if len(contig_sequences.keys()) != len(contigs):
-#WARNING HIGH LEVEL LOG  -ERROR?
-        print >> sys.stderr, 'The number of CS contigs (' + str(len(contigs)) + ') is not equal to the number of contig sequences retrieved (' + str(len(contig_sequences.keys())) + ') for genome ' + g
+        logger.warning('The number of CS contigs (' + str(len(contigs)) + ') is not equal to the number of contig sequences retrieved (' + str(len(contig_sequences.keys())) + ') for genome ' + g)
+        logger.info('The number of CS contigs (' + str(len(contigs)) + ') is not equal to the number of contig sequences retrieved (' + str(len(contig_sequences.keys())) + ') for genome ' + g)
 
     for x in contigs:
         contig = dict()
@@ -529,8 +504,7 @@ def insert_genome(g,ws,wsname,featureData):
         if contig_sequences.has_key(x['id']):
             contig["sequence"] = contig_sequences[x['id']]
         else:
-#Warning Log
-            print >> sys.stderr, 'contig ' + x['id'] + ' does not have sequence defined, setting to empty'
+            logger.warning('contig ' + x['id'] + ' does not have sequence defined, setting to empty')
             contig["sequence"] = ''
         
         contigSet["contigs"][x['id']]=contig
@@ -547,13 +521,9 @@ def insert_genome(g,ws,wsname,featureData):
 # first see if object already exists
     try:
         contigset_info=ws.get_object_info([{"workspace":wsname,"name":contigSet['id']}],0)
-#Info Log
-        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' found, replacing'
-#        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' found, skipping'
-#        return
+        logger.info('contigset '  + contigSet['id'] + ' found, replacing')
     except biokbase.workspace.client.ServerError:
-#Info Log
-        print >> sys.stderr, 'contigset '  + contigSet['id'] + ' not found, adding to ws'
+        logger.info('contigset '  + contigSet['id'] + ' not found, adding to ws')
 
     # this will reference a ContigSet object
     #print simplejson.dumps(contigSet,sort_keys=True,indent=4 * ' ')
@@ -561,27 +531,23 @@ def insert_genome(g,ws,wsname,featureData):
     if contig_set_made_flag:
         try:
             contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
-#Info Log
-            print >> sys.stderr, contigset_info
+            logger.info(contigset_info)
         except biokbase.workspace.client.ServerError, e:
-#Warning Log
-            print >> sys.stderr, 'possible error loading contigset for ' + g
-            print >> sys.stderr, e
-            print >> sys.stderr, 'contigset was unable to be created in the WS (likely too large) for ' + g
+            logger.warning('possible error loading contigset for ' + g)
+            logger.warning(e)
+            logger.warning('contigset was unable to be created in the WS (likely too large) for ' + g)
             contig_set_made_flag = False
         # this is completely untested
         except urllib2.URLError, e:
-#Warning Log
-            print >> sys.stderr, e
-            print >> sys.stderr, 'possible problem with genome ' + g + ' contigset may be too large, not making contigset'
+            logger.warning(e)
+            logger.warning('urllib2.URLError - possible problem with genome ' + g + ' contigset may be too large, not making contigset')
             contig_set_made_flag = False
         # want to check for urllib2.URLError: <urlopen error [Errno 5] _ssl.c:1242: Some I/O error occurred>
         # skip genome and warn if it occurs
 
     end = time.time()
-#Info Log
-    print >> sys.stderr, "inserting contigset into ws " + str(end - start)
-#    print >> sys.stderr, contigset_info
+    logger.info("inserting contigset into ws " + str(end - start))
+#    logger.debug(contigset_info)
 
     #contigset reference is optional.  If could not make contig set it will be empty
     if contig_set_made_flag:
@@ -598,8 +564,8 @@ def insert_genome(g,ws,wsname,featureData):
     
     featureSet['features'] = dict()
     for feature in featureObjects:
-        #print >> sys.stderr, feature 
-        #print >> sys.stderr, featureObjects[feature]
+        #logger.debug(feature) 
+        #logger.debug(featureObjects[feature])
         individualFeature = dict()
         individualFeature['data'] = featureObjects[feature]
         featureSet['features'][feature] = individualFeature
@@ -607,20 +573,18 @@ def insert_genome(g,ws,wsname,featureData):
 #    pp.pprint(featureObjects)
 
     end = time.time()
-#Info Log
-    print  >> sys.stderr, " processing features, elapsed time " + str(end - start)
+    logger.info("processing features, elapsed time " + str(end - start))
 
     # for debugging
 #    return 
 
     # insert into workspace, get path
-#    print simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' ')
+#   logger.debug(simplejson.dumps(featureSet,sort_keys=True,indent=4 * ' '))
     # another try block here?
     featureset_id = genomeObject['genome_id'] + '.featureset'
 
     start  = time.time()
-#Debug Log
-#    print >> sys.stderr, simplejson.dumps(featureSet)
+#    logger.debug(simplejson.dumps(featureSet))
 
     featureSetType='KBaseSearch.SearchFeatureSet'
     if args.debug:
@@ -633,24 +597,20 @@ def insert_genome(g,ws,wsname,featureData):
                                                    "data": featureSet,
                                                    "name": featureset_id}]
                                      })
-#Info Log
-        print >> sys.stderr, featureset_info
+        logger.info(featureset_info)
     except biokbase.workspace.client.ServerError, e:
-#Warning Log
-        print >> sys.stderr, 'possible error loading featureset into the WS for ' + g
-        print >> sys.stderr, e
+        logger.warning('possible error loading featureset into the WS for ' + g)
+        logger.warning(e)
     # this is completely untested
     except urllib2.URLError, e:
-#Warning Log
-        print >> sys.stderr, e
-        print >> sys.stderr, 'possible problem with genome ' + g + ' featureset may be too large, skipping'
+        logger.warning(e)
+        logger.warning('possible problem with genome ' + g + ' featureset may be too large, skipping')
         return
     # want to check for urllib2.URLError: <urlopen error [Errno 5] _ssl.c:1242: Some I/O error occurred>
     # skip genome and warn if it occurs
 
     end = time.time()
-#Info Log 
-   print  >> sys.stderr, " saving featureset to ws, elapsed time " + str(end - start)
+    logger.info("saving featureset for genome " + g + " to ws, elapsed time " + str(end - start))
 
     featureset_ref = wsname + '/' + featureset_id
     genomeObject['featureset_ref'] = featureset_ref
@@ -658,12 +618,10 @@ def insert_genome(g,ws,wsname,featureData):
 
 #    print simplejson.dumps(genomeObject,sort_keys=True,indent=4 * ' ')
     genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.Genome","data":genomeObject,"name":genomeObject['genome_id']}]})
-#Info log
-    print >> sys.stderr, genome_info
+    logger.info(genome_info)
 
     end = time.time()
-#Info Log
-    print  >> sys.stderr, "insert genome into ws " + str(end - start)
+    logger.info("insert genome into ws " + str(end - start))
 
 if __name__ == "__main__":
     import argparse
@@ -673,6 +631,7 @@ if __name__ == "__main__":
     parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
     parser.add_argument('--sorted-file-dir', nargs=1, help='path to sorted dump files to be parsed (default .)')
     parser.add_argument('--contigseq-file-dir', nargs=1, help='path to FASTA contig sequence files (filenames must correspond to KBase genome ids e.g., kb|g.0.fa) (default: use CDMI to get sequences)')
+    parser.add_argument('--logging-file-dir', nargs=1, help='path to the directory to write the logging file (default .)')
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
     parser.add_argument('--debug',action='store_true',help='debugging')
     parser.add_argument('--skip-last',action='store_true',help='skip processing last genome (in case input is incomplete)')
@@ -689,6 +648,14 @@ if __name__ == "__main__":
         skipExistingGenomes = True
     if args.contigseq_file_dir:
         contigseq_file_dir = args.contigseq_file_dir[0]
+    logging_file_dir = '.'
+    if args.logging_file_dir: 
+        logging_file_dir = args.logging_file_dir[0]
+
+    logging.basicConfig(filename=logging_file_dir + '/csFlatFiles_to_ws_'+ datetime.datetime.utcnow().isoformat() + '.log', format='%(name)s - %(asctime)s - %(levelname)s:%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+
+    logger = logging.getLogger('csFlatFiles_to_ws')
+#    logger.debug("THIS IS A TEST")
 
     # ws public instance
     ws = biokbase.workspace.client.Workspace("https://kbase.us/services/ws")
@@ -696,17 +663,14 @@ if __name__ == "__main__":
     if args.debug:
 #        ws = biokbase.workspace.client.Workspace("http://140.221.84.209:7058")
         ws = biokbase.workspace.client.Workspace("http://dev04:7058")
-#Info Log
-    print >> sys.stderr, wsname
+    logger.info('WS = ' + wsname)
     try:
         retval=ws.create_workspace({"workspace":wsname,"globalread":"n","description":"Search CS workspace"})
-#Info Log
-        print >> sys.stderr, 'created workspace ' + wsname + ' at ws url ' + ws.url
-        print >> sys.stderr, retval
+        logger.info('created workspace ' + wsname + ' at ws url ' + ws.url)
+        logger.info(retval)
     # want this to catch only workspace exists errors
     except biokbase.workspace.client.ServerError, e:
-#Info Log
-        print >> sys.stderr, 'workspace ' + wsname + ' at ws url ' + ws.url + ' may already exist, trying to use'
+        logger.info('workspace ' + wsname + ' at ws url ' + ws.url + ' may already exist, trying to use')
 
     genomeDataHandle = open ('Genome.tab','r')
     for line in genomeDataHandle:
@@ -719,8 +683,7 @@ if __name__ == "__main__":
             [ thisGenome['id'] , thisGenome['complete'] , thisGenome['contigs'] , thisGenome['dna_size'] , thisGenome['gc_content'] , thisGenome['genetic_code'] , thisGenome['pegs'] , thisGenome['rnas'], thisGenome['domain'], thisGenome['genome_md5'], thisGenome['scientific_name'], thisGenome['source_id'] ,thisGenome['taxonomy_id'] ] = columns
         all_genome_data[thisGenome['id']] = thisGenome
 
-#Info Log
-    print >> sys.stderr, 'loading contig data into memory'
+    logger.info('loading contig data into memory')
     contigDataHandle = open ('ContigSequence.tab','r')
     for line in contigDataHandle:
         line=line.rstrip()
@@ -730,10 +693,9 @@ if __name__ == "__main__":
         if (not all_contig_data.has_key(thisContig['genome_id'])):
             all_contig_data[thisContig['genome_id']] = list()
         all_contig_data[thisContig['genome_id']].append(thisContig)
-#Info Log
-    print >> sys.stderr, 'done loading contig data into memory'
+    logger.info('done loading contig data into memory')
 
-    print >> sys.stderr, 'loading taxonomy data into memory'
+    logger.info('loading taxonomy data into memory')
     taxonomyDataHandle = open ('TaxonomicGrouping.tab','r')
     for line in taxonomyDataHandle:
         line=line.rstrip()
@@ -742,7 +704,7 @@ if __name__ == "__main__":
         [ thisTaxonomy['taxonomy_id'] , thisTaxonomy['description'] , thisTaxonomy['parent_taxonomy_id'] , thisTaxonomy['hidden'], thisTaxonomy['domain'], thisTaxonomy['type'] ] = columns
         all_taxonomy_data[thisTaxonomy['taxonomy_id']] = thisTaxonomy
 #Info Log
-    print >> sys.stderr, 'done loading taxonomy data into memory'
+    logger.info('done loading taxonomy data into memory')
 
     pubHandle = open ( 'publications.tab.sorted', 'r')
     for line in pubHandle:
@@ -782,11 +744,10 @@ if __name__ == "__main__":
 ### scan through all files till get to the target genome
 ### then continue as normal
     while currentLine['Feature']:
-#        print >> sys.stderr, "currentLine['Feature'] ", unicode(currentLine['Feature'])
+#        logger.debug("currentLine['Feature'] ", unicode(currentLine['Feature']))
 
         [fid,cs_id,gid,restOfLine] = currentLine['Feature'].split("\t",3)
-        #print >> sys.stderr, [fid, cs_id, gid]
-
+        logger.debug('FID: ' + fid + ',  CSID: ' + cs_id + ',  GID: ' + gid)
         [prefix,numericGid] = gid.split('.')
         numericGid = int(numericGid)
 
@@ -794,10 +755,9 @@ if __name__ == "__main__":
             currentGid = gid
             currentNumericGid = numericGid
         if (numericGid > currentNumericGid):
-#Info Log
-            print >> sys.stderr, 'gid is ' + gid
-            print >> sys.stderr, 'numericGid is ' + str(numericGid)
-            print >> sys.stderr, 'currentNumericGid is ' + str(currentNumericGid)
+            logger.info('gid is ' + gid)
+            logger.info('numericGid is ' + str(numericGid))
+            logger.info('currentNumericGid is ' + str(currentNumericGid))
             
             # read other files and populate featureData
             for attribute in attributeList:
@@ -806,13 +766,10 @@ if __name__ == "__main__":
                     if len(currentLine[attribute].split('\t', 1)) == 2:                    
                         [attrFid,attrRestOfLine] = currentLine[attribute].split("\t",1)
                     else:
-#Warning Log
-                        print >> sys.stderr, 'suspect line : ' + currentLine[attribute]
-                        print >> sys.stderr, currentLine[attribute].split(' ', 1)
-
+                        logger.warning('suspect line : ' + currentLine[attribute])
+                        logger.warning(currentLine[attribute].split(' ', 1))
                         if len(currentLine[attribute].strip()) == 0:
-#Warning Log
-                            print >> sys.stderr, attribute                      
+                            logger.warning(attribute)                      
                             #[attrFid, attrRestOfLine] = [,""]
                             #sys.exit(0)
                             #print >> sys.stderr, "skipping"
@@ -828,18 +785,15 @@ if __name__ == "__main__":
                     
                     attrGid = attrGidPrefix + '.' + attrGidNumericId
                     attrGidNumericId = int(attrGidNumericId)
-#Debug log
-#                    print >> sys.stderr, 'attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+                    logger.debug('attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
                     if (attrGidNumericId == currentNumericGid):
                         featureData[attribute].append(currentLine[attribute])
                     if (attrGidNumericId < currentNumericGid):
 #                        if not args.skip_till:
-#Warning Log
-                        print >> sys.stderr, attribute + ' file may have extra data, skipping'
-                        print >> sys.stderr, ' '.join([attrGid, str(currentNumericGid)])
+                        logger.warning(attribute + ' file may have extra data, skipping')
+                        logger.warning(' '.join([attrGid, str(currentNumericGid)]))
                     if (attrGidNumericId > currentNumericGid):
-#Info Log
-                        print >> sys.stderr, 'Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+                        logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
                         break
                     currentLine[attribute] = fileHandle[attribute].readline()
 #            pp.pprint(featureData)
@@ -860,9 +814,9 @@ if __name__ == "__main__":
 #        if (numericGid < currentNumericGid and not args.skip_till):
         if (numericGid < currentNumericGid):
 #ERROR LOG
-            print >> sys.stderr, 'There is a big problem! Feature file may not be sorted properly.'
-            print >> sys.stderr, ' '.join([str(numericGid), str(currentNumericGid)])
-            print >> sys.stderr, currentLine['Feature']
+            logger.error('There is a big problem! Feature file may not be sorted properly.')
+            logger.error(' '.join([str(numericGid), str(currentNumericGid)]))
+            logger.error(currentLine['Feature'])
             exit(5)
 #        if (numericGid < currentNumericGid and args.skip_till):
 #            print >> sys.stderr, 'Skipping line'
@@ -874,13 +828,11 @@ if __name__ == "__main__":
     # if just taking a subset of export data, some files may
     # be incomplete, and you get key errors)
     if args.skip_last:
-#INFO LOG
-        print >> sys.stderr, 'skipping last genome ' + gid
+        logger.info('skipping last genome ' + gid)
         exit(0)
-#Info Log
-    print >> sys.stderr, 'gid is ' + gid
-    print >> sys.stderr, 'numericGid is ' + str(numericGid)
-    print >> sys.stderr, 'currentNumericGid is ' + str(currentNumericGid)
+    logger.info('gid is ' + gid)
+    logger.info('numericGid is ' + str(numericGid))
+    logger.info('currentNumericGid is ' + str(currentNumericGid))
     # read other files and populate featureData
     for attribute in attributeList:
         featureData[attribute] = list()
@@ -893,12 +845,10 @@ if __name__ == "__main__":
             if (attrGidNumericId == currentNumericGid):
                 featureData[attribute].append(currentLine[attribute])
             if (attrGidNumericId < currentNumericGid):
-#Warning Log
-                print >> sys.stderr, attribute + ' file may have extra data, skipping'
-                print >> sys.stderr, ' '.join([attrGid, currentNumericGid])
+                logger.warning(attribute + ' file may have extra data, skipping')
+                logger.warning(' '.join([attrGid, currentNumericGid]))
             if (attrGidNumericId > currentNumericGid):
-#Warning Log
-                print >> sys.stderr, 'need to skip to next attribute here: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+                logger.warning('need to skip to next attribute here: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
                 break
             currentLine[attribute] = fileHandle[attribute].readline()
 #    pp.pprint(featureData)
