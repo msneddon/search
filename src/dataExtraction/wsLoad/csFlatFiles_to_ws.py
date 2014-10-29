@@ -342,8 +342,8 @@ def compute_taxonomy_lineage(taxonomy_id):
         return compute_taxonomy_lineage(all_taxonomy_data[taxonomy_id]['parent_taxonomy_id'])
 
 def insert_genome(g,ws,wsname,featureData):
-    logger.debug("THIS IS A TEST2")
-    sys.exit(0)
+#    logger.debug("THIS IS A TEST2")
+#    sys.exit(0)
 
     start = time.time()
 
@@ -635,11 +635,20 @@ if __name__ == "__main__":
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
     parser.add_argument('--debug',action='store_true',help='debugging')
     parser.add_argument('--skip-last',action='store_true',help='skip processing last genome (in case input is incomplete)')
+    parser.add_argument('--genomes', action="store", nargs='*', help='list of genomes to do only')
 #    parser.add_argument('--skip-till', nargs=1, help='skip genomes with numeric gid < SKIP_TILL (genome must exist)')
 
     args = parser.parse_args()
 
     wsname = args.wsname[0]
+
+    process_all_genomes = True
+    if len(args.genomes) > 0:
+        process_all_genomes = False
+        genomes_list = args.genomes
+        genomes_dict = dict()
+        for genome in genomes_list: 
+            genomes_dict[genome] = 1
 
     sorted_file_dir = '.'
     if args.sorted_file_dir:
@@ -775,8 +784,7 @@ if __name__ == "__main__":
                             #print >> sys.stderr, "skipping"
                             #continue
                         else:
-                            [attrFid,attrRestOfLine] = currentLine[attribute].split(" ",1)              
-#Debug log                    
+                            [attrFid,attrRestOfLine] = currentLine[attribute].split(" ",1)                                 
 # this makes a huge amount of output
 #                    print >> sys.stderr, 'currentFid is ' + str(attrFid)
 #                    print >> sys.stderr, 'attribute is ' + str(attribute)
@@ -798,7 +806,8 @@ if __name__ == "__main__":
                     currentLine[attribute] = fileHandle[attribute].readline()
 #            pp.pprint(featureData)
             # pass featureData to a sub that creates appropriate subobjects
-            insert_genome(currentGid,ws,wsname,featureData)
+            if (currentGid in genomes_dict.keys()) or process_all_genomes:
+                insert_genome(currentGid,ws,wsname,featureData)
 
             # make sure Python does gc right away
             featureData = None
@@ -813,7 +822,6 @@ if __name__ == "__main__":
             featureData['Feature'].append(currentLine['Feature'])
 #        if (numericGid < currentNumericGid and not args.skip_till):
         if (numericGid < currentNumericGid):
-#ERROR LOG
             logger.error('There is a big problem! Feature file may not be sorted properly.')
             logger.error(' '.join([str(numericGid), str(currentNumericGid)]))
             logger.error(currentLine['Feature'])
@@ -853,7 +861,8 @@ if __name__ == "__main__":
             currentLine[attribute] = fileHandle[attribute].readline()
 #    pp.pprint(featureData)
     # pass featureData to a sub that creates appropriate subobjects
-    insert_genome(currentGid,ws,wsname,featureData)
+    if (currentGid in genomes_dict.keys()) or process_all_genomes:
+        insert_genome(currentGid,ws,wsname,featureData)
 
     
 # general arch:
