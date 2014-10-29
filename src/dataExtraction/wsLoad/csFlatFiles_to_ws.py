@@ -756,7 +756,7 @@ if __name__ == "__main__":
 #        logger.debug("currentLine['Feature'] ", unicode(currentLine['Feature']))
 
         [fid,cs_id,gid,restOfLine] = currentLine['Feature'].split("\t",3)
-        logger.debug('FID: ' + fid + ',  CSID: ' + cs_id + ',  GID: ' + gid)
+#        logger.debug('FID: ' + fid + ',  CSID: ' + cs_id + ',  GID: ' + gid)
         [prefix,numericGid] = gid.split('.')
         numericGid = int(numericGid)
 
@@ -764,11 +764,10 @@ if __name__ == "__main__":
             currentGid = gid
             currentNumericGid = numericGid
         if (numericGid > currentNumericGid):
-            logger.info('gid is ' + gid)
-            logger.info('numericGid is ' + str(numericGid))
-            logger.info('currentNumericGid is ' + str(currentNumericGid))
-            
             if (currentGid in genomes_dict.keys()) or process_all_genomes:
+                logger.info('gid is ' + gid)
+                logger.info('numericGid is ' + str(numericGid))
+                logger.info('currentNumericGid is ' + str(currentNumericGid))
                 # read other files and populate featureData
                 for attribute in attributeList:
                     featureData[attribute] = list()
@@ -793,15 +792,18 @@ if __name__ == "__main__":
                         [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
                         attrGid = attrGidPrefix + '.' + attrGidNumericId
                         attrGidNumericId = int(attrGidNumericId)
-                        logger.debug('attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
+                        if (attrGid in genomes_dict.keys()) or process_all_genomes:
+                            logger.debug('attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
                         if (attrGidNumericId == currentNumericGid):
                             featureData[attribute].append(currentLine[attribute])
                         if (attrGidNumericId < currentNumericGid) and process_all_genomes:
                             #                        if not args.skip_till:
-                            logger.warning(attribute + ' file may have extra data, skipping')
-                            logger.warning(' '.join([attrGid, str(currentNumericGid)]))
+                            if (currentGid in genomes_dict.keys()) or process_all_genomes:
+                                logger.warning(attribute + ' file may have extra data, skipping')
+                                logger.warning(' '.join([attrGid, str(currentNumericGid)]))
                         if (attrGidNumericId > currentNumericGid):
-                            logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
+                            if (attrGid in genomes_dict.keys()) or process_all_genomes:
+                                logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
                             break
                         currentLine[attribute] = fileHandle[attribute].readline()
                 #            pp.pprint(featureData)
@@ -816,6 +818,7 @@ if __name__ == "__main__":
             featureData['Feature'].append(currentLine['Feature'])
             currentNumericGid = numericGid
             currentGid = gid
+            logger.info('Current Genome : ' + currentGid)
         if (numericGid == currentNumericGid):
             if not featureData.has_key('Feature'):
                 featureData['Feature'] = list()
@@ -863,6 +866,8 @@ if __name__ == "__main__":
 #    pp.pprint(featureData)
     # pass featureData to a sub that creates appropriate subobjects
         insert_genome(currentGid,ws,wsname,featureData)
+    else:
+        exit(0)
 
     
 # general arch:
