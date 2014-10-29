@@ -80,6 +80,11 @@ def join_contiguous_locations(featureLocations):
     newFeatureLocations.append(lastLoc)
     return newFeatureLocations
 
+def cleanup_filehandles(filehandles):
+    for filehandle in filehandles:
+        filehandle.close()
+
+
 def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
 
     featureObjects = dict()
@@ -467,11 +472,16 @@ def insert_genome(g,ws,wsname,featureData):
             contig_filename = contigseq_file_dir + '/' + g + '.fa'
             contig_filesize = os.stat(contig_filename).st_size
             if contig_filesize > 1000000000:
-#           Contigs file too large.  Can't save to WS but need to make objects so can do the dna sequence in the feature set.
+#                Contigs file too large.  Can't save to WS but need to make objects so can do the dna sequence in the feature set.
                 logger.info('contig file ' + contig_filename + ' may be too big, contigset will not be made for genome ' + g)
                 logger.warning('contig file ' + contig_filename + ' may be too big, contigset will not be made for genome ' + g)
                 contig_set_made_flag = False
 #                return
+            if genomeObject["num_contigs"] > 125000:
+#                There are too many contigs for this genome.  The resulting contigset would be too large.  
+                logger.info('contig file ' + contig_filename + '.  There are too many contigs for genome ' + g + '.  The resulting contigset would be too large')
+                logger.warning('contig file ' + contig_filename + '.  There are too many contigs for genome ' + g + '.  The resulting contigset would be too large')
+                contig_set_made_flag = False
             contig_handle = open (contig_filename, 'rU')
             contigSeqObjects = Bio.SeqIO.to_dict( Bio.SeqIO.parse(contig_handle,'fasta') )
             for contigseq in contigSeqObjects:
@@ -691,6 +701,7 @@ if __name__ == "__main__":
         if len(columns) == 13:
             [ thisGenome['id'] , thisGenome['complete'] , thisGenome['contigs'] , thisGenome['dna_size'] , thisGenome['gc_content'] , thisGenome['genetic_code'] , thisGenome['pegs'] , thisGenome['rnas'], thisGenome['domain'], thisGenome['genome_md5'], thisGenome['scientific_name'], thisGenome['source_id'] ,thisGenome['taxonomy_id'] ] = columns
         all_genome_data[thisGenome['id']] = thisGenome
+    genomeDataHandle.close()    
 
     logger.info('loading contig data into memory')
     contigDataHandle = open ('ContigSequence.tab','r')
@@ -702,6 +713,7 @@ if __name__ == "__main__":
         if (not all_contig_data.has_key(thisContig['genome_id'])):
             all_contig_data[thisContig['genome_id']] = list()
         all_contig_data[thisContig['genome_id']].append(thisContig)
+    contigDataHandle.close()
     logger.info('done loading contig data into memory')
 
     logger.info('loading taxonomy data into memory')
@@ -712,7 +724,7 @@ if __name__ == "__main__":
         columns = line.split("\t")
         [ thisTaxonomy['taxonomy_id'] , thisTaxonomy['description'] , thisTaxonomy['parent_taxonomy_id'] , thisTaxonomy['hidden'], thisTaxonomy['domain'], thisTaxonomy['type'] ] = columns
         all_taxonomy_data[thisTaxonomy['taxonomy_id']] = thisTaxonomy
-#Info Log
+    taxonomyDataHandle.close()
     logger.info('done loading taxonomy data into memory')
 
     pubHandle = open ( 'publications.tab.sorted', 'r')
@@ -727,6 +739,7 @@ if __name__ == "__main__":
             # it in the future, so let's just save it
             [ thisPub['id'] , thisPub['link'] , thisPub['pubdate'] , thisPub['journal_name'] , thisPub['article_title'] , thisPub['article_title_sort'] , thisPub['authors'] , thisPub['abstract'] ] = columns
         publications[thisPub['id']] = thisPub
+    pubHandle.close()
 
     fileHandle = dict()
     featureData = dict()
@@ -744,7 +757,7 @@ if __name__ == "__main__":
     for file in fileList:
         fileName = sorted_file_dir + '/' + file + '.tab.sorted'
 # want to follow up why this was needed
-        fileHandle[file] = codecs.open ( fileName, mode='r', encoding='ISO-8859-1')
+        fileHandle[file] = codecs.open( fileName, mode='r', encoding='ISO-8859-1')
 #        fileHandle[file] = open ( fileName, 'r')
         # seed the first line
         currentLine[file] = fileHandle[file].readline()
@@ -840,6 +853,7 @@ if __name__ == "__main__":
     # be incomplete, and you get key errors)
     if args.skip_last:
         logger.info('skipping last genome ' + gid)
+        cleanup_filehandles(fileHandle.keys())
         exit(0)
     if (currentGid in genomes_dict.keys()) or process_all_genomes:
         logger.info('gid is ' + gid)
@@ -866,9 +880,11 @@ if __name__ == "__main__":
 #    pp.pprint(featureData)
     # pass featureData to a sub that creates appropriate subobjects
         insert_genome(currentGid,ws,wsname,featureData)
+        cleanup_filehandles(fileHandle.keys())
     else:
+        cleanup_filehandles(fileHandle.keys())
         exit(0)
-
+        
     
 # general arch:
 # open publications file
