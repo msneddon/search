@@ -342,7 +342,7 @@ def compute_taxonomy_lineage(taxonomy_id):
         return compute_taxonomy_lineage(all_taxonomy_data[taxonomy_id]['parent_taxonomy_id'])
 
 def insert_genome(g,ws,wsname,featureData):
-#    logger.debug("THIS IS A TEST2")
+#    logger.debug("THIS IS A TEST2" + g)
 #    sys.exit(0)
 
     start = time.time()
@@ -768,45 +768,45 @@ if __name__ == "__main__":
             logger.info('numericGid is ' + str(numericGid))
             logger.info('currentNumericGid is ' + str(currentNumericGid))
             
-            # read other files and populate featureData
-            for attribute in attributeList:
-                featureData[attribute] = list()
-                while currentLine[attribute]:
-                    if len(currentLine[attribute].split('\t', 1)) == 2:                    
-                        [attrFid,attrRestOfLine] = currentLine[attribute].split("\t",1)
-                    else:
-                        logger.warning('suspect line : ' + currentLine[attribute])
-                        logger.warning(currentLine[attribute].split(' ', 1))
-                        if len(currentLine[attribute].strip()) == 0:
-                            logger.warning(attribute)                      
-                            #[attrFid, attrRestOfLine] = [,""]
-                            #sys.exit(0)
-                            #print >> sys.stderr, "skipping"
-                            #continue
-                        else:
-                            [attrFid,attrRestOfLine] = currentLine[attribute].split(" ",1)                                 
-# this makes a huge amount of output
-#                    print >> sys.stderr, 'currentFid is ' + str(attrFid)
-#                    print >> sys.stderr, 'attribute is ' + str(attribute)
-#                    print >> sys.stderr, currentLine[attribute]
-                    [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
-                    
-                    attrGid = attrGidPrefix + '.' + attrGidNumericId
-                    attrGidNumericId = int(attrGidNumericId)
-                    logger.debug('attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
-                    if (attrGidNumericId == currentNumericGid):
-                        featureData[attribute].append(currentLine[attribute])
-                    if (attrGidNumericId < currentNumericGid):
-#                        if not args.skip_till:
-                        logger.warning(attribute + ' file may have extra data, skipping')
-                        logger.warning(' '.join([attrGid, str(currentNumericGid)]))
-                    if (attrGidNumericId > currentNumericGid):
-                        logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
-                        break
-                    currentLine[attribute] = fileHandle[attribute].readline()
-#            pp.pprint(featureData)
-            # pass featureData to a sub that creates appropriate subobjects
             if (currentGid in genomes_dict.keys()) or process_all_genomes:
+                # read other files and populate featureData
+                for attribute in attributeList:
+                    featureData[attribute] = list()
+                    while currentLine[attribute]:
+                        if len(currentLine[attribute].split('\t', 1)) == 2:                    
+                            [attrFid,attrRestOfLine] = currentLine[attribute].split("\t",1)
+                        else:
+                            logger.warning('suspect line : ' + currentLine[attribute])
+                            logger.warning(currentLine[attribute].split(' ', 1))
+                            if len(currentLine[attribute].strip()) == 0:
+                                logger.warning(attribute)                      
+                                #[attrFid, attrRestOfLine] = [,""]
+                                #sys.exit(0)
+                                #print >> sys.stderr, "skipping"
+                                #continue
+                            else:
+                                [attrFid,attrRestOfLine] = currentLine[attribute].split(" ",1)                                 
+                                # this makes a huge amount of output
+                                #                    print >> sys.stderr, 'currentFid is ' + str(attrFid)
+                                #                    print >> sys.stderr, 'attribute is ' + str(attribute)
+                                #                    print >> sys.stderr, currentLine[attribute]
+                        [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
+                        attrGid = attrGidPrefix + '.' + attrGidNumericId
+                        attrGidNumericId = int(attrGidNumericId)
+                        logger.debug('attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
+                        if (attrGidNumericId == currentNumericGid):
+                            featureData[attribute].append(currentLine[attribute])
+                        if (attrGidNumericId < currentNumericGid) and process_all_genomes:
+                            #                        if not args.skip_till:
+                            logger.warning(attribute + ' file may have extra data, skipping')
+                            logger.warning(' '.join([attrGid, str(currentNumericGid)]))
+                        if (attrGidNumericId > currentNumericGid):
+                            logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
+                            break
+                        currentLine[attribute] = fileHandle[attribute].readline()
+                #            pp.pprint(featureData)
+                # pass featureData to a sub that creates appropriate subobjects
+#                if (currentGid in genomes_dict.keys()) or process_all_genomes:
                 insert_genome(currentGid,ws,wsname,featureData)
 
             # make sure Python does gc right away
@@ -838,30 +838,30 @@ if __name__ == "__main__":
     if args.skip_last:
         logger.info('skipping last genome ' + gid)
         exit(0)
-    logger.info('gid is ' + gid)
-    logger.info('numericGid is ' + str(numericGid))
-    logger.info('currentNumericGid is ' + str(currentNumericGid))
-    # read other files and populate featureData
-    for attribute in attributeList:
-        featureData[attribute] = list()
-        while currentLine[attribute]:
-            [attrFid,attrRestOfLine]=currentLine[attribute].split("\t",1)
-            [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
-            attrGid=attrGidPrefix+'.'+attrGidNumericId
-            attrGidNumericId=int(attrGidNumericId)
-#            print >> sys.stderr, 'attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
-            if (attrGidNumericId == currentNumericGid):
-                featureData[attribute].append(currentLine[attribute])
-            if (attrGidNumericId < currentNumericGid):
-                logger.warning(attribute + ' file may have extra data, skipping')
-                logger.warning(' '.join([attrGid, currentNumericGid]))
-            if (attrGidNumericId > currentNumericGid):
-                logger.warning('need to skip to next attribute here: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
-                break
-            currentLine[attribute] = fileHandle[attribute].readline()
+    if (currentGid in genomes_dict.keys()) or process_all_genomes:
+        logger.info('gid is ' + gid)
+        logger.info('numericGid is ' + str(numericGid))
+        logger.info('currentNumericGid is ' + str(currentNumericGid))
+        # read other files and populate featureData
+        for attribute in attributeList:
+            featureData[attribute] = list()
+            while currentLine[attribute]:
+                [attrFid,attrRestOfLine]=currentLine[attribute].split("\t",1)
+                [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
+                attrGid=attrGidPrefix+'.'+attrGidNumericId
+                attrGidNumericId=int(attrGidNumericId)
+            #            print >> sys.stderr, 'attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
+                if (attrGidNumericId == currentNumericGid):
+                    featureData[attribute].append(currentLine[attribute])
+                if (attrGidNumericId < currentNumericGid):
+                    logger.warning(attribute + ' file may have extra data, skipping')
+                    logger.warning(' '.join([attrGid, currentNumericGid]))
+                if (attrGidNumericId > currentNumericGid):
+                    logger.warning('need to skip to next attribute here: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
+                    break
+                currentLine[attribute] = fileHandle[attribute].readline()
 #    pp.pprint(featureData)
     # pass featureData to a sub that creates appropriate subobjects
-    if (currentGid in genomes_dict.keys()) or process_all_genomes:
         insert_genome(currentGid,ws,wsname,featureData)
 
     
