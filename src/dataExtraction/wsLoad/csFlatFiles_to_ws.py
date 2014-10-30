@@ -654,6 +654,7 @@ if __name__ == "__main__":
 
     process_all_genomes = True
     ordered_selected_genomes_list = []
+    max_genome_number = None
     if len(args.genomes) > 0:
         process_all_genomes = False
         genomes_list = args.genomes
@@ -662,6 +663,7 @@ if __name__ == "__main__":
             selectedGidNumber = genome.split('.')[1]
             genomes_dict[genome] = int(selectedGidNumber)
         ordered_selected_genomes_list = sorted(genomes_dict.values())
+        max_genome_number = ordered_selected_genomes_list[-1]
 
     sorted_file_dir = '.'
     if args.sorted_file_dir:
@@ -837,19 +839,26 @@ if __name__ == "__main__":
             currentNumericGid = numericGid
             currentGid = gid
             logger.info('Current Genome : ' + currentGid)
+
         elif (numericGid == currentNumericGid):
             if not featureData.has_key('Feature'):
                 featureData['Feature'] = list()
             featureData['Feature'].append(currentLine['Feature'])
+
 #        if (numericGid < currentNumericGid and not args.skip_till):
         elif (numericGid < currentNumericGid):
             logger.error('There is a big problem! Feature file may not be sorted properly.')
             logger.error(' '.join([str(numericGid), str(currentNumericGid)]))
             logger.error(currentLine['Feature'])
             exit(5)
+
 #        if (numericGid < currentNumericGid and args.skip_till):
 #            print >> sys.stderr, 'Skipping line'
 #            print >> sys.stderr, ' '.join([str(numericGid), str(currentNumericGid)])
+
+        if (not process_all_genomes) and (numericGid > max_genome_number):
+            cleanup_filehandles(fileHandle.keys()) 
+            exit(0) 
         currentLine['Feature'] = fileHandle['Feature'].readline()
 
     # process remaining features if not debugging
@@ -860,6 +869,7 @@ if __name__ == "__main__":
         logger.info('skipping last genome ' + gid)
         cleanup_filehandles(fileHandle.keys())
         exit(0)
+
     if (currentGid in genomes_dict.keys()) or process_all_genomes:
         logger.info('gid is ' + gid)
         logger.info('numericGid is ' + str(numericGid))
