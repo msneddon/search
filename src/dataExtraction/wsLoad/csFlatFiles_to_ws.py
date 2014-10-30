@@ -653,12 +653,15 @@ if __name__ == "__main__":
     wsname = args.wsname[0]
 
     process_all_genomes = True
+    ordered_selected_genomes_list = []
     if len(args.genomes) > 0:
         process_all_genomes = False
         genomes_list = args.genomes
         genomes_dict = dict()
-        for genome in genomes_list: 
-            genomes_dict[genome] = 1
+        for genome in genomes_list:
+            selectedGidNumber = genome.split('.')[1]
+            genomes_dict[genome] = int(selectedGidNumber)
+        ordered_selected_genomes_list = sorted(genomes_dict.values())
 
     sorted_file_dir = '.'
     if args.sorted_file_dir:
@@ -805,16 +808,18 @@ if __name__ == "__main__":
                         [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
                         attrGid = attrGidPrefix + '.' + attrGidNumericId
                         attrGidNumericId = int(attrGidNumericId)
+                        #IF genome of interest or processing all genomes :: aka a genome that will be processed
                         if (attrGid in genomes_dict.keys()) or process_all_genomes:
                             logger.debug('attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
-                        if (attrGidNumericId == currentNumericGid):
-                            featureData[attribute].append(currentLine[attribute])
+                            if (attrGidNumericId == currentNumericGid):
+                                featureData[attribute].append(currentLine[attribute])
+                        #If processing all genomes and you find unexpected data from a previous genome number
                         if (attrGidNumericId < currentNumericGid) and process_all_genomes:
-                            #                        if not args.skip_till:
-                            if (currentGid in genomes_dict.keys()) or process_all_genomes:
-                                logger.warning(attribute + ' file may have extra data, skipping')
-                                logger.warning(' '.join([attrGid, str(currentNumericGid)]))
-                        if (attrGidNumericId > currentNumericGid):
+                            logger.warning(attribute + ' file may have extra data, skipping')
+                            logger.warning(' '.join([attrGid, str(currentNumericGid)]))
+                        #If the attribute genome number is higher than the current genome of interest, you know you have all the atrributes of this type for this genome
+                        elif (attrGidNumericId > currentNumericGid):
+                            #IF genome of interest or processing all genomes :: aka a genome that will be processed
                             if (attrGid in genomes_dict.keys()) or process_all_genomes:
                                 logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
                             break
@@ -832,12 +837,12 @@ if __name__ == "__main__":
             currentNumericGid = numericGid
             currentGid = gid
             logger.info('Current Genome : ' + currentGid)
-        if (numericGid == currentNumericGid):
+        elif (numericGid == currentNumericGid):
             if not featureData.has_key('Feature'):
                 featureData['Feature'] = list()
             featureData['Feature'].append(currentLine['Feature'])
 #        if (numericGid < currentNumericGid and not args.skip_till):
-        if (numericGid < currentNumericGid):
+        elif (numericGid < currentNumericGid):
             logger.error('There is a big problem! Feature file may not be sorted properly.')
             logger.error(' '.join([str(numericGid), str(currentNumericGid)]))
             logger.error(currentLine['Feature'])
