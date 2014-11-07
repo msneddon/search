@@ -42,8 +42,14 @@ class TextFileDecoder(object):
         return line
                     
     def read(self, size):
+        startPosition = self._fp.tell()
+
         byteString = self._fp.read(size)
         charString = codecs.decode(byteString, self._codec)
+
+        charBytes = len(codecs.encode(charString, self._codec))
+        self._fp.seek(startPosition + charBytes)
+
         return charString
 
     def tell(self):
