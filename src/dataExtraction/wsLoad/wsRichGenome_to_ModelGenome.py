@@ -136,6 +136,9 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
                     fbaGenomeObject['contig_lengths'] = [ genome['data']['contig_lengths'][y] for y in genome['data']['contig_lengths'] ]
                     fbaGenomeObject['contig_ids'] = [ y for y in genome['data']['contig_lengths'] ]
 
+                #Provenance
+                genome_provenance = genome['provenance']
+
                 end = time.time()
                 print >> sys.stderr, "compiled genome object for %s %s" % ( x[1], str(end - start))
                 start = time.time()
@@ -149,6 +152,7 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
 #                    print >> sys.stderr, contigref
 #                    print >> sys.stderr, contigref[0]['info']
                     contig = contigref[0]['data']
+                    contig_provenance = contigref[0]['provenance']
                     fbaContig = dict()
                     fbaContig['contigs'] = list()
                     contig_keys = ["id","md5","source","source_id"]
@@ -239,13 +243,13 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
 # have as many searchable fields
                 try:
                     if args.skip_dna_sequences:
-                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id'],"provenance":genome_provenance}]})
                         print >> sys.stderr,genome_info
                     else:
-                        contig_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1]}]})
+                        contig_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1],"provenance":contig_provenance}]})
                         fbaGenomeObject['contigset_ref'] = wsoutput + '/' + contigref[0]['info'][1]
                         print >> sys.stderr,contig_info
-                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
+                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id'],"provenance":genome_provenance}]})
                         print >> sys.stderr,genome_info
                 except biokbase.workspace.client.ServerError as err:
                     rematch = re.search('subdata size exceeds limit', str(err))
