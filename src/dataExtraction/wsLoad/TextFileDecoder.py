@@ -3,17 +3,17 @@
 import os
 import codecs
 
-def open_textdecoder(file=None, codec=None):
+def open_textdecoder(file=None, codec=None, chunkSize=1024):
     fp = open(file, 'rb')
-    return TextFileDecoder(fp, codec)
+    return TextFileDecoder(fp, codec, chunkSize)
 
 class TextFileDecoder(object):
-    def __init__(self, file=None, codec=None):
+    def __init__(self, file=None, codec=None, chunkSize=1024):
         self._fp = file
         self._codec = codec
         
         # use chunk size of 1KB
-        self._chunkSize = 1024
+        self._chunkSize = chunkSize
     
     def close(self):
         self._fp.close()
@@ -23,28 +23,31 @@ class TextFileDecoder(object):
 
         chunkString = str()       
 
-        haveLine = False
-        while not haveLine:          
-            nextChunk = codecs.decode(self._fp.read(self._chunkSize), self._codec)
-            chunkString += nextChunk
+        while 1:
+            bytes = self._fp.read(self._chunkSize)
 
-            firstEOL = chunkString.find("\n")
+            if not bytes:
+                return bytes
 
-            if firstEOL > -1:
-                if firstEOL == len(chunkString) - 1:
-                    line = chunkString
-                else:
-                    line = chunkString[:firstEOL + 1]
-                
-                self._fp.seek(startPosition + len(codecs.encode(line, self._codec)))
-                haveLine = True
+            nextChunk = codecs.decode(bytes, self._codec)
+
+            eol = nextChunk.find("\n")
+
+            if eol != -1:
+                chunkString += nextChunk[:eol + 1]
+                self._fp.seek(startPosition + len(codecs.encode(chunkString, self._codec)),0)
+                return chunkString
         
-        return line
+            chunkString += nextChunk
                     
     def read(self, size):
         startPosition = self._fp.tell()
 
         byteString = self._fp.read(size)
+
+        if byteString == None:
+            return None
+
         charString = codecs.decode(byteString, self._codec)
 
         charBytes = len(codecs.encode(charString, self._codec))
@@ -81,6 +84,7 @@ class TextFileDecoder(object):
         stringBytes = len(codecs.encode(s, self._codec))
 
         if stringBytes > lastPosition - startPosition:
+            self._fp.seek(filePosition)
             return -1
 
         chunkSize = self._chunkSize        
@@ -88,12 +92,16 @@ class TextFileDecoder(object):
         if stringBytes > chunkSize:
             chunkSize = stringBytes * 4
 
+        if lastPosition - startPosition < chunkSize:
+            chunkSize = lastPosition - startPosition
+
         offset = 0
-        while True:
+        while 1:
             try:
                 self._fp.seek(startPosition + offset)
                 chunkString = codecs.decode(self._fp.read(chunkSize), self._codec)
             except IOError, e:
+                self._fp.seek(filePosition)
                 return -1                
 
             # look for the first instance of this string
@@ -103,33 +111,33 @@ class TextFileDecoder(object):
                 # set the file position back to where it was before we began
                 self._fp.seek(filePosition)
                 
-                remainderString = str()
+                offsetString = chunkString
                 
                 # if the string is at the end we are done, otherwise we need to get everything on the end after our string
                 if s != chunkString[-stringLength:]:
                     if firstByte:
                         # calculate up to the start of the string
-                        remainderString = chunkString[firstInstance:]
+                        offsetString = chunkString[:firstInstance]
                     else:
                         # calculate up to the end of the string
-                        remainderString = chunkString[firstInstance + stringLength:]                        
+                        offsetString = chunkString[:firstInstance + stringLength]                        
                 
                 # calculate the bytes to the string
-                return startPosition + offset + chunkSize - len(codecs.encode(remainderString, self._codec))
+                return startPosition + offset + len(codecs.encode(offsetString, self._codec))
             elif startPosition + offset + chunkSize == lastPosition:
                 # we reached the end of the file and didn't find the string
                 self._fp.seek(filePosition)
                 return -1
             
             # need to read further ahead
-            if startPosition + offset + self._chunkSize < lastPosition: 
-                offset += self._chunkSize
+            if startPosition + offset + chunkSize + chunkSize < lastPosition: 
+                offset += chunkSize
             else:
                 # the only part left is the end of the file
-                chunkSize = lastPosition - startPosition + offset
+                chunkSize = lastPosition - startPosition
 
 
-    def rfind(self, s, startPosition=0, lastPosition=-1, firstByte=False):
+    def rfind(self, s, lastPosition=-1, startPosition=0, firstByte=False):
         filePosition = self._fp.tell()
         self._fp.seek(0,2)
         finalPosition = self._fp.tell()
@@ -146,11 +154,12 @@ class TextFileDecoder(object):
 
         if startPosition > lastPosition:
             raise Exception("Start position greater than ending position!")
-            
+
         stringLength = len(s)
         stringBytes = len(codecs.encode(s, self._codec))
 
         if stringBytes > lastPosition - startPosition:
+            self._fp.seek(filePosition)
             return -1
 
         chunkSize = self._chunkSize * 4
@@ -158,12 +167,16 @@ class TextFileDecoder(object):
         if stringBytes > chunkSize:
             chunkSize = stringBytes * 4
 
+        if lastPosition - startPosition < chunkSize:
+            chunkSize = lastPosition - startPosition
+
         offset = 0
-        while True:
+        while 1:
             try:
-                self._fp.seek(startPosition - offset - chunkSize)
+                self._fp.seek(lastPosition - offset - chunkSize)
                 chunkString = codecs.decode(self._fp.read(chunkSize), self._codec)
             except IOError, e:
+                self._fp.seek(filePosition)
                 return -1
 
             # look for the last instance of this string                
@@ -173,29 +186,29 @@ class TextFileDecoder(object):
                 # set the file position back to where it was before we began
                 self._fp.seek(filePosition)
 
-                remainderString = str()
+                remainderString = chunkString
 
                 # if the string is at the end we are done, otherwise we need to get everything on the end after our string
                 if s != chunkString[-stringLength:]:
                     if firstByte:
                         # calculate up to the start of the string
-                        remainderString = chunkString[lastInstance:]
+                        remainderString = chunkString[:lastInstance]
                     else:
                         # calculate up to the end of the string
-                        remainderString = chunkString[lastInstance + stringLength:]
+                        remainderString = chunkString[:lastInstance + stringLength]
 
                 # calculate the bytes to the string
-                return startPosition - offset - len(codecs.encode(remainderString, self._codec))
-            elif startPosition - offset - chunkSize == 0:
+                return lastPosition - offset - chunkSize + len(codecs.encode(remainderString, self._codec))
+            elif lastPosition - offset - chunkSize <= 0:
                 # we reached the beginning of the file and didn't find the string
                 self._fp.seek(filePosition)
                 return -1
 
             # need to read further back
-            if startPosition - offset - chunkSize - self._chunkSize > 0:                
-                offset += self._chunkSize
+            if lastPosition - offset - chunkSize - chunkSize > 0:                
+                offset += chunkSize - stringLength
             else:
                 # the only part left is the beginning of the file                
-                chunkSize = startPosition - offset
-                offset = 0
+                offset += chunkSize - stringLength
+                chunkSize = lastPosition - offset
                    
