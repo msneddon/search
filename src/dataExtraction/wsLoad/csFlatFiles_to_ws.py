@@ -6,7 +6,7 @@
 # use the ws-url command-line tool to set the active workspace service URL
 # use kbase-login to set the appropriate auth token
 
-import datetime
+from datetime import datetime
 import sys
 import simplejson
 import time
@@ -14,11 +14,14 @@ import random
 import requests
 import pprint
 import codecs
+import TextFileDecoder
 import os
 import Bio.SeqIO
 import Bio.SeqFeature
 import urllib2
 import logging
+import warnings
+import re
 
 import biokbase.workspace.client
 import biokbase.cdmi.client
@@ -48,6 +51,7 @@ cdmi_entity_api = biokbase.cdmi.client.CDMI_EntityAPI()
 # check that end of N is same as begin of N+1
 # if so, join them up (properly)
 def join_contiguous_locations(featureLocations):
+    #Appears to order the locations in the proper order (depending on + or - strand)
     newFeatureLocations = list()
     lastLoc = list()
     for index,loc in enumerate(featureLocations):
@@ -81,12 +85,107 @@ def join_contiguous_locations(featureLocations):
     return newFeatureLocations
 
 def cleanup_filehandles(filehandles):
-    for filehandle in filehandles:
-        filehandle.close()
+    #Closes all the attribute and feature open file_handles.
+    for fileName in filehandles:
+        filehandles[fileName].close()
+
+def find_genome_first_line(fp, looking_for, begin, end):
+    found_it = False 
+    counter = 0 
+    while (begin < end): 
+        mid_point = (end + begin) / 2 
+        line_start = fp.rfind("\n",mid_point) 
+        if line_start == -1 : 
+            line_start = 0 
+        fp.seek(line_start) 
+        line_to_check = fp.readline() 
+        first_element = line_to_check.split("\t")[0]
+        record_number = int(first_element.split(".")[1])
+#        print "Next binary search iteration - Begin : " + str(begin) + "  End : " + str(end)
+        if record_number == looking_for: 
+            found_it = True 
+            break 
+            # found what you wanted                                                                                                           
+        elif record_number > looking_for:
+            end = line_start
+        else: 
+            begin = fp.tell() 
+        counter = counter + 1 
+#    print "Found it ? " + str(looking_for) + " " + str(found_it)
+    logger.debug("Binary Search Result - Looking for " + str(looking_for) + "  Found? " + str(found_it))
+    if found_it: 
+        #Now find the first line of the file that has the genome of interest   
+        scan_chunk_size = 100000
+        found_first_line = False
+        while (not found_first_line):
+            scan_point = fp.tell() - scan_chunk_size 
+            if scan_point < 0: 
+                scan_point = 0 
+            fp.seek(scan_point,0) 
+            file_chunk = fp.read(scan_chunk_size)
+            file_lines = file_chunk.split('\n',)
+            while (len(file_lines) == 1) and (scan_point > 0): 
+                #dont have a full line.  Double the scan chunk size until you get a new line.  
+                scan_chunk_size = scan_chunk_size * 2 
+                scan_point = fp.tell - scan_chunk_size 
+                if scan_point < 0: 
+                    scan_point = 0 
+                fp.seek(scan_point,0)
+            #first line is partial                                     
+            fp.seek(scan_point,0)
+            if scan_point != 0 :
+                fp.readline()
+            first_full_line = fp.readline()
+            #split line and compare first element   
+            first_element = first_full_line.split("\t")[0] 
+            record_number = int(first_full_line.split(".")[1]) 
+            if (record_number == looking_for) and (scan_point == 0):
+                return_result = [found_it,0]
+#                print "First Full line : " + first_full_line 
+                return return_result 
+            elif record_number < looking_for: 
+                #if not the id looking for keep looping through readline until you find it. 
+                previous_line_start = fp.tell()
+                check_line = fp.readline()
+                while (not found_first_line):
+                    first_element = check_line.split("\t")[0]
+                    record_number = int(check_line.split(".")[1])
+                    if record_number == looking_for:
+                        #found the first_line 
+                        begin = previous_line_start 
+                        return_result = [found_it,begin] 
+#                        print "First line : " + check_line 
+                        return return_result 
+                    elif record_number < looking_for: 
+                        #keep looping  
+                        previous_line_start = fp.tell() 
+                        check_line = fp.readline() 
+                    else: 
+                        #ERROR FILE NOT SORTED  
+#                        print "ERROR the file is not properly sorted" 
+                        logger.error("Binary Search : File not properly sorted")
+                        fp.close() 
+                        exit(0) 
+            elif record_number == looking_for: 
+                #elif id you are looking for and need to go back further. 
+                fp.seek(scan_point,0) 
+            else: 
+                #ERROR FILE NOT SORTED 
+#                print "ERROR the file is not properly sorted" 
+                logger.error("Binary Search : File not properly sorted")
+                fp.close() 
+                exit(0) 
+    else: 
+        fp.seek(begin,0) 
+        #next two lines are just for debugging  
+#        stop_line = fp.read(1000) 
+#        print "DID NOT FIND - The area stopped at : \n" + stop_line
+        return_result = [found_it,begin] 
+        return return_result 
 
 
 def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
-
+    #Creates a hash/dict of feature objects
     featureObjects = dict()
 
     for feature_line in featureData['Feature']:
@@ -180,9 +279,11 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
         featureObjects[fid]['aliases'][source_db].append(alias)
 
     featureLocations = dict()
+#    logger.debug("Number of rows in feature locations : " + str(len(featureData['Locations'])))
     for location_line in featureData['Locations']:
         location_line=location_line.rstrip()
         [fid,contig,begin,strand,length,ordinal]=location_line.split("\t")
+#        logger.debug("FID : " + fid + " -- contig : " + contig + " -- begin : " + begin + " -- strand : "+strand+ " -- length : " + length + " -- ordinal : " + ordinal)
         if not featureLocations.has_key(fid):
             featureLocations[fid] = list()
         if strand == '-':
@@ -196,20 +297,15 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
         featureLocations[fid].sort( key = lambda loc: loc[4] )
 
     for fid in featureLocations:
-#       logger.debug(featureLocations[fid])
+#        logger.debug(featureLocations[fid])
+#        logger.debug("Has locations " + fid)
         featureObjects[fid]['location'] = join_contiguous_locations(featureLocations[fid])
 #       logger.debug(featureObjects[fid]['location'])
         if len(featureObjects[fid]['location']) > 0:
 #           logger.debug('making feature_dna for ' + fid + ' on contig ' + featureObjects[fid]['location'][0][0])
             if not featureObjects[fid].has_key('dna_sequence'):
                 featureObjects[fid]['dna_sequence'] = ''
-
             locations = featureObjects[fid]['location']
-            # some genomes have the list of locations in reverse order
-            # jkbaumohl is researching
-            # if featureObjects[fid]['location'][0][2] == '-':
-            #     locations = reversed(featureObjects[fid]['location'])
-
             for loc in locations:
 #                if loc[3] > 100000 and (featureObjects[fid]['feature_type'] != 'CDS' or len(featureObjects[fid]['protein_sequence']) < 30000 ) :
                 if loc[3] > 100000 and (featureObjects[fid]['feature_type'] != 'CDS' or len(featureObjects[fid]['protein_translation']) < 30000) :
@@ -223,7 +319,8 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
 #                    logger.debug(featSeqFeature)
 #                    logger.debug(featSeqFeature.extract( contigSeqObjects[loc[0]]))
                 if contigSeqObjects.has_key(loc[0]):
-                    featureObjects[fid]['dna_sequence'] += str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq)
+#                     logger.debug(featSeqFeature)
+                     featureObjects[fid]['dna_sequence'] += str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq)
 #            logger.debug('genetic_code is ' + str(genetic_code))
 #            logger.debug(fid)
 
@@ -247,19 +344,28 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
                 if featureObjects[fid]['feature_type'] == 'CDS' and (featureObjects[fid]['protein_translation'] + stop_codon != Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code) ) :
                     logger.warning('warning: computed translation does not match translation in db for ' + fid)
                     if featureObjects[fid]['protein_translation'].find('X'):
-                        logger.debug('X found in CS translation, not worrying about for feature ' + fid)
+                        logger.warning('X found in CS translation, not worrying about for feature ' + fid)
                     else:
+                        logger.debug("IN ELSE BIOPYTHON TRANSLATE:")
                         logger.debug(featureObjects[fid]['protein_translation'] + stop_codon)
                         logger.debug(cdmi_api.fids_to_dna_sequences([fid]))
                         logger.debug(cdmi_api.fids_to_locations([fid]))
                         logger.debug(featureObjects[fid]['location'])
                         logger.debug(Bio.Seq.translate( featureObjects[fid]['dna_sequence'], cds=complete_cds,table=genetic_code))
                         logger.debug(featureObjects[fid]['dna_sequence'])
-#                        print >> sys.stderr, str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq.translate(table=genetic_code, cds=complete_cds) )
+            #                        print >> sys.stderr, str(featSeqFeature.extract( contigSeqObjects[loc[0]]).seq.translate(table=genetic_code, cds=complete_cds) )
+#            except Warning, w:
+                #CANT GET IT TO CATCH THIS WARNING
+#                /usr/local/lib/python2.7/dist-packages/Bio/Seq.py:1976: BiopythonWarning: Partial codon, len(sequence) not a multiple of three. Explicitly trim the sequence or add trailing N before translation. This may become an error in future. BiopythonWarning)
+                #NOT huge deal, but annoying
+#                logger.warning('Feature ID Warning' + fid + ' : ' + w)
             except Bio.Data.CodonTable.TranslationError, e:
                 logger.warning('possible problem with translation of fid ' + fid)
                 logger.warning(str(e))
                 logger.warning(featureObjects[fid]['function'])
+#            except Exception, e:
+#                #WARNING Still does not get caught here.
+#                logger.warning('FINAL EXCPETION CATCH : ' + e)
         else:
             logger.warning('no locations for ' + fid + ', not making feature_dna')
 
@@ -293,7 +399,6 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
         regulons2tfs[reg].append(fid)
     for fid in fids2regulons:
         for regulon_id in fids2regulons[fid]:
-#            regulon_id = fids2regulons[fid]
             regulon_set = regulons2fids[regulon_id]
             tfs = list()
             if regulons2tfs.has_key(regulon_id):
@@ -336,6 +441,7 @@ def create_feature_objects(gid,genetic_code,featureData,contigSeqObjects):
     return featureObjects
 
 def compute_taxonomy_lineage(taxonomy_id):
+    #recursive function that will retrieve the taxonomy lineage.
     if not all_taxonomy_data.has_key(taxonomy_id):
         return ''
     if int(all_taxonomy_data[taxonomy_id]['domain']) == 1:
@@ -346,16 +452,15 @@ def compute_taxonomy_lineage(taxonomy_id):
     else:
         return compute_taxonomy_lineage(all_taxonomy_data[taxonomy_id]['parent_taxonomy_id'])
 
-def insert_genome(g,ws,wsname,featureData):
-#    logger.debug("THIS IS A TEST2" + g)
-#    sys.exit(0)
-
+def insert_genome(g,ws,wsname,featureData,provenance_description,provenance_time_string):
+    #This inserts the genome objects (Genome, ContigSet and FeatureSet) into the WS
     start = time.time()
 
     numericGid = int(g.split('.')[1])
     logger.info(g)
     logger.info(numericGid)
     
+    #IF do not want to replace existing genomes in the WS
     try:
         ws.get_object_info([{"workspace":wsname,"name":g}],0)
         if skipExistingGenomes == True:
@@ -387,7 +492,7 @@ def insert_genome(g,ws,wsname,featureData):
     featureSet = dict()
     featureSet['features'] = dict()
 
-###############################################
+    ###############################################
     #fill in top level genome object properties
     genomeObject["genome_id"] = g
     genomeObject["scientific_name"] = genome_data["scientific_name"]
@@ -419,7 +524,7 @@ def insert_genome(g,ws,wsname,featureData):
     #genomeObject["proteinset_ref"] = 
     #genomeObject["transcriptset_ref"] = 
 
-##########################
+    ##########################
     # build ContigSet and Contig objects
     # ultimately we will want to build ContigSet independent of
     # the Genome object, insert it first, get its workspace path,
@@ -452,6 +557,8 @@ def insert_genome(g,ws,wsname,featureData):
     contigSeqObjects = dict()
     contig_set_made_flag = True
 
+    ##########################################################
+    #IF CONTIG FILE DIRECTORY DOES NOT EXIST USE CDMI
     if contigseq_file_dir == '':
         logger.info('no contig path defined, using CDMI')
 
@@ -467,6 +574,8 @@ def insert_genome(g,ws,wsname,featureData):
         # need to make contigSeqObjects here to pass to create_feature_objects
 
     else:
+        ######################################################
+        #CONTIG DIR EXISTS USE FILE if the file exists.
         logger.info('contig path defined, attempting to read file in ' + contigseq_file_dir)
         try:
             contig_filename = contigseq_file_dir + '/' + g + '.fa'
@@ -476,7 +585,6 @@ def insert_genome(g,ws,wsname,featureData):
                 logger.info('contig file ' + contig_filename + ' may be too big, contigset will not be made for genome ' + g)
                 logger.warning('contig file ' + contig_filename + ' may be too big, contigset will not be made for genome ' + g)
                 contig_set_made_flag = False
-#                return
             if genomeObject["num_contigs"] > 125000:
 #                There are too many contigs for this genome.  The resulting contigset would be too large.  
                 logger.info('contig file ' + contig_filename + '.  There are too many contigs for genome ' + g + '.  The resulting contigset would be too large')
@@ -485,7 +593,7 @@ def insert_genome(g,ws,wsname,featureData):
             contig_handle = open (contig_filename, 'rU')
             contigSeqObjects = Bio.SeqIO.to_dict( Bio.SeqIO.parse(contig_handle,'fasta') )
             for contigseq in contigSeqObjects:
-#                logger.debug(contigseq)
+#                logger.debug(contigseq + ":::" + str(contigSeqObjects[contigseq].seq) )
                 contig_sequences[contigseq] = str(contigSeqObjects[contigseq].seq)
             contig_handle.close()
             logger.info('reading contig file ' + contig_filename + ' succeeded')
@@ -540,7 +648,7 @@ def insert_genome(g,ws,wsname,featureData):
 
     if contig_set_made_flag:
         try:
-            contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id']}]})
+            contigset_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.ContigSet","data":contigSet,"name":contigSet['id'],"provenance":[{"time":provenance_time_string,"service": "KBase Search","description":provenance_description}]}]})
             logger.info(contigset_info)
         except biokbase.workspace.client.ServerError, e:
             logger.warning('possible error loading contigset for ' + g)
@@ -605,7 +713,8 @@ def insert_genome(g,ws,wsname,featureData):
 #                                       "objects":[{"type": "KBaseSearch.SearchFeatureSet",
                                        "objects":[{"type": featureSetType,
                                                    "data": featureSet,
-                                                   "name": featureset_id}]
+                                                   "name": featureset_id,
+                                                   "provenance":[{"time":provenance_time_string,"service": "KBase Search","description":provenance_description}]}]
                                      })
         logger.info(featureset_info)
     except biokbase.workspace.client.ServerError, e:
@@ -627,7 +736,7 @@ def insert_genome(g,ws,wsname,featureData):
     start = time.time()
 
 #    print simplejson.dumps(genomeObject,sort_keys=True,indent=4 * ' ')
-    genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.Genome","data":genomeObject,"name":genomeObject['genome_id']}]})
+    genome_info = ws.save_objects({"workspace":wsname,"objects":[ { "type":"KBaseSearch.Genome","data":genomeObject,"name":genomeObject['genome_id'],"provenance":[{"time":provenance_time_string,"service": "KBase Search","description":provenance_description}]}]})
     logger.info(genome_info)
 
     end = time.time()
@@ -645,6 +754,8 @@ if __name__ == "__main__":
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
     parser.add_argument('--debug',action='store_true',help='debugging')
     parser.add_argument('--skip-last',action='store_true',help='skip processing last genome (in case input is incomplete)')
+    parser.add_argument('--database_version', nargs=1,help='This is the version of the central store database that was used to generate the datbase dump files.  Ex: \'V5\'')
+    parser.add_argument('--search_version', nargs=1,help='This is the version of search used to populate the workspace.  Ex: \'V0.4\'')
     parser.add_argument('--genomes', action="store", nargs='*', help='list of genomes to do only')
 #    parser.add_argument('--skip-till', nargs=1, help='skip genomes with numeric gid < SKIP_TILL (genome must exist)')
 
@@ -652,17 +763,34 @@ if __name__ == "__main__":
 
     wsname = args.wsname[0]
 
+    logging_file_dir = '.'
+    if args.logging_file_dir: 
+        logging_file_dir = args.logging_file_dir[0]
+
+    logging.basicConfig(filename=logging_file_dir + '/csFlatFiles_to_ws_'+ datetime.utcnow().isoformat() + '.log', format='%(name)s - %(asctime)s - %(levelname)s:%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+
+    logger = logging.getLogger('csFlatFiles_to_ws')
+#    logger.debug("THIS IS A TEST")
+
     process_all_genomes = True
     ordered_selected_genomes_list = []
     max_genome_number = None
     if len(args.genomes) > 0:
+        g_regex = re.compile('kb\|g.\d+$')
         process_all_genomes = False
         genomes_list = args.genomes
         genomes_dict = dict()
         for genome in genomes_list:
+            g_match = g_regex.match(genome)
+            if (not g_match):
+                #genome string is not in expected format.
+                print "Entered Genome : " + genome + " is not in valid format. Exiting program."
+                logger.error("Entered Genome : " + genome + " is not in valid format.  Exiting program.")
+                sys.exit(0)
             selectedGidNumber = genome.split('.')[1]
             genomes_dict[genome] = int(selectedGidNumber)
         ordered_selected_genomes_list = sorted(genomes_dict.values())
+#        logger.debug("Genome Numeric IDS entered : " + str(ordered_selected_genomes_list))
         max_genome_number = ordered_selected_genomes_list[-1]
 
     sorted_file_dir = '.'
@@ -672,14 +800,18 @@ if __name__ == "__main__":
         skipExistingGenomes = True
     if args.contigseq_file_dir:
         contigseq_file_dir = args.contigseq_file_dir[0]
-    logging_file_dir = '.'
-    if args.logging_file_dir: 
-        logging_file_dir = args.logging_file_dir[0]
+        if (not os.path.isdir(contigseq_file_dir)):
+            logger.error("Contig directory " + contigseq_file_dir + " does not exist. Fix path in call.  Exiting program")
+            print "Contig directory " + contigseq_file_dir + " does not exist.  Exiting program."
+            sys.exit(0)
 
-    logging.basicConfig(filename=logging_file_dir + '/csFlatFiles_to_ws_'+ datetime.datetime.utcnow().isoformat() + '.log', format='%(name)s - %(asctime)s - %(levelname)s:%(message)s', datefmt='%m/%d/%Y %I:%M:%S %p', level=logging.DEBUG)
+    database_version = None
+    if args.database_version:
+        database_version = args.database_version[0]
 
-    logger = logging.getLogger('csFlatFiles_to_ws')
-#    logger.debug("THIS IS A TEST")
+    search_version = None
+    if args.search_version:
+        search_version = args.search_version[0]
 
     # ws public instance
     ws = biokbase.workspace.client.Workspace("https://kbase.us/services/ws")
@@ -758,108 +890,190 @@ if __name__ == "__main__":
 
     fileList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','Feature','fids2pubs','HasAliasAssertedFrom','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
     attributeList = ['Annotation','AtomicRegulons','CoexpressedFids','CoOccurringFids','fids2pubs','HasAliasAssertedFrom','Locations','ProteinFamilies','regulonData.members','regulonData.tfs','Roles','Subsystems','SubsystemData']
+    fileBegins = dict()
+    fileEnds = dict()
+    max_file_time = 0.0
+    provenance_time_string = None
 
     for file in fileList:
-        fileName = sorted_file_dir + '/' + file + '.tab.sorted'
+#        fileName = sorted_file_dir + '/' + file + '.tab.sorted'
+        fileName = file + '.tab.sorted'
+        original_dump_fileName = file + '.tab'
 # want to follow up why this was needed
-        fileHandle[file] = codecs.open( fileName, mode='r', encoding='ISO-8859-1')
+#        fileHandle[file] = codecs.open( fileName, mode='r', encoding='ISO-8859-1')
 #        fileHandle[file] = open ( fileName, 'r')
+#        fileHandle[file] = open(os.path.join(sorted_file_dir, fileName), 'r')
+        fileHandle[file] = TextFileDecoder.open_textdecoder(os.path.join(sorted_file_dir, fileName), 'ISO-8859-1')
+
+        current_file_time = os.stat(fileName).st_mtime 
+        if current_file_time > max_file_time : 
+            max_file_time = current_file_time 
+        if not process_all_genomes:
+            #initialize begins to zero
+            fileBegins[file] = 0 
+            #initialize ends to last byte of files
+            fileHandle[file].seek(0,2)
+            fileEnds[file] =  fileHandle[file].tell()
+            fileHandle[file].seek(0,0)
         # seed the first line
         currentLine[file] = fileHandle[file].readline()
+
+    provenance_time_string = datetime.utcfromtimestamp(max_file_time).isoformat().split(".")[0] + "Z"
+
+    #Provenance Description                                              
+    provenance_description = "Data from Central Store "
+    if database_version : 
+        provenance_description = provenance_description + str(database_version) + " "   
+    provenance_description = provenance_description + "at " + provenance_time_string + " using KBase Search"   
+    if search_version : 
+        provenance_description = provenance_description + " " + search_version   
 
 ### to do: allow user to specify --first-genome
 ### scan through all files till get to the target genome
 ### then continue as normal
-    while currentLine['Feature']:
-#        logger.debug("currentLine['Feature'] ", unicode(currentLine['Feature']))
 
-        [fid,cs_id,gid,restOfLine] = currentLine['Feature'].split("\t",3)
-#        logger.debug('FID: ' + fid + ',  CSID: ' + cs_id + ',  GID: ' + gid)
-        [prefix,numericGid] = gid.split('.')
-        numericGid = int(numericGid)
-
-        if (currentNumericGid == -1):
-            currentGid = gid
-            currentNumericGid = numericGid
-        if (numericGid > currentNumericGid):
-            if (currentGid in genomes_dict.keys()) or process_all_genomes:
-                logger.info('gid is ' + gid)
-                logger.info('numericGid is ' + str(numericGid))
-                logger.info('currentNumericGid is ' + str(currentNumericGid))
-                # read other files and populate featureData
-                for attribute in attributeList:
-                    featureData[attribute] = list()
-                    while currentLine[attribute]:
-                        if len(currentLine[attribute].split('\t', 1)) == 2:                    
-                            [attrFid,attrRestOfLine] = currentLine[attribute].split("\t",1)
-                        else:
-                            logger.warning('suspect line : ' + currentLine[attribute])
-                            logger.warning(currentLine[attribute].split(' ', 1))
-                            if len(currentLine[attribute].strip()) == 0:
-                                logger.warning(attribute)                      
-                                #[attrFid, attrRestOfLine] = [,""]
-                                #sys.exit(0)
-                                #print >> sys.stderr, "skipping"
-                                #continue
-                            else:
-                                [attrFid,attrRestOfLine] = currentLine[attribute].split(" ",1)                                 
-                                # this makes a huge amount of output
-                                #                    print >> sys.stderr, 'currentFid is ' + str(attrFid)
-                                #                    print >> sys.stderr, 'attribute is ' + str(attribute)
-                                #                    print >> sys.stderr, currentLine[attribute]
-                        [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
-                        attrGid = attrGidPrefix + '.' + attrGidNumericId
-                        attrGidNumericId = int(attrGidNumericId)
-                        #IF genome of interest or processing all genomes :: aka a genome that will be processed
-                        if (attrGid in genomes_dict.keys()) or process_all_genomes:
-                            logger.debug('attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
-                            if (attrGidNumericId == currentNumericGid):
-                                featureData[attribute].append(currentLine[attribute])
-                        #If processing all genomes and you find unexpected data from a previous genome number
-                        if (attrGidNumericId < currentNumericGid) and process_all_genomes:
-                            logger.warning(attribute + ' file may have extra data, skipping')
-                            logger.warning(' '.join([attrGid, str(currentNumericGid)]))
-                        #If the attribute genome number is higher than the current genome of interest, you know you have all the atrributes of this type for this genome
-                        elif (attrGidNumericId > currentNumericGid):
-                            #IF genome of interest or processing all genomes :: aka a genome that will be processed
-                            if (attrGid in genomes_dict.keys()) or process_all_genomes:
-                                logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
-                            break
+    select_genome_counter = 0
+    processing_new_genome = True
+    
+    while currentLine['Feature']: 
+#        logger.debug("currentLine['Feature'] ", unicode(currentLine['Feature']))  
+        [fid,cs_id,gid,restOfLine] = currentLine['Feature'].split("\t",3) 
+#        logger.debug('FID: ' + fid + ',  CSID: ' + cs_id + ',  GID: ' + gid) 
+        [prefix,numericGid] = gid.split('.') 
+        numericGid = int(numericGid) 
+#    print "starting new loop -- Processing new genome : " + str(processing_new_genome) 
+        if (not process_all_genomes) and (processing_new_genome) :
+            found_genome = False
+            count = 0
+            while (not found_genome) :
+#                print "fg " + str(found_genome) + " " + str(type(found_genome))
+                count += 1
+                if count > 10:
+                    sys.exit(1)
+#                print "ORDERED SELECTED GENOMES_LIST : " + ('\t'.join(map(str,ordered_selected_genomes_list)))
+                numericGid = ordered_selected_genomes_list[select_genome_counter]
+                currentNumericGid = -1
+                logger.info("Binary search for Feature")
+                (found_genome,fileBegins['Feature']) = find_genome_first_line(fileHandle['Feature'], numericGid, fileBegins['Feature'], fileEnds['Feature'])
+                #print "Genome : " + str(numericGid) + " -- Found Genome Feature : " + str(found_genome) + " -- File Begin : " + str(fileBegins['Feature']) 
+                if (not found_genome):
+                    select_genome_counter = select_genome_counter + 1
+                else:
+                    processing_new_genome = False
+                if (select_genome_counter >= len(ordered_selected_genomes_list)):
+                    break            
+                    #or sys.exit(0)?
+            fileHandle['Feature'].seek(fileBegins['Feature'],0)
+            currentLine['Feature'] = fileHandle['Feature'].readline()
+            [fid,cs_id,gid,restOfLine] = currentLine['Feature'].split("\t",3)                                                                          
+        if (currentNumericGid == -1): 
+            currentGid = gid 
+            currentNumericGid = numericGid 
+        if (numericGid > currentNumericGid): 
+#            if (currentGid in genomes_dict.keys()) or process_all_genomes: 
+            logger.info('gid is ' + gid) 
+            logger.info('numericGid is ' + str(numericGid)) 
+            logger.info('currentNumericGid is ' + str(currentNumericGid)) 
+            # read other files and populate featureData
+            for attribute in attributeList: 
+                featureData[attribute] = list() 
+#                processing_attribute = True
+                if (not process_all_genomes): 
+                    attribute_found_genome = False 
+#                    print "ATTRIBUTE " + attribute
+#                    print "INPUTS looking_for " + str(currentNumericGid) + "  Begin " + str(fileBegins[attribute]) + "  End " + str(fileEnds[attribute])
+                    logger.info("Binary search for " + attribute)
+                    (attribute_found_genome,fileBegins[attribute]) = find_genome_first_line(fileHandle[attribute], currentNumericGid, fileBegins[attribute], fileEnds[attribute]) 
+                    logger.debug("Genome : " + str(currentNumericGid) + " -- Attribute " + attribute + " -- Found Genome ATTR : " + str(attribute_found_genome) + " -- File Begin : " + str(fileBegins[attribute]) + "   File Ends : " +  str(fileEnds[attribute]))  
+                    fileHandle[attribute].seek(fileBegins[attribute],0) 
+                    if (fileBegins[attribute] <  fileEnds[attribute]):
                         currentLine[attribute] = fileHandle[attribute].readline()
-                #            pp.pprint(featureData)
-                # pass featureData to a sub that creates appropriate subobjects
-#                if (currentGid in genomes_dict.keys()) or process_all_genomes:
-                insert_genome(currentGid,ws,wsname,featureData)
-
-            # make sure Python does gc right away
-            featureData = None
+#                    if (attribute_found_genome):
+#                        processing_attribute = False
+                    if (not attribute_found_genome):
+                        #genome is not in that attribute
+#                        print "Did not find attribute for genome, moving to next attribute \n" 
+                        logger.info("Did not find attribute for genome, moving to next attribute") 
+                        continue
+                while currentLine[attribute]: 
+                    if len(currentLine[attribute].split('\t', 1)) == 2: 
+                        [attrFid,attrRestOfLine] = currentLine[attribute].split("\t",1) 
+                    else: 
+                        logger.warning('suspect line : ' + currentLine[attribute]) 
+                        logger.warning(currentLine[attribute].split(' ', 1)) 
+                        if len(currentLine[attribute].strip()) == 0: 
+                            logger.warning(attribute) 
+                            #[attrFid, attrRestOfLine] = [,""]
+                            #sys.exit(0)
+                            #print >> sys.stderr, "skipping"
+                            #continue
+                        else: 
+                            [attrFid,attrRestOfLine] = currentLine[attribute].split(" ",1) 
+                            # this makes a huge amount of output 
+                            #                    print >> sys.stderr, 'currentFid is ' + str(attrFid)
+                            #                    print >> sys.stderr, 'attribute is ' + str(attribute)
+                            #                    print >> sys.stderr, currentLine[attribute]
+                    [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2) 
+                    attrGid = attrGidPrefix + '.' + attrGidNumericId 
+                    attrGidNumericId = int(attrGidNumericId) 
+                    #IF genome of interest or processing all genomes :: aka a genome that will be processed 
+                    if (attrGid in genomes_dict.keys()) or process_all_genomes: 
+                        if (attrGidNumericId == currentNumericGid): 
+                            featureData[attribute].append(currentLine[attribute]) 
+                    #If processing all genomes and you find unexpected data from a previous genome number 
+                    if (attrGidNumericId < currentNumericGid) and process_all_genomes: 
+                        logger.warning(attribute + ' file may have extra data, skipping') 
+                        logger.warning(' '.join([attrGid, str(currentNumericGid)])) 
+                    #If the attribute genome number is higher than the current genome of interest, you know you have all the atrributes of this type for this genome
+                    elif (attrGidNumericId > currentNumericGid): 
+                        #IF genome of interest or processing all genomes :: aka a genome that will be processed
+                        if (attrGid in genomes_dict.keys()) or process_all_genomes: 
+                            logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)) 
+                        break 
+                    currentLine[attribute] = fileHandle[attribute].readline() 
+            #            pp.pprint(featureData)
+            # pass featureData to a sub that creates appropriate subobjects
+#             if (currentGid in genomes_dict.keys()) or process_all_genomes:
+            insert_genome(currentGid,ws,wsname,featureData,provenance_description,provenance_time_string) 
+            
+ 
+            # make sure Python does gc right away  
+            featureData = None 
             featureData = dict()
             featureData['Feature'] = list()
             featureData['Feature'].append(currentLine['Feature'])
-            currentNumericGid = numericGid
-            currentGid = gid
-            logger.info('Current Genome : ' + currentGid)
+            currentNumericGid = numericGid 
+            currentGid = gid 
+            processing_new_genome = True
+            logger.info('Current Genome : ' + currentGid) 
 
-        elif (numericGid == currentNumericGid):
+            if not process_all_genomes:
+                select_genome_counter = select_genome_counter+1 
+                if (select_genome_counter >= len(ordered_selected_genomes_list)):
+                    break
+#                if  (max_genome_number == numericGid):
+#                    break
+ 
+        elif (numericGid == currentNumericGid): 
             if not featureData.has_key('Feature'):
-                featureData['Feature'] = list()
-            featureData['Feature'].append(currentLine['Feature'])
-
+                featureData['Feature'] = list() 
+            featureData['Feature'].append(currentLine['Feature']) 
+ 
 #        if (numericGid < currentNumericGid and not args.skip_till):
-        elif (numericGid < currentNumericGid):
+        elif (numericGid < currentNumericGid): 
             logger.error('There is a big problem! Feature file may not be sorted properly.')
             logger.error(' '.join([str(numericGid), str(currentNumericGid)]))
-            logger.error(currentLine['Feature'])
-            exit(5)
-
+            logger.error(currentLine['Feature']) 
+            exit(5) 
+ 
 #        if (numericGid < currentNumericGid and args.skip_till):
 #            print >> sys.stderr, 'Skipping line'
-#            print >> sys.stderr, ' '.join([str(numericGid), str(currentNumericGid)])
-
+#            print >> sys.stderr, ' '.join([str(numericGid), str(currentNumericGid)]) 
         if (not process_all_genomes) and (numericGid > max_genome_number):
-            cleanup_filehandles(fileHandle.keys()) 
-            exit(0) 
+            cleanup_filehandles(fileHandle) 
+            sys.exit(0) 
         currentLine['Feature'] = fileHandle['Feature'].readline()
+#END WHILE LOOP
 
     # process remaining features if not debugging
     # (need to skip if not parsing complete data set, since
@@ -894,10 +1108,10 @@ if __name__ == "__main__":
                 currentLine[attribute] = fileHandle[attribute].readline()
 #    pp.pprint(featureData)
     # pass featureData to a sub that creates appropriate subobjects
-        insert_genome(currentGid,ws,wsname,featureData)
-        cleanup_filehandles(fileHandle.keys())
+        insert_genome(currentGid,ws,wsname,featureData,provenance_description,provenance_time_string)
+        cleanup_filehandles(fileHandle)
     else:
-        cleanup_filehandles(fileHandle.keys())
+        cleanup_filehandles(fileHandle)
         exit(0)
         
     
