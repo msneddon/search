@@ -775,24 +775,28 @@ if __name__ == "__main__":
     process_all_genomes = True
     ordered_selected_genomes_list = []
     max_genome_number = None
-    if len(args.genomes) > 0:
-        g_regex = re.compile('kb\|g.\d+$')
-        process_all_genomes = False
-        genomes_list = args.genomes
-        genomes_dict = dict()
-        for genome in genomes_list:
-            g_match = g_regex.match(genome)
-            if (not g_match):
+    if (args.genomes): 
+        if (len(args.genomes) > 0):
+            g_regex = re.compile('kb\|g.\d+$')
+            process_all_genomes = False
+            genomes_list = args.genomes
+            genomes_dict = dict()
+            for genome in genomes_list:
+                g_match = g_regex.match(genome)
+                if (not g_match):
                 #genome string is not in expected format.
-                print "Entered Genome : " + genome + " is not in valid format. Exiting program."
-                logger.error("Entered Genome : " + genome + " is not in valid format.  Exiting program.")
-                sys.exit(0)
-            selectedGidNumber = genome.split('.')[1]
-            genomes_dict[genome] = int(selectedGidNumber)
-        ordered_selected_genomes_list = sorted(genomes_dict.values())
-#        logger.debug("Genome Numeric IDS entered : " + str(ordered_selected_genomes_list))
-        max_genome_number = ordered_selected_genomes_list[-1]
-
+                    print "Entered Genome : " + genome + " is not in valid format. Exiting program."
+                    logger.error("Entered Genome : " + genome + " is not in valid format.  Exiting program.")
+                    sys.exit(0)
+                selectedGidNumber = genome.split('.')[1]
+                genomes_dict[genome] = int(selectedGidNumber)
+            ordered_selected_genomes_list = sorted(genomes_dict.values())
+#            logger.debug("Genome Numeric IDS entered : " + str(ordered_selected_genomes_list))
+            max_genome_number = ordered_selected_genomes_list[-1]
+        else:
+            logger.error("program was run with the genomes argument.  However no genomes were passed.")
+            print "program was run with the genomes argument.  However no genomes were passed."
+            sys.exit(0)
     sorted_file_dir = '.'
     if args.sorted_file_dir:
         sorted_file_dir = args.sorted_file_dir[0]
