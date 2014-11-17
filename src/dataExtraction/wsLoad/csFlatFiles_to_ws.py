@@ -1023,7 +1023,8 @@ if __name__ == "__main__":
                     #If processing all genomes and you find unexpected data from a previous genome number 
                     if (attrGidNumericId < currentNumericGid) and process_all_genomes: 
                         logger.warning(attribute + ' file may have extra data, skipping') 
-                        logger.warning(' '.join([attrGid, str(currentNumericGid)])) 
+                        logger.warning(' '.join(str(x) for x in [attrGid, str(currentNumericGid)]))
+                        break
                     #If the attribute genome number is higher than the current genome of interest, you know you have all the atrributes of this type for this genome
                     elif (attrGidNumericId > currentNumericGid): 
                         #IF genome of interest or processing all genomes :: aka a genome that will be processed
@@ -1091,22 +1092,43 @@ if __name__ == "__main__":
         # read other files and populate featureData
         for attribute in attributeList:
             featureData[attribute] = list()
+            if (not process_all_genomes): 
+                attribute_found_genome = False 
+#               print "ATTRIBUTE " + attribute                                                                                                                    
+#               print "INPUTS looking_for " + str(currentNumericGid) + "  Begin " + str(fileBegins[attribute]) + "  End " + str(fileEnds[attribute])              
+                logger.info("Binary search for " + attribute) 
+                (attribute_found_genome,fileBegins[attribute]) = find_genome_first_line(fileHandle[attribute], currentNumericGid, fileBegins[attribute], fileEnds[attribute]) 
+                logger.debug("Genome : " + str(currentNumericGid) + " -- Attribute " + attribute + " -- Found Genome ATTR : " + str(attribute_found_genome) + " -- File Begin : " + str(fileBegins[attribute]) + "   File Ends : " +  str(fileEnds[attribute])) 
+                fileHandle[attribute].seek(fileBegins[attribute],0) 
+                if (fileBegins[attribute] <  fileEnds[attribute]): 
+                    currentLine[attribute] = fileHandle[attribute].readline() 
+#                if (attribute_found_genome):                                                                                                                      
+#                    processing_attribute = False                                                                                                                  
+                if (not attribute_found_genome): 
+                    #genome is not in that attribute                                                                                                               
+#                   print "Did not find attribute for genome, moving to next attribute \n"                                                                        
+                    logger.info("Did not find attribute for genome, moving to next attribute") 
+                    continue 
             while currentLine[attribute]:
                 [attrFid,attrRestOfLine]=currentLine[attribute].split("\t",1)
                 [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
                 attrGid=attrGidPrefix+'.'+attrGidNumericId
                 attrGidNumericId=int(attrGidNumericId)
-            #            print >> sys.stderr, 'attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)
-                if (attrGidNumericId == currentNumericGid):
-                    featureData[attribute].append(currentLine[attribute])
-                if (attrGidNumericId < currentNumericGid):
-                    logger.warning(attribute + ' file may have extra data, skipping')
-                    logger.warning(' '.join([attrGid, currentNumericGid]))
-                if (attrGidNumericId > currentNumericGid):
-                    logger.warning('need to skip to next attribute here: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid))
-                    break
-                currentLine[attribute] = fileHandle[attribute].readline()
-#    pp.pprint(featureData)
+                if (attrGid in genomes_dict.keys()) or process_all_genomes: 
+                    if (attrGidNumericId == currentNumericGid): 
+                        featureData[attribute].append(currentLine[attribute]) 
+                #If processing all genomes and you find unexpected data from a previous genome number                                                              
+                if (attrGidNumericId < currentNumericGid) and process_all_genomes: 
+                    logger.warning(attribute + ' file may have extra data, skipping') 
+                    logger.warning(' '.join(str(x) for x in [attrGid, str(currentNumericGid)])) 
+                    break 
+                #If the attribute genome number is higher than the current genome of interest, you know you have all the atrributes of this type for this genome   
+                elif (attrGidNumericId > currentNumericGid): 
+                    #IF genome of interest or processing all genomes :: aka a genome that will be processed                                                        
+                    if (attrGid in genomes_dict.keys()) or process_all_genomes: 
+                        logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)) 
+                    break 
+                currentLine[attribute] = fileHandle[attribute].readline() 
     # pass featureData to a sub that creates appropriate subobjects
         insert_genome(currentGid,ws,wsname,featureData,provenance_description,provenance_time_string)
         cleanup_filehandles(fileHandle)
