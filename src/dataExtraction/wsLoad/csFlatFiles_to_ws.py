@@ -1021,7 +1021,7 @@ if __name__ == "__main__":
                     attrGid = attrGidPrefix + '.' + attrGidNumericId 
                     attrGidNumericId = int(attrGidNumericId) 
                     #IF genome of interest or processing all genomes :: aka a genome that will be processed 
-                    if (attrGid in genomes_dict.keys()) or process_all_genomes: 
+                    if process_all_genomes or (attrGid in genomes_dict.keys()): 
                         if (attrGidNumericId == currentNumericGid): 
                             featureData[attribute].append(currentLine[attribute]) 
                     #If processing all genomes and you find unexpected data from a previous genome number 
@@ -1032,7 +1032,7 @@ if __name__ == "__main__":
                     #If the attribute genome number is higher than the current genome of interest, you know you have all the atrributes of this type for this genome
                     elif (attrGidNumericId > currentNumericGid): 
                         #IF genome of interest or processing all genomes :: aka a genome that will be processed
-                        if (attrGid in genomes_dict.keys()) or process_all_genomes: 
+                        if process_all_genomes or (attrGid in genomes_dict.keys()): 
                             logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)) 
                         break 
                     currentLine[attribute] = fileHandle[attribute].readline() 
@@ -1089,7 +1089,7 @@ if __name__ == "__main__":
         cleanup_filehandles(fileHandle.keys())
         exit(0)
 
-    if (currentGid in genomes_dict.keys()) or process_all_genomes:
+    if process_all_genomes or (currentGid in genomes_dict.keys()): 
         logger.info('gid is ' + gid)
         logger.info('numericGid is ' + str(numericGid))
         logger.info('currentNumericGid is ' + str(currentNumericGid))
@@ -1118,10 +1118,10 @@ if __name__ == "__main__":
                 [attrGidPrefix,attrGidNumericId,rest] = attrFid.split('.',2)
                 attrGid=attrGidPrefix+'.'+attrGidNumericId
                 attrGidNumericId=int(attrGidNumericId)
-                if (attrGid in genomes_dict.keys()) or process_all_genomes: 
+                if process_all_genomes or (attrGid in genomes_dict.keys()): 
                     if (attrGidNumericId == currentNumericGid): 
                         featureData[attribute].append(currentLine[attribute]) 
-                #If processing all genomes and you find unexpected data from a previous genome number                                                              
+                #If processing all genomes and you find unexpected data from a previous genome number 
                 if (attrGidNumericId < currentNumericGid) and process_all_genomes: 
                     logger.warning(attribute + ' file may have extra data, skipping') 
                     logger.warning(' '.join(str(x) for x in [attrGid, str(currentNumericGid)])) 
@@ -1129,7 +1129,7 @@ if __name__ == "__main__":
                 #If the attribute genome number is higher than the current genome of interest, you know you have all the atrributes of this type for this genome   
                 elif (attrGidNumericId > currentNumericGid): 
                     #IF genome of interest or processing all genomes :: aka a genome that will be processed                                                        
-                    if (attrGid in genomes_dict.keys()) or process_all_genomes: 
+                    if process_all_genomes or (attrGid in genomes_dict.keys()): 
                         logger.info('Should be the last feature for this genome: attrGid for ' + attribute + ' is ' + attrGid + ' for currentNumericGid ' + str(currentNumericGid)) 
                     break 
                 currentLine[attribute] = fileHandle[attribute].readline() 
