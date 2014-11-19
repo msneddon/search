@@ -63,7 +63,7 @@ def initialize_logging():
 
     controllers.logger = search_wsgi.logger
 
-    if serviceConfig['search'].has_key('log_syslog') and serviceConfig['search']['log_syslog'] == True:
+    if serviceConfig['search'].has_key('log_syslog') and serviceConfig['search']['log_syslog'] == 'True':
         syslog_handler = logging.handlers.SysLogHandler(facility = logging.handlers.SysLogHandler.LOG_DAEMON, 
                                                         address = "/dev/log")
         search_wsgi.logger.addHandler(syslog_handler)
@@ -72,7 +72,14 @@ def initialize_logging():
         file_handler = logging.FileHandler(serviceConfig['search']['log_file'])
         search_wsgi.logger.addHandler(file_handler)
     
-    search_wsgi.logger.setLevel(logging.DEBUG)
+    configLevel = serviceConfig['search']['log_level']
+
+    if configLevel in logging._levelNames:
+        level = logging._levelNames[configLevel]
+    else:
+        level = logging.INFO
+
+    search_wsgi.logger.setLevel(level)
 
 
 #create a categories.json file that can be loaded and sent to the client
