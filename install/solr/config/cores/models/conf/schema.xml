@@ -69,7 +69,6 @@
 these fields are for any workspace object
 -->
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
-   <field name="object_version" type="int" indexed="false" stored="true" multiValued="false" required="false" />
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="object_workspace" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" />
