@@ -16,7 +16,7 @@ import biokbase.workspace.client
 
 pp = pprint.PrettyPrinter(indent=4)
 
-solr_keys = ['fba_model_id', 'fba_model_name', 'fba_model_type', 'genome_id', 'scientific_name', 'taxonomy', 'domain', 'number_of_gapfillings', 'number_of_gapgens', 'number_of_biomasses', 'number_of_templates', 'number_of_compartments', 'number_of_compounds', 'compound_names', 'compound_aliases', 'compound_ids', 'number_of_reactions', 'reaction_names', 'reaction_aliases', 'reaction_pathways', 'number_of_features', 'feature_ids', 'feature_aliases', 'feature_functions']
+solr_keys = ['object_id', 'object_type', 'object_workspace', 'object_name', 'fba_model_id', 'fba_model_name', 'fba_model_type', 'genome_id', 'scientific_name', 'taxonomy', 'domain', 'number_of_gapfillings', 'number_of_gapgens', 'number_of_biomasses', 'number_of_templates', 'number_of_compartments', 'number_of_compounds', 'compound_names', 'compound_aliases', 'compound_ids', 'number_of_reactions', 'reaction_names', 'reaction_aliases', 'reaction_pathways', 'number_of_features', 'feature_ids', 'feature_aliases', 'feature_functions']
 
 
 def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
@@ -87,6 +87,11 @@ def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
 
                     fba_model_object = dict()
                     feature_set = set()
+
+                    fba_model_object['object_id'] = 'kb|ws.' + str(fba_model['info'][6]) + '.obj.' + str(fba_model['info'][0]) 
+                    fba_model_object['workspace_name'] = fba_model['info'][7] 
+                    fba_model_object['object_type'] = fba_model['info'][2] 
+                    fba_model_object['object_name'] = fba_model['info'][1] 
 
                     fba_model_object["fba_model_id"] = fba_model['data']['id']
 
