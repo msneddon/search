@@ -6,6 +6,7 @@ import sys
 import random 
 import re 
 import pprint
+import datetime
  
 # found at https://pythonadventures.wordpress.com/tag/unicodeencodeerror/    
 reload(sys)
@@ -15,6 +16,9 @@ import biokbase.workspace.client
 
 pp = pprint.PrettyPrinter(indent=4)
 
+solr_keys = ['fba_model_id', 'fba_model_name', 'fba_model_type', 'genome_id', 'scientific_name', 'taxonomy', 'domain', 'number_of_gapfillings', 'number_of_gapgens', 'number_of_biomasses', 'number_of_templates', 'number_of_compartments', 'number_of_compounds', 'compound_names', 'compound_aliases', 'compound_ids', 'number_of_reactions', 'reaction_names', 'reaction_aliases', 'reaction_pathways', 'number_of_features', 'feature_ids', 'feature_aliases', 'feature_functions']
+
+
 def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
     # gavin's dev instance
 #    ws_client = biokbase.workspace.client.Workspace('http://dev04:7058')
@@ -23,6 +27,13 @@ def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
  
     workspace_object = ws_client.get_workspace_info({'workspace':wsname})  
     all_workspaces = [ workspace_object ] 
+
+    headerOutFile = open('FBAmodelsToSolr.tab.headers', 'w') 
+    print >> headerOutFile, "\t".join(solr_keys) 
+    #print >> headerOutFile, "\n"                                                                                                                
+    headerOutFile.close() 
+
+    outFile = open('FBAmodelsToSolr.tab', 'w')
 
     workspace_counter = 0
     for n in all_workspaces: 
@@ -54,8 +65,6 @@ def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
             print "\tWorkspace %s has %d matching objects" % (workspace_name, len(objects_list))
             object_counter = 0
  
-#            type_dict = dict()
-
             if maxNumObjects < 1000: 
                 objects_list = random.sample(objects_list,maxNumObjects) 
  
@@ -64,7 +73,6 @@ def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
 #Info log 
 #                print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name) 
                 if "FBAModel" in x[2]:
-#                    print "in x-2 spot : " + str(x[2])
                     done = False
                     while not done:
                         try: 
@@ -76,16 +84,9 @@ def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
                             print "Having trouble getting " + str(x[0]) + " from workspace " + str(workspace_id) 
                     fba_model = fba_model[0] 
 #                    print fba_model['data'].keys()                                                                            
-                    #[u'gapfillings', u'name', u'source', u'modelcompounds', u'gapgens', u'biomasses', u'template_refs', u'modelcompartments', u'genome_ref', u'type', u'source_id', u'__VERSION__', u'template_ref', u'id', u'modelreactions']
-
-#list (modelreactions) top level FBA Model->ModelReaction(list(modelReactionProteins))->
-#ModelReactionProtein(list(ModelReactionProteinSubunit))->
-#ModelReactionProteinSubunit(list(feature_refs))->KBaseGenomes.Genome.features.[*].ids
-
-
 
                     fba_model_object = dict()
-                    feature_dict = dict()
+                    feature_set = set()
 
                     fba_model_object["fba_model_id"] = fba_model['data']['id']
 
@@ -120,28 +121,69 @@ def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
                     else:
                         fba_model_object["number_of_compartments"] = 0
 
+                    found_genome = False
+                    if fba_model['data'].has_key('genome_ref'):
+                        #FOLLOW THE REFERENCE
+#debug log
+#                        print "Genome ref : " + str(fba_model['data']['genome_ref'])
+                        try:
+                            [gws_id,gwsobject_id,gwsobject_ver]=fba_model['data']['genome_ref'].split("/") 
+                            genome = ws_client.get_objects([{"wsid": str(gws_id), "objid": str(gwsobject_id), "ver": str(gwsobject_ver)}])[0]
+#                            print genome['data'].keys() 
+                            found_genome = True                             
+#                            pp.pprint(genome)
+                            #Get Genome top level data
+                            fba_model_object["scientific_name"] = genome['data']['scientific_name']
+                            fba_model_object["domain"] = genome['data']['domain']
+                            fba_model_object["genome_id"] = genome['data']['id']
+                            if genome['data'].has_key('taxonomy'):
+                                fba_model_object["taxonomy"] = genome['data']['taxonomy']
+                            else:
+                                fba_model_object["taxonomy"] = ''
+                        except Exception, e:
+                            print "Can't get genome at : " + fba_model['data']['genome_ref'] + ". Not indexing this model."
+                            print "ERROR: " + str(e)
+                            continue
+                    else:
+                        #DO WE INDEX THE OBJECT?  DO WE DO THE METAGENOME
+                        #ASSUME either genome_ref or metagenome_ref must exist?
+                        print "A Genome reference did not exist.  Not indexing this model"
+                        continue
+
                     if fba_model['data'].has_key('modelreactions'):
                         fba_model_object["number_of_reactions"] = len(fba_model['data']['modelreactions'])
                         fba_model_object["reaction_names"] = ' '.join([x['name'] for x in fba_model['data']['modelreactions'] if x.has_key('name') ])
                         fba_model_object["reaction_pathways"]= ' '.join([x['pathway'] for x in fba_model['data']['modelreactions'] if x.has_key('pathway')])
                         fba_model_object["reaction_aliases"] = ' '.join([y for y in x['aliases'] for x in fba_model['data']['modelreactions'] if x.has_key('aliases')])
-#NEED TO GET FEATURES.  BUT REFERENCES GENOME SUBOBJECT
-#                        if fba_model['data']['modelreactions'].has_key(['modelReactionProteins']):
-                        for model_reaction in fba_model['data']['modelreactions']:
-                            for model_reaction_protein in model_reaction['modelReactionProteins']:
-                                for model_reaction_protein_subunit in model_reaction_protein['modelReactionProteinSubunits']:
-                                    for feature_ref in model_reaction_protein_subunit['feature_refs']:
-                                        feature_dict[feature_ref]=1                            
-                        fba_model_object["number_of_features"] = len(feature_dict.keys())
-                        print "NUM FEATURES : " + str(fba_model_object["number_of_features"])
-#                            print "FEATURE REFS " + str(fba_model['data']['modelreactions']['modelReactionProteins']['modelReactionProteinSubunits']['feature_refs'])
-
+                        if found_genome :
+#LOGGING INFO                            
+#                            print "IN FOUND GENOME "
+                            feature_aliases = ''
+                            feature_functions = ''
+                            for model_reaction in fba_model['data']['modelreactions']:
+                                for model_reaction_protein in model_reaction['modelReactionProteins']:
+                                    for model_reaction_protein_subunit in model_reaction_protein['modelReactionProteinSubunits']:
+                                        for feature_ref in model_reaction_protein_subunit['feature_refs']:
+                                            feature_id = feature_ref.split("/")[-1]
+                                            #                                        feature_dict[feature_ref]=feature_id                            
+                                            #                                        feature_dict[feature_id]=1                            
+                                            feature_set.add(feature_id)                            
+                            fba_model_object["number_of_features"] = len(feature_set)
+                            #Go through each genome feature and look for features and grab their aliases
+                            fba_model_object["feature_ids"] = ' '.join(x for x in feature_set) 
+                            for feature_object in genome['data']['features']:
+                                if feature_object["id"] in feature_set:
+                                    if feature_object.has_key('aliases'):
+                                        feature_aliases += ' '.join(x for x in feature_object["aliases"]) + " " 
+                                    if feature_object.has_key('function'):
+                                        feature_functions += feature_object["function"] + " " 
+                            fba_model_object["feature_aliases"] = feature_aliases
+                            fba_model_object["feature_functions"] = feature_functions
                     else:
                         fba_model_object["number_of_reactions"] = 0
                         fba_model_object["reaction_names"] = ''
                         fba_model_object["reaction_pathway"] = ''
                         fba_model_object["reaction_aliases"] = ''
-
 
                     if fba_model['data'].has_key('modelcompounds'):
                         fba_model_object["number_of_compounds"] = len(fba_model['data']['modelcompounds'])
@@ -153,40 +195,31 @@ def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
                         fba_model_object["compound_names"] = ''
                         fba_model_object["compound_ids"] = '' 
                         fba_model_object["compound_aliases"] = '' 
-                    
-                    if fba_model['data'].has_key('genome_ref'):
-                        #FOLLOW THE REFERENCE
-                        print "Genome ref : " + str(fba_model['data']['genome_ref'])
-                        try:
-                            fba_model = ws_client.get_referenced_objects(fba_model['data']['genome_ref'])
-                        except:
-                            print "Can't get genome at : " + fba_model['data']['genome_ref']
-                    else:
-                        #DO WE INDEX THE OBJECT?  DO WE DO THE METAGENOME
-                        #ASSUME either genome_ref or metagenome_ref must exist?
-                        print "IN ELSE"
-                        
-
-
 
 #                    pp.pprint("MODEL REACTIONS\n" + str(fba_model['data']['modelreactions']))
 #                    pp.pprint("OBJECT\n" + str(fba_model_object))
-                    pp.pprint("Feature refs\n" + str(feature_dict.keys()))
+#                    pp.pprint("OBJECT\n" + str(fba_model_object.keys()))
+#                    pp.pprint("Feature refs\n" + str(feature_dict.keys()))
+#                    pp.pprint("Feature refs\n" + str(feature_dict))
 
-#                    if fba_model['data']['type']:
-#                        if  type_dict.has_key(fba_model['data']['type']): 
-#                            type_dict[fba_model['data']['type']] = type_dict[fba_model['data']['type']] + 1  
-#                        else:
-#                            type_dict[fba_model['data']['type']] = 1 
-#                    else:
-#                        if  type_dict.has_key("blank"): 
-#                            type_dict["blank"] = type_dict["blank"] + 1  
-#                        else:
-#                            type_dict["blank"] = 1 
                     counter = counter + 1
-                    sys.stdout.write("Counter: " + str(counter)  + " \r" )
+#                    sys.stdout.write("Counter: " + str(counter)  + " \r" )
+                    sys.stdout.write("Counter Time : " + str(counter) + " : Model " + fba_model_object["fba_model_id"] + " : " + str(datetime.datetime.now()) + "\n")
                     sys.stdout.flush()
- #       pp.pprint(type_dict)
+
+                    outBuffer = StringIO.StringIO()
+                    try: 
+                        solr_strings = [ unicode(str(fba_model_object[x])) for x in solr_keys ]
+                        solr_line = "\t".join(solr_strings)
+                        outBuffer.write(solr_line + "\n") 
+#                        print outBuffer.getvalue()
+                    except Exception, e:
+#Warning Log                                                                                                                                     
+                        print str(e)
+                        print "Failed trying to write to string buffer for model " + fba_model_object['fba_model_id']
+                    outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
+                    outBuffer.close() 
+    outFile.close() 
                             
 if __name__ == "__main__":
     import argparse
@@ -202,6 +235,8 @@ if __name__ == "__main__":
     wsname = args.wsname[0] 
 #Info Log                                                                                                                                                  
     print args.fba_models 
+    sys.stdout.write("START TIME : " + str(datetime.datetime.now())+ "\n")
     export_fba_models_from_ws(maxNumObjects,args.fba_models,wsname) 
+    sys.stdout.write("END TIME : " + str(datetime.datetime.now())+ "\n")
 
 
