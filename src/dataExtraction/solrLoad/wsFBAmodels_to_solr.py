@@ -89,7 +89,7 @@ def export_fba_models_from_ws(maxNumObjects, fba_model_list, wsname):
                     feature_set = set()
 
                     fba_model_object['object_id'] = 'kb|ws.' + str(fba_model['info'][6]) + '.obj.' + str(fba_model['info'][0]) 
-                    fba_model_object['workspace_name'] = fba_model['info'][7] 
+                    fba_model_object['object_workspace'] = fba_model['info'][7] 
                     fba_model_object['object_type'] = fba_model['info'][2] 
                     fba_model_object['object_name'] = fba_model['info'][1] 
 
