@@ -70,35 +70,50 @@ these fields are for any workspace object
 -->
 
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
-   <field name="object_version" type="int" indexed="false" stored="true" multiValued="false" required="false" />
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="object_workspace" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" />
+
+
+ ['object_id', 'object_type', 'object_workspace', 'object_name','media_id','media_name','media_source_id','media_source','protocol_link','is_defined','\
+is_minimal','is_aerobic','media_type','pH_data','temperature','atmosphere','number_of_compounds','compound_ids','compound_names','compound_abbreviations'] 
+
 
 <!--
 these are for the top level media object
 -->
 
    <field name="media_id" type="string" indexed="true" stored="true" multiValued="false"  />
-   <field name="media_source_id" type="string" indexed="true" stored="true" multiValued="false" />
-   <field name="media_isDefined" type="boolean" indexed="true" stored="true" multiValued="false" />
-   <field name="media_isMinimal" type="boolean" indexed="true" stored="true" multiValued="false" />
    <field name="media_name" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="media_source_id" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="media_source" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="protocol_link" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="is_defined" type="boolean" indexed="true" stored="true" multiValued="false" />
+   <field name="is_minimal" type="boolean" indexed="true" stored="true" multiValued="false" />
+   <field name="is_aerobic" type="boolean" indexed="true" stored="true" multiValued="false" />
    <field name="media_type" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="pH_data" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="temperature" type="float" indexed="true" stored="true" multiValued="false" />
+   <field name="atmosphere" type="string" indexed="true" stored="true" multiValued="false" />
+
+
 
 <!--
 these fields are for media compounds
 -->
+   <field name="number_of_compounds" type="int" indexed="true" stored="true" multiValued="false" />
+   <field name="compound_ids" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="compound_names" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="compound_abbreviations" type="string" indexed="true" stored="true" multiValued="true" />
 
-   <field name="compound_ref" type="string" indexed="true" stored="true" multiValued="false" />
-   <field name="compound_concentration" type="float" indexed="true" stored="true" multiValued="false" />
-   <field name="compound_maxFlux" type="float" indexed="true" stored="true" multiValued="false" />
-   <field name="compound_minFlux" type="float" indexed="true" stored="true" multiValued="false" />
+
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
 
+<!--
    <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
+-->
    <field name="_version_" type="long" indexed="true" stored="true"/>
 
  </fields>
@@ -116,8 +131,8 @@ these fields are for media compounds
    <copyField source="media_id" dest="text_boost"/>
    <copyField source="media_name" dest="text"/>
    <copyField source="media_type" dest="text"/>
+   <copyField source="compound_ids" dest="text_boost"/>
 
-   <copyField source="compound_ref" dest="text"/>
  
   <types>
     <!-- field type definitions. The "name" attribute is
