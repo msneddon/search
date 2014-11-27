@@ -127,9 +127,16 @@ these fields are for media compounds
    <copyField source="media_id" dest="text"/>
    <copyField source="media_id" dest="text_boost"/>
    <copyField source="media_name" dest="text"/>
+   <copyField source="media_source_id" dest="text_boost"/>
+   <copyField source="media_source" dest="text"/>
+   <copyField source="protocol_link" dest="text"/>
    <copyField source="media_type" dest="text"/>
+   <copyField source="pH_data" dest="text"/>
+   <copyField source="temperature" dest="text"/>
+   <copyField source="atmosphere" dest="text"/>
    <copyField source="compound_ids" dest="text_boost"/>
-
+   <copyField source="compound_names" dest="text"/>
+   <copyField source="compound_abbreviations" dest="text"/>
  
   <types>
     <!-- field type definitions. The "name" attribute is
