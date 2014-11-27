@@ -75,9 +75,6 @@ these fields are for any workspace object
    <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" />
 
 
- ['object_id', 'object_type', 'object_workspace', 'object_name','media_id','media_name','media_source_id','media_source','protocol_link','is_defined','\
-is_minimal','is_aerobic','media_type','pH_data','temperature','atmosphere','number_of_compounds','compound_ids','compound_names','compound_abbreviations'] 
-
 
 <!--
 these are for the top level media object
