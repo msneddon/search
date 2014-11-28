@@ -578,7 +578,7 @@ def insert_genome(g,ws,wsname,featureData,provenance_description,provenance_time
         #CONTIG DIR EXISTS USE FILE if the file exists.
         logger.info('contig path defined, attempting to read file in ' + contigseq_file_dir)
         try:
-            contig_filename = contigseq_file_dir + '/' + g + '.fa'
+            contig_filename = contigseq_file_dir + '/' + g + '.fasta'
             contig_filesize = os.stat(contig_filename).st_size
             if contig_filesize > 1000000000:
 #                Contigs file too large.  Can't save to WS but need to make objects so can do the dna sequence in the feature set.
@@ -749,7 +749,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Create KBasePublicRichGenome ws objects from flat file dumps from CS.')
     parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
     parser.add_argument('--sorted-file-dir', nargs=1, help='path to sorted dump files to be parsed (default .)')
-    parser.add_argument('--contigseq-file-dir', nargs=1, help='path to FASTA contig sequence files (filenames must correspond to KBase genome ids e.g., kb|g.0.fa) (default: use CDMI to get sequences)')
+    parser.add_argument('--contigseq-file-dir', nargs=1, help='path to FASTA contig sequence files (filenames must correspond to KBase genome ids e.g., kb|g.0.fasta) (default: use CDMI to get sequences)')
     parser.add_argument('--logging-file-dir', nargs=1, help='path to the directory to write the logging file (default .)')
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
     parser.add_argument('--debug',action='store_true',help='debugging')
