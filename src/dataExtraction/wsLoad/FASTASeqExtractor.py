@@ -7,7 +7,7 @@ import json
 
 import Bio.Seq
 import Bio.SeqRecord
-import Bio.Alphabet
+import Bio.Alphabet.IUPAC
 
 class FASTASeqExtractor(object):
 
@@ -170,7 +170,7 @@ class FASTASeqExtractor(object):
         sequenceObjects = dict()
         
         for x in sequences:
-            sequenceObjects[x] = Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(sequences[x], Bio.Alphabet.SingleLetterAlphabet()),
+            sequenceObjects[x] = Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(sequences[x], Bio.Alphabet.IUPAC.ambiguous_dna),
                                                          id=x,
                                                          name=x,
                                                          description=x)
@@ -179,7 +179,7 @@ class FASTASeqExtractor(object):
     
     
     def getAllBioPythonSeqRecordObjects(self):
-        return self._extractAll(lambda h,s: Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(s, Bio.Alphabet.SingleLetterAlphabet()),
+        return self._extractAll(lambda h,s: Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(s, Bio.Alphabet.IUPAC.ambiguous_dna),
                                                                     id=h,
                                                                     name=h,
                                                                     description=h))
