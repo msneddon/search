@@ -6,7 +6,8 @@ import sys
 import json
 
 import Bio.Seq
-import Bio.Alphabet
+import Bio.SeqRecord
+import Bio.Alphabet.IUPAC
 
 class FASTASeqExtractor(object):
 
@@ -137,10 +138,13 @@ class FASTASeqExtractor(object):
                 if nextHeader == -1:
                     nextHeader = len(contents)
                 
-                sequencesDict[contents[headerStart + 1:headerEnd - 1].strip()] = \
-                    func(contents[headerEnd + 1:nextHeader - 1])
+                header = contents[headerStart + 1:headerEnd - 1].strip()
+                sequencesDict[header] = func(header, contents[headerEnd + 1:nextHeader - 1])
 
                 headerStart = contents.find(">", nextHeader)
+                
+                # free memory
+                header = None
                 
         return sequencesDict
 
@@ -161,18 +165,24 @@ class FASTASeqExtractor(object):
         return self._extractAll()
     
             
-    def getBioPythonSeqObjects(self, keys=list()):
+    def getBioPythonSeqRecordObjects(self, keys=list()):
         sequences = self._extractSequence(keys)
         sequenceObjects = dict()
         
         for x in sequences:
-            sequenceObjects[x] = Bio.Seq.Seq(sequences[x], Bio.Alphabet.SingleLetterAlphabet())
+            sequenceObjects[x] = Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(sequences[x], Bio.Alphabet.IUPAC.ambiguous_dna),
+                                                         id=x,
+                                                         name=x,
+                                                         description=x)
         
         return sequenceObjects
     
     
-    def getAllBioPythonSeqObjects(self):
-        return self._extractAll(lambda s: Bio.Seq.Seq(s, Bio.Alphabet.SingleLetterAlphabet()))
+    def getAllBioPythonSeqRecordObjects(self):
+        return self._extractAll(lambda h,s: Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(s, Bio.Alphabet.IUPAC.ambiguous_dna),
+                                                                    id=h,
+                                                                    name=h,
+                                                                    description=h))
 
 
 if __name__ == "__main__":
@@ -199,11 +209,11 @@ if __name__ == "__main__":
     print "Reading all sequences as strings took : %s" % str(end - start)
 
     start = datetime.datetime.utcnow()
-    # read the whole file and pull out everything then convert to BioPython Seq objects
-    d.getAllBioPythonSeqObjects()
+    # read the whole file and pull out everything then convert to BioPython SeqRecord objects
+    d.getAllBioPythonSeqRecordObjects()
     end = datetime.datetime.utcnow()
 
-    print "Reading all sequences as BioPython Seq Objects took : %s" % str(end - start)
+    print "Reading all sequences as BioPython SeqRecord Objects took : %s" % str(end - start)
 
     start = datetime.datetime.utcnow()
     # read the file in chunks and extract just the headers while recording contig start and end
@@ -226,14 +236,15 @@ if __name__ == "__main__":
 
 
     start = datetime.datetime.utcnow()
-    # for each key, get the sequence from the file then make a BioPython Seq object        
+    # for each key, get the sequence from the file then make a BioPython SeqRecord object        
     for x in headers:
-        d.getBioPythonSeqObjects([x])
+        d.getBioPythonSeqRecordObjects([x])
     end = datetime.datetime.utcnow()
-    print "Reading individual sequences using keys as BioPython Seq Objects took : %s" % str(end - start)
+    print "Reading individual sequences using keys as BioPython SeqRecord Objects took : %s" % str(end - start)
 
     start = datetime.datetime.utcnow()
-    # get all sequences as BioPython Seq Objects by passing in all keys
-    d.getBioPythonSeqObjects(headers)
+    # get all sequences as BioPython SeqRecord Objects by passing in all keys
+    records = d.getBioPythonSeqRecordObjects(headers)
+    print records.popitem()
     end = datetime.datetime.utcnow()
-    print "Reading all sequences as BioPython Seq Objects took : %s" % str(end - start)
+    print "Reading all sequences as BioPython SeqRecord Objects took : %s" % str(end - start)
