@@ -7,7 +7,7 @@ import json
 
 import Bio.Seq
 import Bio.SeqRecord
-import Bio.Alphabet.IUPAC
+import Bio.Alphabet
 
 class FASTASeqExtractor(object):
 
@@ -61,7 +61,7 @@ class FASTASeqExtractor(object):
                     else:
                         nextHeader = eof - start + 1
         
-                header = chunk[headerStart + 1:headerEnd - 1].strip()
+                header = chunk[headerStart + 1:headerEnd].strip()
 
                 if header not in self._sequences:
                     self._sequences[header] = dict()
@@ -121,7 +121,7 @@ class FASTASeqExtractor(object):
                 if nextHeader == -1:
                     nextHeader = len(contents)
 
-                sequencesDict[contents[headerStart + 1:headerEnd - 1].strip()] = \
+                sequencesDict[contents[headerStart + 1:headerEnd].strip()] = \
                     contents[headerEnd + 1:nextHeader - 1]
 
                 headerStart = contents.find(">", nextHeader)
@@ -138,7 +138,7 @@ class FASTASeqExtractor(object):
                 if nextHeader == -1:
                     nextHeader = len(contents)
                 
-                header = contents[headerStart + 1:headerEnd - 1].strip()
+                header = contents[headerStart + 1:headerEnd].strip()
                 sequencesDict[header] = func(header, contents[headerEnd + 1:nextHeader - 1])
 
                 headerStart = contents.find(">", nextHeader)
@@ -170,7 +170,7 @@ class FASTASeqExtractor(object):
         sequenceObjects = dict()
         
         for x in sequences:
-            sequenceObjects[x] = Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(sequences[x], Bio.Alphabet.IUPAC.ambiguous_dna),
+            sequenceObjects[x] = Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(sequences[x], Bio.Alphabet.SingleLetterAlphabet()),
                                                          id=x,
                                                          name=x,
                                                          description=x)
@@ -179,7 +179,7 @@ class FASTASeqExtractor(object):
     
     
     def getAllBioPythonSeqRecordObjects(self):
-        return self._extractAll(lambda h,s: Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(s, Bio.Alphabet.IUPAC.ambiguous_dna),
+        return self._extractAll(lambda h,s: Bio.SeqRecord.SeqRecord(Bio.Seq.Seq(s, Bio.Alphabet.SingleLetterAlphabet()),
                                                                     id=h,
                                                                     name=h,
                                                                     description=h))
@@ -199,7 +199,7 @@ if __name__ == "__main__":
     print "Fastest file read possible took : %s" % str(end - start)
     contents = None
 
-    d = FASTASeqExtractor("/mnt/search/v5/v5seqfiles/kb|g.140056.fasta")
+    d = FASTASeqExtractor("/mnt/search/v5/v5seqfiles/kb|g.0.fasta")
 
     start = datetime.datetime.utcnow()
     # read the whole file and pull out everything as strings
@@ -218,6 +218,9 @@ if __name__ == "__main__":
     start = datetime.datetime.utcnow()
     # read the file in chunks and extract just the headers while recording contig start and end
     headers = d.getHeaders()
+    
+    print headers
+    
     end = datetime.datetime.utcnow()
     print "Reading headers and recording contig start and end took : %s" % str(end - start)
 
