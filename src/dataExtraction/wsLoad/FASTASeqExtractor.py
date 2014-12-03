@@ -87,7 +87,7 @@ class FASTASeqExtractor(object):
             fp = io.open(self._sourceFile, 'r')
             for k in sorted(keys, key=lambda x: self._sequences[x]["indexBegin"]):
                 fp.seek(self._sequences[k]["indexBegin"])
-                sequenceDict[k] = fp.read(self._sequences[k]["indexEnd"] - self._sequences[k]["indexBegin"])
+                sequenceDict[k] = fp.read(self._sequences[k]["indexEnd"] - self._sequences[k]["indexBegin"]).replace("\n","")
             fp.close()
             return sequenceDict
         except KeyError, e:
@@ -122,7 +122,7 @@ class FASTASeqExtractor(object):
                     nextHeader = len(contents)
 
                 sequencesDict[contents[headerStart + 1:headerEnd].strip()] = \
-                    contents[headerEnd + 1:nextHeader - 1]
+                    contents[headerEnd + 1:nextHeader - 1].replace("\n","")
 
                 headerStart = contents.find(">", nextHeader)
         else:
@@ -139,7 +139,7 @@ class FASTASeqExtractor(object):
                     nextHeader = len(contents)
                 
                 header = contents[headerStart + 1:headerEnd].strip()
-                sequencesDict[header] = func(header, contents[headerEnd + 1:nextHeader - 1])
+                sequencesDict[header] = func(header, contents[headerEnd + 1:nextHeader - 1].replace("\n",""))
 
                 headerStart = contents.find(">", nextHeader)
                 
@@ -218,9 +218,6 @@ if __name__ == "__main__":
     start = datetime.datetime.utcnow()
     # read the file in chunks and extract just the headers while recording contig start and end
     headers = d.getHeaders()
-    
-    print headers
-    
     end = datetime.datetime.utcnow()
     print "Reading headers and recording contig start and end took : %s" % str(end - start)
 
