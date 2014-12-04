@@ -15,6 +15,7 @@ import requests
 import pprint
 import codecs
 import TextFileDecoder
+import FASTASeqExtractor
 import os
 import Bio.SeqIO
 import Bio.SeqFeature
@@ -591,7 +592,20 @@ def insert_genome(g,ws,wsname,featureData,provenance_description,provenance_time
                 logger.warning('contig file ' + contig_filename + '.  There are too many contigs for genome ' + g + '.  The resulting contigset would be too large')
                 contig_set_made_flag = False
             contig_handle = open (contig_filename, 'rU')
-            contigSeqObjects = Bio.SeqIO.to_dict( Bio.SeqIO.parse(contig_handle,'fasta') )
+            logger.debug("Before Bio.SeqIO call")
+            try:
+                fasta_extractor = FASTASeqExtractor.FASTASeqExtractor(contig_filename)
+                contig_headers = fasta_extractor.getHeaders()
+                contigSeqObjects = fasta_extractor.getBioPythonSeqRecordObjects(contig_headers) 
+#OLD WAY OF DOING IT (REPLACED BY ABOVE 3 lines).  Old way would have segementation fault on large genomes.
+#                contigSeqObjects = Bio.SeqIO.to_dict( Bio.SeqIO.parse(contig_handle,'fasta') )
+#                print "Contig Seq Objects:\n"
+#                pp.pprint(contigSeqObjects)
+            except Exception, e:
+                print str(e)
+                print "Having trouble getting " + str(x[0]) 
+                sys.exit(0)
+            logger.debug("Before Bio.SeqIO call")
             for contigseq in contigSeqObjects:
 #                logger.debug(contigseq + ":::" + str(contigSeqObjects[contigseq].seq) )
                 contig_sequences[contigseq] = str(contigSeqObjects[contigseq].seq)
