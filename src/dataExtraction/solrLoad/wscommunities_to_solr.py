@@ -495,7 +495,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                                 tax_profile_object['object_name'] = tax_profile['info'][1]                             
 
                                 tax_profile_object['tax_leaf'] = level_name_dict[tax_level][tax_name]["is_leaf"]
-                                tax_profile_object['tax_level'] = tax_level
+                                tax_profile_object['tax_level'] = tax_level + 1
                                 tax_profile_object['tax_level_description'] = tax_name
                                 tax_profile_object['tax_abundance'] = round((100. * level_name_dict[tax_level][tax_name]["abundance"]/total_abundance),3) 
                                 tax_profile_object['tax_evalue'] = level_name_dict[tax_level][tax_name]["e_value"]
@@ -577,7 +577,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                                 functional_profile_object['object_name'] = functional_profile['info'][1]
  
                                 functional_profile_object['func_leaf'] = level_name_dict[functional_level][functional_name]["is_leaf"]
-                                functional_profile_object['func_level'] = functional_level
+                                functional_profile_object['func_level'] = functional_level + 1
                                 functional_profile_object['func_level_description'] = functional_name
                                 functional_profile_object['func_abundance'] = round((100. * level_name_dict[functional_level][functional_name]["abundance"]/total_abundance),3)
                                 functional_profile_object['func_evalue'] = level_name_dict[functional_level][functional_name]["e_value"]
