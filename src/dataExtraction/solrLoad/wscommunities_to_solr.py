@@ -380,23 +380,43 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
 
                     if metagenome['data'].has_key('pipeline_parameters'):
                         p_dict = metagenome['data']['pipeline_parameters'] 
-                        metagenome_object['pipeline_assembled'] = p_dict["assembled"] if p_dict.has_key("assembled") else "" 
+                        if p_dict.has_key("assembled"):
+                            if p_dict["assembled"] == "yes":
+                                metagenome_object['pipeline_assembled'] = "True"
+                            elif p_dict["assembled"] == "no":
+                                metagenome_object['pipeline_assembled'] = "False"
                         metagenome_object['pipeline_rna_pid'] = p_dict["rna_pid"] if p_dict.has_key("rna_pid") else "" 
-                        metagenome_object['pipeline_fgs_type'] = p_dict["fgs_type"] if p_dict.has_key("fgs_type") else "" 
-                        metagenome_object['pipeline_filter_ambig'] = p_dict["filter_ambig"] if p_dict.has_key("filter_ambig") else "" 
+                        metagenome_object['pipeline_fgs_type'] = p_dict["fgs_type"] if p_dict.has_key("fgs_type") else ""
+                        if p_dict.has_key("filter_ambig"):
+                            if p_dict["filter_ambig"] == "yes":
+                                metagenome_object['pipeline_filter_ambig'] = "True"
+                            elif p_dict["filter_ambig"] == "no":
+                                metagenome_object['pipeline_filter_ambig'] = "False" 
                         metagenome_object['pipeline_prefix_length'] = p_dict["prefix_length"] if p_dict.has_key("prefix_length") else "" 
                         metagenome_object['pipeline_aa_pid'] = p_dict["aa_pid"] if p_dict.has_key("aa_pid") else "" 
                         metagenome_object['pipeline_publish_priority'] = p_dict["publish_priority"] if p_dict.has_key("publish_priority") else "" 
                         metagenome_object['pipeline_m5nr_sims_version'] = p_dict["m5nr_sims_version"] if p_dict.has_key("m5nr_sims_version") else "" 
                         metagenome_object['pipeline_m5nr_annotation_version'] = p_dict["m5nr_annotation_version"] if p_dict.has_key("m5nr_annotation_version") else "" 
-                        metagenome_object['pipeline_filter_ln'] = p_dict["filter_ln"] if p_dict.has_key("filter_ln") else "" 
+                        if p_dict.has_key("filter_ln"):
+                            if p_dict["filter_ln"] == "yes":
+                                metagenome_object['pipeline_filter_ln'] = "True"
+                            elif p_dict["filter_ln"] == "no":
+                                metagenome_object['pipeline_filter_ln'] = "False" 
                         metagenome_object['pipeline_m5rna_annotation_version'] = p_dict["m5rna_annotation_version"] if p_dict.has_key("m5rna_annotation_version") else "" 
                         metagenome_object['pipeline_file_type'] = p_dict["file_type"] if p_dict.has_key("file_type") else "" 
                         metagenome_object['pipeline_m5rna_sims_version'] = p_dict["m5rna_sims_version"] if p_dict.has_key("m5rna_sims_version") else "" 
-                        metagenome_object['pipeline_max_ambig'] = p_dict["max_ambig"] if p_dict.has_key("max_ambig") else "" 
-                        metagenome_object['pipeline_bowtie'] = p_dict["bowtie"] if p_dict.has_key("bowtie") else "" 
-                        metagenome_object['pipeline_filter_ln_mult'] = p_dict["filter_ln_mult"] if p_dict.has_key("filter_ln_mult") else "" 
-                        metagenome_object['pipeline_dereplicate'] = p_dict["dereplicate"] if p_dict.has_key("dereplicate") else "" 
+                        metagenome_object['pipeline_max_ambig'] = p_dict["max_ambig"] if p_dict.has_key("max_ambig") else ""
+                        if p_dict.has_key("bowtie"):
+                            if p_dict["bowtie"] == "yes":
+                                metagenome_object['pipeline_bowtie'] = "True"
+                            elif p_dict["bowtie"] == "no":
+                                metagenome_object['pipeline_bowtie'] = "False" 
+                        metagenome_object['pipeline_filter_ln_mult'] = p_dict["filter_ln_mult"] if p_dict.has_key("filter_ln_mult") else ""
+                        if p_dict.has_key("dereplicate"):
+                            if p_dict["dereplicate"] == "yes":
+                                metagenome_object['pipeline_dereplicate'] = "True"
+                            elif p_dict["dereplicate"] == "no":
+                                metagenome_object['pipeline_dereplicate'] = "False" 
                         metagenome_object['pipeline_screen_indexes'] = p_dict["screen_indexes"] if p_dict.has_key("screen_indexes") else "" 
             
 
