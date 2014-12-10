@@ -21,10 +21,21 @@ pp = pprint.PrettyPrinter(indent=4)
 #Tax Profiles get ['object_id', 'object_type', 'object_workspace', 'object_name', 'metagenome_id','metagenome_name','tax_leaf','tax_level','tax_level_description','tax_abundance','tax_evalue','tax_percent_id','tax_alignment_length','tax_lineage'] columns
 #Func Profiles get ['object_id', 'object_type', 'object_workspace', 'object_name', 'metagenome_id','metagenome_name','func_leaf','func_level','func_level_description','func_abundance','func_evalue','func_percent_id','func_alignment_length','func_lineage'] columns
  
-solr_keys = ['object_id', 'object_type', 'object_workspace', 'object_name', 'metagenome_id', 'metagenome_name', 'sequence_type', 'metagenome_created','project_id','project_url','mixs_compliant','mix_env_package_type','mix_country','mix_location','mix_latitude','mix_longitude','mix_PI_firstname','mix_PI_lastname','mix_PI_full_name','mix_sequence_type','mix_seq_method','mix_collection_date','mix_feature','mix_biome','mix_project_name','mix_project_id','mix_material','ss_average_ambig_chars_raw','ss_read_count_annotated','ss_ratio_reads_rna','ss_ambig_sequence_count_raw','ss_alpha_diversity_shannon','ss_standard_deviation_gc_ratio_raw','ss_drisee_score_raw','ss_standard_deviation_gc_ratio_preprocessed','ss_sequence_count_processed_rna','ss_length_min_preprocessed_rna','ss_sequence_count_preprocessed','ss_read_count_processed_rna','ss_average_length_preprocessed','ss_average_gc_ratio_preprocessed','ss_average_ambig_chars_preprocessed','ss_average_length_raw','ss_ambig_sequence_count_preprocessed_rna','ss_average_gc_ratio_preprocessed_rna','ss_cluster_count_processed_aa','ss_length_max_preprocessed_rna','ss_ambig_char_count_raw','ss_average_length_preprocessed_rna','ss_standard_deviation_length_raw','ss_average_gc_content_preprocessed','ss_sequence_count_sims_rna','ss_sequence_count_dereplication_removed','ss_read_count_processed_aa','ss_bp_count_preprocessed','ss_standard_deviation_gc_content_raw','ss_bp_count_raw','ss_standard_deviation_gc_ratio_preprocessed_rna','ss_average_ambig_chars_preprocessed_rna','ss_cluster_count_processed_rna','ss_standard_deviation_length_preprocessed_rna','ss_clustered_sequence_count_processed_rna','ss_ratio_reads_aa','ss_sequence_count_preprocessed_rna','ss_sequence_count_ontology','ss_sequence_count_raw','ss_clustered_sequence_count_processed_aa','ss_average_gc_ratio_raw','ss_average_gc_content_raw','ss_standard_deviation_gc_content_preprocessed_rna','ss_sequence_count_sims_aa','ss_ambig_char_count_preprocessed_rna','ss_bp_count_preprocessed_rna','ss_standard_deviation_length_preprocessed','ss_standard_deviation_gc_content_preprocessed','ss_average_gc_content_preprocessed_rna','ss_ambig_char_count_preprocessed','ss_ambig_sequence_count_preprocessed','pipeline_version','pipeline_assembled','pipeline_rna_pid','pipeline_fgs_type','pipeline_filter_ambig','pipeline_prefix_length','pipeline_aa_pid','pipeline_publish_priority','pipeline_m5nr_sims_version','pipeline_m5nr_annotation_version','pipeline_filter_ln','pipeline_m5rna_annotation_version','pipeline_file_type','pipeline_m5rna_sims_version','pipeline_max_ambig','pipeline_bowtie','pipeline_filter_ln_mult','pipeline_dereplicate','pipeline_screen_indexes','tax_leaf','tax_level','tax_level_description','tax_abundance','tax_evalue','tax_percent_id','tax_alignment_length','tax_lineage','func_leaf','func_level','func_level_description','func_abundance','func_evalue','func_percent_id','func_alignment_length','func_lineage']
+solr_keys = ['object_id', 'object_type', 'object_workspace', 'object_name', 'metagenome_id', 'metagenome_name', 'sequence_type', 'metagenome_created','project_id','project_url','metagenome_metadata','mixs_compliant','mix_env_package_type','mix_country','mix_location','mix_latitude','mix_longitude','mix_PI_firstname','mix_PI_lastname','mix_PI_full_name','mix_sequence_type','mix_seq_method','mix_collection_date','mix_feature','mix_biome','mix_project_name','mix_project_id','mix_material','ss_average_ambig_chars_raw','ss_read_count_annotated','ss_ratio_reads_rna','ss_ambig_sequence_count_raw','ss_alpha_diversity_shannon','ss_standard_deviation_gc_ratio_raw','ss_drisee_score_raw','ss_standard_deviation_gc_ratio_preprocessed','ss_sequence_count_processed_rna','ss_length_min_preprocessed_rna','ss_sequence_count_preprocessed','ss_read_count_processed_rna','ss_average_length_preprocessed','ss_average_gc_ratio_preprocessed','ss_average_ambig_chars_preprocessed','ss_average_length_raw','ss_ambig_sequence_count_preprocessed_rna','ss_average_gc_ratio_preprocessed_rna','ss_cluster_count_processed_aa','ss_length_max_preprocessed_rna','ss_ambig_char_count_raw','ss_average_length_preprocessed_rna','ss_standard_deviation_length_raw','ss_average_gc_content_preprocessed','ss_sequence_count_sims_rna','ss_sequence_count_dereplication_removed','ss_read_count_processed_aa','ss_bp_count_preprocessed','ss_standard_deviation_gc_content_raw','ss_bp_count_raw','ss_standard_deviation_gc_ratio_preprocessed_rna','ss_average_ambig_chars_preprocessed_rna','ss_cluster_count_processed_rna','ss_standard_deviation_length_preprocessed_rna','ss_clustered_sequence_count_processed_rna','ss_ratio_reads_aa','ss_sequence_count_preprocessed_rna','ss_sequence_count_ontology','ss_sequence_count_raw','ss_clustered_sequence_count_processed_aa','ss_average_gc_ratio_raw','ss_average_gc_content_raw','ss_standard_deviation_gc_content_preprocessed_rna','ss_sequence_count_sims_aa','ss_ambig_char_count_preprocessed_rna','ss_bp_count_preprocessed_rna','ss_standard_deviation_length_preprocessed','ss_standard_deviation_gc_content_preprocessed','ss_average_gc_content_preprocessed_rna','ss_ambig_char_count_preprocessed','ss_ambig_sequence_count_preprocessed','pipeline_version','pipeline_assembled','pipeline_rna_pid','pipeline_fgs_type','pipeline_filter_ambig','pipeline_prefix_length','pipeline_aa_pid','pipeline_publish_priority','pipeline_m5nr_sims_version','pipeline_m5nr_annotation_version','pipeline_filter_ln','pipeline_m5rna_annotation_version','pipeline_file_type','pipeline_m5rna_sims_version','pipeline_max_ambig','pipeline_bowtie','pipeline_filter_ln_mult','pipeline_dereplicate','pipeline_screen_indexes','tax_leaf','tax_level','tax_level_description','tax_abundance','tax_evalue','tax_percent_id','tax_alignment_length','tax_lineage','func_leaf','func_level','func_level_description','func_abundance','func_evalue','func_percent_id','func_alignment_length','func_lineage']
 
 
-#LEAF AS True or False
+# to create a string of values from an arbitrary structure:
+def extractValues(d):
+# would want to handle more types (e.g., int, float, list)
+    values = [x for x in d.values() if type(x) == unicode ]
+#    print >> sys.stderr, values
+    for x in d.values():
+#        print >> sys.stderr, type(x)
+        if type(x) == dict:
+#            print >> sys.stderr, x
+            subvalues = extractValues(x)
+            values.extend(subvalues)
+        return values
 
 def get_profile_grouping_info(profile, row_metadata_key):
     data_rows = profile["data"]["data"]
@@ -246,10 +257,16 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                             metagenome_object["project_id"]= project_list[0]
                             metagenome_object["project_url"]= project_list[1]
 
+                    #METADATA PORTION     
+                    pat = re.compile(r'\s+')
+                    if metagenome['data'].has_key('metadata'):
+                        metagenome_object['metagenome_metadata']  = pat.sub(' ',' '.join(extractValues(metagenome['data']['metadata'])))
+
+
+                    #MIXS PORTION
                     if metagenome['data'].has_key('mixs_compliant'):
                         metagenome_object["mixs_compliant"] = metagenome['data']['mixs_compliant']     
 
-                    #MIXS PORTION
                     if metagenome['data'].has_key('mixs'):
                         mixs_dict = metagenome['data']['mixs']
                         if mixs_dict.has_key('env_package_type'): 
