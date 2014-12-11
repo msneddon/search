@@ -71,46 +71,152 @@
 -->
 
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
-   <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="object_workspace" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
 
    <field name="metagenome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="metagenome_name" type="text_general" indexed="true" stored="true"/>
-   <field name="metagenome_name_sort" type="string" indexed="true" stored="true"/>
-   <field name="library_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="metagenome_metadata" type="text_general" indexed="true" stored="true"/>
    <field name="sequence_type" type="text_general" indexed="true" stored="true"/>
-   <field name="seq_method" type="text_general" indexed="true" stored="true"/>
    <field name="metagenome_created" type="text_general" indexed="true" stored="true"/>
-
    <field name="project_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
-   <field name="project_name" type="text_general" indexed="true" stored="true"/>
-   <field name="project_name_sort" type="string" indexed="true" stored="true"/>
-   <field name="project_description" type="text_general" indexed="true" stored="true"/>
-   <field name="project_created" type="text_general" indexed="true" stored="true"/>
-   <field name="PI_info" type="text_general" indexed="true" stored="true"/>
-   <field name="tech_contact" type="text_general" indexed="true" stored="true"/>
-   <field name="funding_source" type="text_general" indexed="true" stored="true"/>
-   <field name="ncbi_id" type="text_ws_general" indexed="true" stored="true"/>
-   <field name="qiime_id" type="text_ws_general" indexed="true" stored="true"/>
-   <field name="vamps_id" type="text_ws_general" indexed="true" stored="true"/>
-   <field name="greengenes_id" type="text_ws_general" indexed="true" stored="true"/>
+   <field name="project_url" type="text_general" indexed="true" stored="true"/>
+   <field name="metagenome_metadata" type="text_general" indexed="true" stored="true"  multiValued="true" />
 
-   <field name="sample_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
-   <field name="sample_name" type="text_general" indexed="true" stored="true"/>
-   <field name="sample_name_sort" type="string" indexed="true" stored="true"/>
-   <field name="sample_created" type="text_general" indexed="true" stored="true"/>
-   <field name="collection_date" type="text_general" indexed="true" stored="true"/>
-   <field name="env_package_type" type="string" indexed="true" stored="true"/>
-   <field name="feature" type="text_general" indexed="true" stored="true"/>
-   <field name="biome" type="string" indexed="true" stored="true"/>
-   <field name="material" type="text_general" indexed="true" stored="true"/>
-   <field name="location" type="text_general" indexed="true" stored="true"/>
-   <field name="country" type="text_general" indexed="true" stored="true"/>
-   <field name="latitude" type="float" indexed="true" stored="true"/>
-   <field name="longitude" type="float" indexed="true" stored="true"/>
-<!--   sample metadata is already in metagenome metadata, don't bother indexing twice
+<!-- 
+   mixs portion 
+-->
+   <field name="mix_compliant" type="boolean" indexed="true" stored="true"/>
+   <field name="mix_env_package_type" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_country" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_location" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_latitude" type="float" indexed="true" stored="true"/>
+   <field name="mix_longitude" type="float" indexed="true" stored="true"/>
+   <field name="mix_PI_firstname" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_PI_lastname" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_PI_full_name" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_sequence_type" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_seq_method" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_collection_date" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_feature" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_biome" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_project_name" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_project_id" type="text_general" indexed="true" stored="true"/>
+   <field name="mix_material" type="text_general" indexed="true" stored="true"/>
+
+<!-- 
+   Sequence stats portion 
+-->
+   <field name="ss_average_ambig_chars_raw" type="int" indexed="true" stored="true"/>
+   <field name="ss_read_count_annotated" type="int" indexed="true" stored="true"/>
+   <field name="ss_ratio_reads_rna" type="float" indexed="true" stored="true"/>
+   <field name="ss_ambig_sequence_count_raw" type="int" indexed="true" stored="true"/>
+   <field name="ss_alpha_diversity_shannon" type="float" indexed="true" stored="true"/>
+
+   <field name="ss_standard_deviation_gc_ratio_raw" type="float" indexed="true" stored="true"/>
+   <field name="ss_drisee_score_raw" type="float" indexed="true" stored="true"/>
+   <field name="ss_standard_deviation_gc_ratio_preprocessed" type="float" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_processed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_length_min_preprocessed_rna" type="int" indexed="true" stored="true"/>
+
+   <field name="ss_sequence_count_preprocessed" type="int" indexed="true" stored="true"/>
+   <field name="ss_read_count_processed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_average_length_preprocessed" type="float" indexed="true" stored="true"/>
+   <field name="ss_average_gc_ratio_preprocessed" type="float" indexed="true" stored="true"/>
+   <field name="ss_average_ambig_chars_preprocessed" type="float" indexed="true" stored="true"/>
+
+   <field name="ss_average_length_raw" type="float" indexed="true" stored="true"/>
+   <field name="ss_ambig_sequence_count_preprocessed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_average_gc_ratio_preprocessed_rna" type="float" indexed="true" stored="true"/>
+   <field name="ss_cluster_count_processed_aa" type="float" indexed="true" stored="true"/>
+   <field name="ss_length_max_preprocessed_rna" type="int" indexed="true" stored="true"/>
+
+   <field name="ss_ambig_char_count_raw" type="int" indexed="true" stored="true"/>
+   <field name="ss_average_length_preprocessed_rna" type="float" indexed="true" stored="true"/>
+   <field name="ss_standard_deviation_length_raw" type="float" indexed="true" stored="true"/>
+   <field name="ss_average_gc_content_preprocessed" type="float" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_sims_rna" type="int" indexed="true" stored="true"/>
+
+   <field name="ss_sequence_count_dereplication_removed" type="int" indexed="true" stored="true"/>
+   <field name="ss_read_count_processed_aa" type="int" indexed="true" stored="true"/>
+   <field name="ss_bp_count_preprocessed" type="int" indexed="true" stored="true"/>
+   <field name="ss_standard_deviation_gc_content_raw" type="float" indexed="true" stored="true"/>
+   <field name="ss_bp_count_raw" type="int" indexed="true" stored="true"/>
+
+   <field name="ss_standard_deviation_gc_ratio_preprocessed_rna" type="float" indexed="true" stored="true"/>
+   <field name="ss_average_ambig_chars_preprocessed_rna" type="float" indexed="true" stored="true"/>
+   <field name="ss_cluster_count_processed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_standard_deviation_length_preprocessed_rna" type="float" indexed="true" stored="true"/>
+   <field name="ss_clustered_sequence_count_processed_rna" type="int" indexed="true" stored="true"/>
+
+   <field name="ss_ratio_reads_aa" type="float" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_preprocessed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_ontology" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_raw" type="int" indexed="true" stored="true"/>
+   <field name="ss_clustered_sequence_count_processed_aa" type="float" indexed="true" stored="true"/>
+
+   <field name="ss_average_gc_ratio_raw" type="float" indexed="true" stored="true"/>
+   <field name="ss_average_gc_content_raw" type="float" indexed="true" stored="true"/>
+   <field name="ss_standard_deviation_gc_content_preprocessed_rna" type="float" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_sims_aa" type="int" indexed="true" stored="true"/>
+   <field name="ss_ambig_char_count_preprocessed_rna" type="int" indexed="true" stored="true"/>
+
+   <field name="ss_bp_count_preprocessed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_standard_deviation_length_preprocessed" type="float" indexed="true" stored="true"/>
+   <field name="ss_standard_deviation_gc_content_preprocessed" type="float" indexed="true" stored="true"/>
+   <field name="ss_average_gc_content_preprocessed_rna" type="float" indexed="true" stored="true"/>
+   <field name="ss_ambig_char_count_preprocessed" type="int" indexed="true" stored="true"/>
+   <field name="ss_ambig_sequence_count_preprocessed" type="int" indexed="true" stored="true"/>
+
+<!-- 
+   pipeline portion 
+-->
+   <field name="pipeline_version" type="text_general" indexed="true" stored="true"/>
+   <field name="pipeline_assembled" type="boolean" indexed="true" stored="true"/>
+   <field name="pipeline_rna_pid" type="int" indexed="true" stored="true"/>
+   <field name="pipeline_fgs_type" type="text_general" indexed="true" stored="true"/>
+   <field name="pipeline_filter_ambig" type="boolean" indexed="true" stored="true"/>
+   <field name="pipeline_prefix_length" type="int" indexed="true" stored="true"/>
+   <field name="pipeline_aa_pid" type="int" indexed="true" stored="true"/>
+   <field name="pipeline_publish_priority" type="text_general" indexed="true" stored="true"/>
+   <field name="pipeline_m5nr_sims_version" type="text_general" indexed="true" stored="true"/>
+   <field name="pipeline_m5nr_annotation_version" type="text_general" indexed="true" stored="true"/>
+   <field name="pipeline_filter_ln" type="boolean" indexed="true" stored="true"/>
+   <field name="pipeline_m5rna_annotation_version" type="text_general" indexed="true" stored="true"/>
+   <field name="pipeline_file_type" type="text_general" indexed="true" stored="true"/>
+   <field name="pipeline_m5rna_sims_version" type="text_general" indexed="true" stored="true"/>
+   <field name="pipeline_max_ambig" type="int" indexed="true" stored="true"/>
+   <field name="pipeline_bowtie" type="boolean" indexed="true" stored="true"/>
+   <field name="pipeline_filter_ln_mult" type="text_general" indexed="true" stored="true"/>
+   <field name="pipeline_dereplicate" type="boolean" indexed="true" stored="true"/>
+   <field name="pipeline_screen_indexes" type="text_general" indexed="true" stored="true"/>
+
+<!-- 
+   taxonomy profile portion 
+-->
+   <field name="tax_leaf" type="boolean" indexed="true" stored="true"/>
+   <field name="tax_level" type="int" indexed="true" stored="true"/>
+   <field name="tax_level_description" type="text_general" indexed="true" stored="true"/>
+   <field name="tax_abundance" type="float" indexed="true" stored="true"/>
+   <field name="tax_evalue" type="float" indexed="true" stored="true"/>
+   <field name="tax_percent_id" type="float" indexed="true" stored="true"/>
+   <field name="tax_alignment_length" type="int" indexed="true" stored="true"/>
+   <field name="tax_lineage" type="text_general" indexed="true" stored="true"/>
+
+<!-- 
+   functional profile portion 
+-->
+   <field name="func_leaf" type="boolean" indexed="true" stored="true"/>
+   <field name="func_level" type="int" indexed="true" stored="true"/>
+   <field name="func_level_description" type="text_general" indexed="true" stored="true"/>
+   <field name="func_abundance" type="float" indexed="true" stored="true"/>
+   <field name="func_evalue" type="float" indexed="true" stored="true"/>
+   <field name="func_percent_id" type="float" indexed="true" stored="true"/>
+   <field name="func_alignment_length" type="int" indexed="true" stored="true"/>
+   <field name="func_lineage" type="text_general" indexed="true" stored="true"/>
+
+<!--  
+ sample metadata is already in metagenome metadata, don't bother indexing twice
 -->
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
@@ -128,45 +234,32 @@
         or to add multiple fields to the same field for easier/faster searching.  -->
 
    <copyField source="object_id" dest="text"/>
-   <copyField source="workspace_name" dest="text"/>
    <copyField source="object_type" dest="text"/>
-
+   <copyField source="object_workspace" dest="text"/>
    <copyField source="object_id" dest="text_boost"/>
+   <copyField source="object_name" dest="text"/>
    <copyField source="metagenome_id" dest="text_boost"/>
-   <copyField source="project_id" dest="text_boost"/>
-   <copyField source="sample_id" dest="text_boost"/>
-
-   <copyField source="metagenome_id" dest="text"/>
    <copyField source="metagenome_name" dest="text"/>
-   <copyField source="library_id" dest="text"/>
-   <copyField source="metagenome_metadata" dest="text"/>
    <copyField source="sequence_type" dest="text"/>
-   <copyField source="seq_method" dest="text"/>
-   <copyField source="metagenome_created" dest="text"/>
-   <copyField source="project_id" dest="text"/>
-   <copyField source="project_name" dest="text"/>
-   <copyField source="project_description" dest="text"/>
-   <copyField source="project_created" dest="text"/>
-   <copyField source="PI_info" dest="text"/>
-   <copyField source="tech_contact" dest="text"/>
-   <copyField source="funding_source" dest="text"/>
-   <copyField source="ncbi_id" dest="text"/>
-   <copyField source="qiime_id" dest="text"/>
-   <copyField source="vamps_id" dest="text"/>
-   <copyField source="greengenes_id" dest="text"/>
-   <copyField source="sample_id" dest="text"/>
-   <copyField source="sample_name" dest="text"/>
-   <copyField source="sample_created" dest="text"/>
-   <copyField source="collection_date" dest="text"/>
-   <copyField source="env_package_type" dest="text"/>
-   <copyField source="feature" dest="text"/>
-   <copyField source="biome" dest="text"/>
-   <copyField source="material" dest="text"/>
-   <copyField source="location" dest="text"/>
-   <copyField source="country" dest="text"/>
-   <copyField source="latitude" dest="text"/>
-   <copyField source="longitude" dest="text"/>
- 
+   <copyField source="project_id" dest="text_boost"/>
+   <copyField source="project_url" dest="text"/>
+   <copyField source="project_url" dest="text"/>
+   <copyField source="metagenome_metadata" dest="text"/>
+   <copyField source="mix_env_package_type" dest="text"/>
+   <copyField source="mix_country" dest="text"/>
+   <copyField source="mix_location" dest="text"/>
+   <copyField source="mix_PI_firstname" dest="text"/>
+   <copyField source="mix_PI_lastname" dest="text"/>
+   <copyField source="mix_PI_full_name" dest="text"/>
+   <copyField source="mix_sequence_type" dest="text"/>
+   <copyField source="mix_seq_method" dest="text"/>
+   <copyField source="mix_collection_date" dest="text"/>
+   <copyField source="mix_feature" dest="text"/>
+   <copyField source="mix_biome" dest="text"/>
+   <copyField source="mix_project_name" dest="text"/>
+   <copyField source="mix_project_id" dest="text"/>
+   <copyField source="mix_material" dest="text"/>
+
   <types>
     <!-- field type definitions. The "name" attribute is
        just a label to be used by field definitions.  The "class"
