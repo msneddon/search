@@ -71,12 +71,13 @@ def get_profile_grouping_info(profile, row_metadata_key):
         sys.exit(0) 
 
     metagenome_ref = ""
-    metagenomes = profile["metagenomes"]["elements"]
-    if len(metagenomes) != 1: 
-        print "ERROR :Either Zero or More than one metagenome for object : "+  str(x[0]) 
-        sys.exit(0) 
-    for metagenome in metagenomes.keys():
-        metagenome_ref = metagenomes[metagenome]["ref"]
+    if (profile.has_key("metagenomes") and profile["metagenomes"].has_key("elements")): 
+        metagenomes = profile["metagenomes"]["elements"]
+        if len(metagenomes) != 1: 
+            print "ERROR :Either Zero or More than one metagenome for object : "+  str(x[0]) 
+            sys.exit(0) 
+        for metagenome in metagenomes.keys():
+            metagenome_ref = metagenomes[metagenome]["ref"]
  
     total_abundance = 0 
  
@@ -238,7 +239,6 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                     ws_id = str(metagenome['info'][6])
                     ws_object_version = str(metagenome['info'][4])
                     metagenome_object_ref_key = ws_id + "/" + ws_object_id + "/" + ws_object_version
-
 
                     metagenome_object["metagenome_id"] = metagenome['data']['id']
                     metagenome_object["metagenome_name"] = metagenome['data']['name']
@@ -469,9 +469,9 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                         tax_profile = tax_profile[0] 
 
                         tax_profile_results_list = get_profile_grouping_info(tax_profile,"taxonomy")
-                        level_name_dict = tax_profile_list[2]
-                        total_abundance = tax_profile_list[1]
-                        tax_metagenome_ref = tax_profile_list[0]
+                        level_name_dict = tax_profile_results_list[2]
+                        total_abundance = tax_profile_results_list[1]
+                        tax_metagenome_ref = tax_profile_results_list[0]
                         
                         temp_metagenome_id = ""
                         temp_metagenome_name = ""
@@ -480,7 +480,8 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                             temp_metagenome_name = metagenome_id_name_dict[tax_metagenome_ref][1]
                         else:
                             print "WARNING NO METAGENOME FOUND FOR TaxonomicProfile : " +  tax_profile['info'][1]
-                            continue
+#TEMPORARY HACK SINCE THEY NOT DONE WITH NEW METAGENOME WS OBJECTS
+#                            continue
 
                         #go through the results and populate the rows.
                         for tax_level in level_name_dict.keys() :
@@ -551,9 +552,9 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                         functional_profile = functional_profile[0]
  
                         functional_profile_results_list = get_profile_grouping_info(funtional_profile,"ontology")
-                        level_name_dict = functional_profile_list[2]
-                        total_abundance = functional_profile_list[1]
-                        func_metagenome_ref = functional_profile_list[0] 
+                        level_name_dict = functional_profile_results_list[2]
+                        total_abundance = functional_profile_results_list[1]
+                        func_metagenome_ref = functional_profile_results_list[0] 
  
                         temp_metagenome_id = ""
                         temp_metagenome_name = ""
@@ -562,7 +563,8 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                             temp_metagenome_name = metagenome_id_name_dict[func_metagenome_ref][1]
                         else:
                             print "WARNING NO METAGENOME FOUND FOR FunctionalProfile : " +  functional_profile['info'][1]
-                            continue
+#TEMPORARY HACK SINCE THEY NOT DONE WITH NEW METAGENOME WS OBJECTS
+#                            continue
  
                         #go through the results and populate the rows.
                         for functional_level in level_name_dict.keys() :
