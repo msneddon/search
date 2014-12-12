@@ -14,10 +14,10 @@ import biokbase.workspace.client
 
 solr_keys = ["object_id" , "workspace_name" , "object_type" , 'object_name', "genome_id", "feature_id", "genome_source" , "genome_source_id" , "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "num_cds", "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids" , "has_publications" , "has_protein_families" ]
 solr_genome_keys = ["genome_id", "genome_source" , "genome_source_id" , "scientific_name" , "scientific_name_sort" , "genome_dna_size" , "num_contigs" , "num_cds", "complete" , "domain" , "taxonomy" , "gc_content" , "genome_publications", "has_publications"]
-solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids" , "has_protein_families" ]
+solr_feature_keys = ["feature_id",  "feature_source_id" , "protein_translation_length" , "dna_sequence_length", "feature_type" , "function" , "gene_name", "aliases" , "feature_publications" , "location_contig", "location_begin", "location_end", "location_strand", "locations", "roles" , "subsystems" , "subsystem_data" , "protein_families" , "annotations" , "regulon_data" , "atomic_regulons", "coexpressed_fids" , "co_occurring_fids" , "has_protein_families", "cs_db_version" ]
 
 
-def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
+def export_genomes_from_ws(maxNumObjects,genome_list,wsname,csdbversion):
     # gavin's dev instance
 #    ws_client = biokbase.workspace.client.Workspace('http://dev04:7058')
     # production instance
@@ -172,6 +172,8 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
                     genomeObject['genome_dna_size'] = str(genome['data']['dna_size'])
                     genomeObject['genome_publications'] = ''
                     genomeObject['has_publications'] = False
+                    genomeObject['cs_db_version'] = csdbversion
+                    
 
                     featureset_info = ws_client.get_objects([{"ref": genome['data']['featureset_ref']}])
                     features = featureset_info[0]['data']['features']
@@ -310,7 +312,9 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname):
     
 #                        if f.has_key('subsystems'):
 #                            featureObject['subsystems'] = ' , '.join([str(k) for k in f["subsystems"]])
+                        featureObject['cs_db_version'] = csdbversion
     
+
                         outBuffer = StringIO.StringIO()
                 
                         try:
@@ -337,6 +341,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Create import files from workspace objects')
     parser.add_argument('--count', action="store", dest="maxNumObjects", type=int)
     parser.add_argument('--wsname', nargs=1, help='workspace name to use', required=True)
+    parser.add_argument('--csdbversion', nargs=1, help='cs db version used to generate data', required=True)
     parser.add_argument('genomes', action="store", nargs='*')
     args = parser.parse_args()
     maxNumObjects = sys.maxint
@@ -344,6 +349,7 @@ if __name__ == "__main__":
         maxNumObjects = args.maxNumObjects
     
     wsname = args.wsname[0]
+    csdbversion = args.csdbversion[0]
 #Info Log
     print args.genomes
-    export_genomes_from_ws(maxNumObjects,args.genomes,wsname)
+    export_genomes_from_ws(maxNumObjects,args.genomes,wsname,csdbversion)
