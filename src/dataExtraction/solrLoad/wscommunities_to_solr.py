@@ -285,10 +285,11 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                             metagenome_object["mix_longitude"] = mixs_dict['longitude'] 
 
                         mix_full_name = ""
-                        if mixs_dict.has_key('PI_lastname'): 
+                        if mixs_dict.get('PI_lastname') is not None: 
                             metagenome_object["mix_PI_lastname"] = mixs_dict['PI_lastname']
                             mix_full_name = mixs_dict['PI_lastname']
-                        if mixs_dict.has_key('PI_firstname'): 
+                        if mixs_dict.get('PI_firstname') is not None: 
+#                        if mixs_dict.has_key('PI_firstname') and mixs_dict.has_key('PI_firstname') is not None: 
                             metagenome_object["mix_PI_firstname"] = mixs_dict['PI_firstname'] 
                             mix_full_name = mix_full_name + ", " + mixs_dict['PI_firstname']
                         metagenome_object["mix_PI_fullname"] = mix_full_name 
@@ -427,7 +428,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
  
                     outBuffer = StringIO.StringIO() 
                     try: 
-                        solr_strings = [ unicode(str(metagenome_model_object[x])) for x in solr_keys ] 
+                        solr_strings = [ unicode(str(metagenome_object[x])) for x in solr_keys ] 
                         solr_line = "\t".join(solr_strings) 
                         outBuffer.write(solr_line + "\n") 
 #                        print outBuffer.getvalue()
