@@ -444,6 +444,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
             tax_profile_object_count = 1
             skipNum = 0 
             limitNum = 5000 
+            tax_profile_objects_list = list() 
             while tax_profile_object_count != 0:
                 tax_profile_list = ws_client.list_objects({"ids": [workspace_id],"type":"Communities.TaxonomicProfile","limit":limitNum,"skip":skipNum})
                 tax_profile_object_count=len(tax_profile_list)
@@ -453,10 +454,11 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
             tax_profile_objects_list.sort() 
  
             if len(tax_profile_objects_list) > 0:
+                print "\tWorkspace %s has %d matching objects" % (workspace_name, len(tax_profile_objects_list))
                 counter = 0 
                 for x in tax_profile_objects_list: 
 #Info log   
-#                print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name) 
+                    print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(counter)/len(tax_profile_objects_list)) + " %", workspace_name) 
                     if "TaxonomicProfile" in x[2]: 
                         done = False 
                         while not done: 
@@ -507,6 +509,11 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                                 tax_profile_object['metagenome_id'] = temp_metagenome_id
                                 tax_profile_object['metagenome_name'] = temp_metagenome_name
 
+                        #        counter = counter + 1
+                    #                    sys.stdout.write("Counter: " + str(counter)  + " \r" ) 
+                         #       sys.stdout.write("Counter Time : " + str(counter) + " : tax_profile " + tax_profile_object['object_name'] + " : " + str(datetime.datetime.now()) + "\n") 
+                         #       sys.stdout.flush() 
+
                                 outBuffer = StringIO.StringIO() 
                                 try: 
                                     solr_strings = [ unicode(str(tax_profile_object[x])) for x in solr_keys ] 
@@ -520,13 +527,14 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                                 outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"','')) 
                                 outBuffer.close()                                
                         counter = counter + 1 
-                        sys.stdout.write("Counter Time : "+ str(counter)+ " : TaxonomicProfile " + tax_profile_object["object_name"] + " : " + str(datetime.datetime.now()) + "\n") 
+                        sys.stdout.write("Counter Time : "+ str(counter)+ " : TaxonomicProfile " + tax_profile['info'][1] + " : " + str(datetime.datetime.now()) + "\n") 
                         sys.stdout.flush() 
 
             #NOW DO FUNCTIONAL_PROFILES 
             functional_profile_object_count = 1
             skipNum = 0 
             limitNum = 5000 
+            functional_profile_objects_list = list() 
             while functional_profile_object_count != 0:
                 functional_profile_list = ws_client.list_objects({"ids": [workspace_id],"type":"Communities.FunctionalProfile","limit":limitNum,"skip":skipNum})
                 functional_profile_object_count=len(functional_profile_list)
@@ -539,7 +547,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                 counter = 0
                 for x in functional_profile_objects_list:
 #Info log 
-                     # print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
+                    print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(counter)/len(functional_profile_objects_list)) + " %", workspace_name)
                     if "FunctionalProfile" in x[2]: 
                         done = False
                         while not done: 
@@ -552,7 +560,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                                 print "Having trouble getting " + str(x[0]) + " from workspace " + str(workspace_id)
                         functional_profile = functional_profile[0]
  
-                        functional_profile_results_list = get_profile_grouping_info(funtional_profile,"ontology")
+                        functional_profile_results_list = get_profile_grouping_info(functional_profile,"ontology")
                         level_name_dict = functional_profile_results_list[2]
                         total_abundance = functional_profile_results_list[1]
                         func_metagenome_ref = functional_profile_results_list[0] 
@@ -585,11 +593,16 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                                 functional_profile_object['func_abundance'] = round((100. * level_name_dict[functional_level][functional_name]["abundance"]/total_abundance),3)
                                 functional_profile_object['func_evalue'] = level_name_dict[functional_level][functional_name]["e_value"]
                                 functional_profile_object['func_percent_id'] = level_name_dict[functional_level][functional_name]["percent_identity"]
-                                functional_profile_object['func_alignment_length'] = level_name_dict[tax_level][tax_name]["alignment"]
-                                functional_profile_object['func_lineage'] = level_name_dict[tax_level][tax_name]["lineage"]
+                                functional_profile_object['func_alignment_length'] = level_name_dict[functional_level][functional_name]["alignment"]
+                                functional_profile_object['func_lineage'] = level_name_dict[functional_level][functional_name]["lineage"]
                                 functional_profile_object['metagenome_id'] = temp_metagenome_id 
                                 functional_profile_object['metagenome_name'] = temp_metagenome_name
  
+#                                counter = counter + 1
+                    #                    sys.stdout.write("Counter: " + str(counter)  + " \r" ) 
+          #                      sys.stdout.write("Counter Time : " + str(counter) + " : functional_profile " + functional_profile_object['object_name'] + " : " + str(datetime.datetime.now()) + "\n") 
+           #                     sys.stdout.flush() 
+
                                 outBuffer = StringIO.StringIO() 
                                 try: 
                                     solr_strings = [ unicode(str(functional_profile_object[x])) for x in solr_keys ] 
@@ -603,7 +616,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                                 outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"','')) 
                                 outBuffer.close() 
                         counter = counter + 1 
-                        sys.stdout.write("Counter Time : "+ str(counter)+ " : TaxonomicProfile " + tax_profile_object["object_name"] + " : " + str(datetime.datetime.now()) + "\n") 
+                        sys.stdout.write("Counter Time : "+ str(counter)+ " : FunctionalProfile " + functional_profile['info'][1] + " : " + str(datetime.datetime.now()) + "\n") 
                         sys.stdout.flush() 
     outFile.close() 
                             
