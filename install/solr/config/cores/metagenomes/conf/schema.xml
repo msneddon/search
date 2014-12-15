@@ -68,6 +68,8 @@
 <!-- can't use date type yet, metagenome objects don't precisely
      conform to solr date type
      (will need to massage their date to what solr expects)
+NOTE metagenome_id should be required = True, but have to remove that requirement due to references not being correct.
+<field name="metagenome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
 -->
 
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" /> 
@@ -75,7 +77,7 @@
    <field name="object_workspace" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
 
-   <field name="metagenome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
+   <field name="metagenome_id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="metagenome_name" type="text_general" indexed="true" stored="true"/>
    <field name="sequence_type" type="text_general" indexed="true" stored="true"/>
    <field name="metagenome_created" type="text_general" indexed="true" stored="true"/>
@@ -90,8 +92,8 @@
    <field name="mix_env_package_type" type="text_general" indexed="true" stored="true"/>
    <field name="mix_country" type="text_general" indexed="true" stored="true"/>
    <field name="mix_location" type="text_general" indexed="true" stored="true"/>
-   <field name="mix_latitude" type="float" indexed="true" stored="true"/>
-   <field name="mix_longitude" type="float" indexed="true" stored="true"/>
+   <field name="mix_latitude" type="string" indexed="true" stored="true"/>
+   <field name="mix_longitude" type="string" indexed="true" stored="true"/>
    <field name="mix_PI_firstname" type="text_general" indexed="true" stored="true"/>
    <field name="mix_PI_lastname" type="text_general" indexed="true" stored="true"/>
    <field name="mix_PI_full_name" type="text_general" indexed="true" stored="true"/>
@@ -108,36 +110,36 @@
    Sequence stats portion 
 -->
    <field name="ss_average_ambig_chars_raw" type="float" indexed="true" stored="true"/>
-   <field name="ss_read_count_annotated" type="int" indexed="true" stored="true"/>
+   <field name="ss_read_count_annotated" type="long" indexed="true" stored="true"/>
    <field name="ss_ratio_reads_rna" type="float" indexed="true" stored="true"/>
-   <field name="ss_ambig_sequence_count_raw" type="int" indexed="true" stored="true"/>
+   <field name="ss_ambig_sequence_count_raw" type="long" indexed="true" stored="true"/>
    <field name="ss_alpha_diversity_shannon" type="float" indexed="true" stored="true"/>
 
    <field name="ss_standard_deviation_gc_ratio_raw" type="float" indexed="true" stored="true"/>
    <field name="ss_drisee_score_raw" type="float" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_gc_ratio_preprocessed" type="float" indexed="true" stored="true"/>
-   <field name="ss_sequence_count_processed_rna" type="int" indexed="true" stored="true"/>
-   <field name="ss_length_min_preprocessed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_processed_rna" type="long" indexed="true" stored="true"/>
+   <field name="ss_length_min_preprocessed_rna" type="long" indexed="true" stored="true"/>
 
    <field name="ss_sequence_count_preprocessed" type="long" indexed="true" stored="true"/>
-   <field name="ss_read_count_processed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_read_count_processed_rna" type="long" indexed="true" stored="true"/>
    <field name="ss_average_length_preprocessed" type="float" indexed="true" stored="true"/>
    <field name="ss_average_gc_ratio_preprocessed" type="float" indexed="true" stored="true"/>
    <field name="ss_average_ambig_chars_preprocessed" type="float" indexed="true" stored="true"/>
 
    <field name="ss_average_length_raw" type="float" indexed="true" stored="true"/>
-   <field name="ss_ambig_sequence_count_preprocessed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_ambig_sequence_count_preprocessed_rna" type="long" indexed="true" stored="true"/>
    <field name="ss_average_gc_ratio_preprocessed_rna" type="float" indexed="true" stored="true"/>
    <field name="ss_cluster_count_processed_aa" type="float" indexed="true" stored="true"/>
-   <field name="ss_length_max_preprocessed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_length_max_preprocessed_rna" type="long" indexed="true" stored="true"/>
 
-   <field name="ss_ambig_char_count_raw" type="int" indexed="true" stored="true"/>
+   <field name="ss_ambig_char_count_raw" type="long" indexed="true" stored="true"/>
    <field name="ss_average_length_preprocessed_rna" type="float" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_length_raw" type="float" indexed="true" stored="true"/>
    <field name="ss_average_gc_content_preprocessed" type="float" indexed="true" stored="true"/>
    <field name="ss_sequence_count_sims_rna" type="long" indexed="true" stored="true"/>
 
-   <field name="ss_sequence_count_dereplication_removed" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_dereplication_removed" type="long" indexed="true" stored="true"/>
    <field name="ss_read_count_processed_aa" type="long" indexed="true" stored="true"/>
    <field name="ss_bp_count_preprocessed" type="long" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_gc_content_raw" type="float" indexed="true" stored="true"/>
@@ -145,13 +147,13 @@
 
    <field name="ss_standard_deviation_gc_ratio_preprocessed_rna" type="float" indexed="true" stored="true"/>
    <field name="ss_average_ambig_chars_preprocessed_rna" type="float" indexed="true" stored="true"/>
-   <field name="ss_cluster_count_processed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_cluster_count_processed_rna" type="long" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_length_preprocessed_rna" type="float" indexed="true" stored="true"/>
    <field name="ss_clustered_sequence_count_processed_rna" type="long" indexed="true" stored="true"/>
 
    <field name="ss_ratio_reads_aa" type="float" indexed="true" stored="true"/>
    <field name="ss_sequence_count_preprocessed_rna" type="long" indexed="true" stored="true"/>
-   <field name="ss_sequence_count_ontology" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_ontology" type="long" indexed="true" stored="true"/>
    <field name="ss_sequence_count_raw" type="long" indexed="true" stored="true"/>
    <field name="ss_clustered_sequence_count_processed_aa" type="float" indexed="true" stored="true"/>
 
@@ -159,14 +161,14 @@
    <field name="ss_average_gc_content_raw" type="float" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_gc_content_preprocessed_rna" type="float" indexed="true" stored="true"/>
    <field name="ss_sequence_count_sims_aa" type="long" indexed="true" stored="true"/>
-   <field name="ss_ambig_char_count_preprocessed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_ambig_char_count_preprocessed_rna" type="long" indexed="true" stored="true"/>
 
    <field name="ss_bp_count_preprocessed_rna" type="long" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_length_preprocessed" type="float" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_gc_content_preprocessed" type="float" indexed="true" stored="true"/>
    <field name="ss_average_gc_content_preprocessed_rna" type="float" indexed="true" stored="true"/>
-   <field name="ss_ambig_char_count_preprocessed" type="int" indexed="true" stored="true"/>
-   <field name="ss_ambig_sequence_count_preprocessed" type="int" indexed="true" stored="true"/>
+   <field name="ss_ambig_char_count_preprocessed" type="long" indexed="true" stored="true"/>
+   <field name="ss_ambig_sequence_count_preprocessed" type="long" indexed="true" stored="true"/>
 
 <!-- 
    pipeline portion 
