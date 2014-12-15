@@ -119,7 +119,7 @@
    <field name="ss_sequence_count_processed_rna" type="int" indexed="true" stored="true"/>
    <field name="ss_length_min_preprocessed_rna" type="int" indexed="true" stored="true"/>
 
-   <field name="ss_sequence_count_preprocessed" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_preprocessed" type="long" indexed="true" stored="true"/>
    <field name="ss_read_count_processed_rna" type="int" indexed="true" stored="true"/>
    <field name="ss_average_length_preprocessed" type="float" indexed="true" stored="true"/>
    <field name="ss_average_gc_ratio_preprocessed" type="float" indexed="true" stored="true"/>
@@ -135,33 +135,33 @@
    <field name="ss_average_length_preprocessed_rna" type="float" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_length_raw" type="float" indexed="true" stored="true"/>
    <field name="ss_average_gc_content_preprocessed" type="float" indexed="true" stored="true"/>
-   <field name="ss_sequence_count_sims_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_sims_rna" type="long" indexed="true" stored="true"/>
 
    <field name="ss_sequence_count_dereplication_removed" type="int" indexed="true" stored="true"/>
-   <field name="ss_read_count_processed_aa" type="int" indexed="true" stored="true"/>
-   <field name="ss_bp_count_preprocessed" type="int" indexed="true" stored="true"/>
+   <field name="ss_read_count_processed_aa" type="long" indexed="true" stored="true"/>
+   <field name="ss_bp_count_preprocessed" type="long" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_gc_content_raw" type="float" indexed="true" stored="true"/>
-   <field name="ss_bp_count_raw" type="int" indexed="true" stored="true"/>
+   <field name="ss_bp_count_raw" type="long" indexed="true" stored="true"/>
 
    <field name="ss_standard_deviation_gc_ratio_preprocessed_rna" type="float" indexed="true" stored="true"/>
    <field name="ss_average_ambig_chars_preprocessed_rna" type="float" indexed="true" stored="true"/>
    <field name="ss_cluster_count_processed_rna" type="int" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_length_preprocessed_rna" type="float" indexed="true" stored="true"/>
-   <field name="ss_clustered_sequence_count_processed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_clustered_sequence_count_processed_rna" type="long" indexed="true" stored="true"/>
 
    <field name="ss_ratio_reads_aa" type="float" indexed="true" stored="true"/>
-   <field name="ss_sequence_count_preprocessed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_preprocessed_rna" type="long" indexed="true" stored="true"/>
    <field name="ss_sequence_count_ontology" type="int" indexed="true" stored="true"/>
-   <field name="ss_sequence_count_raw" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_raw" type="long" indexed="true" stored="true"/>
    <field name="ss_clustered_sequence_count_processed_aa" type="float" indexed="true" stored="true"/>
 
    <field name="ss_average_gc_ratio_raw" type="float" indexed="true" stored="true"/>
    <field name="ss_average_gc_content_raw" type="float" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_gc_content_preprocessed_rna" type="float" indexed="true" stored="true"/>
-   <field name="ss_sequence_count_sims_aa" type="int" indexed="true" stored="true"/>
+   <field name="ss_sequence_count_sims_aa" type="long" indexed="true" stored="true"/>
    <field name="ss_ambig_char_count_preprocessed_rna" type="int" indexed="true" stored="true"/>
 
-   <field name="ss_bp_count_preprocessed_rna" type="int" indexed="true" stored="true"/>
+   <field name="ss_bp_count_preprocessed_rna" type="long" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_length_preprocessed" type="float" indexed="true" stored="true"/>
    <field name="ss_standard_deviation_gc_content_preprocessed" type="float" indexed="true" stored="true"/>
    <field name="ss_average_gc_content_preprocessed_rna" type="float" indexed="true" stored="true"/>
