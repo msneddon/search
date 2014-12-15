@@ -86,7 +86,7 @@
 <!-- 
    mixs portion 
 -->
-   <field name="mix_compliant" type="boolean" indexed="true" stored="true"/>
+   <field name="mixs_compliant" type="boolean" indexed="true" stored="true"/>
    <field name="mix_env_package_type" type="text_general" indexed="true" stored="true"/>
    <field name="mix_country" type="text_general" indexed="true" stored="true"/>
    <field name="mix_location" type="text_general" indexed="true" stored="true"/>
@@ -107,7 +107,7 @@
 <!-- 
    Sequence stats portion 
 -->
-   <field name="ss_average_ambig_chars_raw" type="int" indexed="true" stored="true"/>
+   <field name="ss_average_ambig_chars_raw" type="float" indexed="true" stored="true"/>
    <field name="ss_read_count_annotated" type="int" indexed="true" stored="true"/>
    <field name="ss_ratio_reads_rna" type="float" indexed="true" stored="true"/>
    <field name="ss_ambig_sequence_count_raw" type="int" indexed="true" stored="true"/>
