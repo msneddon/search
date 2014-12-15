@@ -292,7 +292,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
 #                        if mixs_dict.has_key('PI_firstname') and mixs_dict.has_key('PI_firstname') is not None: 
                             metagenome_object["mix_PI_firstname"] = mixs_dict['PI_firstname'] 
                             mix_full_name = mix_full_name + ", " + mixs_dict['PI_firstname']
-                        metagenome_object["mix_PI_fullname"] = mix_full_name 
+                        metagenome_object["mix_PI_full_name"] = mix_full_name 
 
                         if mixs_dict.has_key('sequence_type'): 
                             metagenome_object["mix_sequence_type"] = mixs_dict['sequence_type'] 
@@ -428,7 +428,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
  
                     outBuffer = StringIO.StringIO() 
                     try: 
-                        solr_strings = [ unicode(str(metagenome_object[x])) for x in solr_keys ] 
+                        solr_strings = [ unicode(str(metagenome_object[x]).replace("\t"," ")) for x in solr_keys ] 
                         solr_line = "\t".join(solr_strings) 
                         outBuffer.write(solr_line + "\n") 
 #                        print outBuffer.getvalue()
@@ -516,7 +516,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
 
                                 outBuffer = StringIO.StringIO() 
                                 try: 
-                                    solr_strings = [ unicode(str(tax_profile_object[x])) for x in solr_keys ] 
+                                    solr_strings = [ unicode(str(tax_profile_object[x]).replace("\t"," ")) for x in solr_keys ] 
                                     solr_line = "\t".join(solr_strings) 
                                     outBuffer.write(solr_line + "\n") 
                     #                        print outBuffer.getvalue()
@@ -605,7 +605,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
 
                                 outBuffer = StringIO.StringIO() 
                                 try: 
-                                    solr_strings = [ unicode(str(functional_profile_object[x])) for x in solr_keys ] 
+                                    solr_strings = [ unicode(str(functional_profile_object[x]).replace("\t"," ")) for x in solr_keys ] 
                                     solr_line = "\t".join(solr_strings) 
                                     outBuffer.write(solr_line + "\n") 
                 #                        print outBuffer.getvalue()                                
