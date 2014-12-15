@@ -35,7 +35,7 @@
        that you fully re-index after changing this setting as it can
        affect both how text is indexed and queried.
   -->
-  <luceneMatchVersion>4.6</luceneMatchVersion>
+  <luceneMatchVersion>4.10</luceneMatchVersion>
 
   <!-- <lib/> directives can be used to instruct Solr to load an Jars
        identified and use them to resolve any "plugins" specified in
@@ -103,7 +103,7 @@
        replication is in use, this should match the replication
        configuration.
     -->
-  <dataDir>/kb/deployment/services/search/solr/data/genomes</dataDir>
+  <dataDir>%KB_DEPLOYMENT%/services/search/solr/data/genomes</dataDir>
 
 
   <!-- The DirectoryFactory to use for indexes.
