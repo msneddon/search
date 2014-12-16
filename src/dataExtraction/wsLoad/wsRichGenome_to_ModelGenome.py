@@ -19,7 +19,7 @@ import biokbase.workspace.client
 #wsoutput = 'KBasePublicGenomesV3LoadJul2014'
 #wsoutput = 'kbasetest:home'
 
-def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
+def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_index,end_index):
     #ws_prod_client = biokbase.workspace.client.Workspace('http://localhost:7058')
     ws_prod_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
     # gavin's dev instance
@@ -57,12 +57,20 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
     objects_list.sort(key=lambda object: object[1])
 #    print >> sys.stderr, objects_list
 
+
     if len(objects_list) > 0:
         print "\tWorkspace %s has %d matching objects" % (workspace_name, len(objects_list))
         object_counter = 0
 
         if maxNumObjects < 1000:
             objects_list = random.sample(objects_list,maxNumObjects)
+
+        if start_index is None:
+            start_index = 0
+        if end_index is None:
+            end_index = len(objects_list) - 1
+
+        objects_list = objects_list[start_index:(end_index + 1)] 
 
         for x in objects_list:
             print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
@@ -309,13 +317,42 @@ if __name__ == "__main__":
     parser.add_argument('--wsinput', nargs=1, help='workspace name to load from', required=True)
     parser.add_argument('--wsoutput', nargs=1, help='workspace name to load to', required=True)
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
+    parser.add_argument('--startindex',action='store',type=int,nargs="?", help='Number allows user to take a slice of total genomes in the WS.  Note start must be less end. Both start and end are required if used.  Indexing starts at zero.')
+    parser.add_argument('--endindex', action="store",type=int,nargs="?",help='Number that the genome list slice goes up to (including).  If start index is not specified, this gets ignored.  If set to artificially high number it runs to the end of list.')
     parser.add_argument('--skip-dna-sequences',action='store_true',help='skip storing contigset object and feature DNA sequences')
     parser.add_argument('genomes', action="store", nargs='*')
-    args = parser.parse_args()
+
+    try:
+        args = parser.parse_args()
+    except Exception, e:
+        print args
+        raise
 
     maxNumObjects = sys.maxint
     if args.maxNumObjects:
         maxNumObjects = args.maxNumObjects
+
+    start_index = None
+    end_index = None
+
+    if args.startindex:
+        try:
+            start_index = int(args.startindex)
+        except Exception, e:
+            print "Unable to convert startindex to an integer"
+            sys.exit(0)
+        if args.endindex:
+            try:
+                end_index = int(args.endindex)
+            except Exception, e:
+                print "Unable to convert endindex to an integer"
+                sys.exit(0)
+        else:
+            print "ERROR : the start_index was set but there was no corresponding endindex."
+            sys.exit()
+        if start_index > end_index:
+            print "ERROR : the startindex was larger than the endindex."
+            sys.exit()
     
     print args.genomes
-    copy_richGenome_to_genome(maxNumObjects,args.genomes,args.wsinput[0],args.wsoutput[0])
+    copy_richGenome_to_genome(maxNumObjects,args.genomes,args.wsinput[0],args.wsoutput[0],start_index, end_index)
