@@ -310,7 +310,7 @@ if __name__ == "__main__":
     parser.add_argument('--wsoutput', nargs=1, help='workspace name to load to', required=True)
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
     parser.add_argument('--skip-dna-sequences',action='store_true',help='skip storing contigset object and feature DNA sequences')
-    parser.add_argument('--genomes', action="store", nargs='*')
+    parser.add_argument('genomes', action="store", nargs='*')
     args = parser.parse_args()
 
     maxNumObjects = sys.maxint
