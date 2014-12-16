@@ -172,7 +172,7 @@ def export_biochems_from_ws(maxNumObjects, biochem_list, wsname):
 
                     outBuffer = StringIO.StringIO()
                     try: 
-                        solr_strings = [ unicode(str(biochem_object[x])) for x in solr_keys ]
+                        solr_strings = [ unicode(str(biochem_object[x]).replace("\t"," ")) for x in solr_keys ]
                         solr_line = "\t".join(solr_strings)
                         outBuffer.write(solr_line + "\n") 
 #                        print outBuffer.getvalue()

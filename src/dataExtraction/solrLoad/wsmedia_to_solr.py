@@ -192,7 +192,7 @@ def export_medias_from_ws(maxNumObjects, media_list, wsname):
 
                     outBuffer = StringIO.StringIO()
                     try: 
-                        solr_strings = [ unicode(str(media_object[x])) for x in solr_keys ]
+                        solr_strings = [ unicode(str(media_object[x]).replace("\t"," ")) for x in solr_keys ]
                         solr_line = "\t".join(solr_strings)
                         outBuffer.write(solr_line + "\n") 
 #                        print outBuffer.getvalue()

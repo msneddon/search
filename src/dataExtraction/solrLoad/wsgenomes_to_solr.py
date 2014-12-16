@@ -181,7 +181,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname,csdbversion):
                     outBuffer = StringIO.StringIO()
 
                     try:
-                        solr_strings = [ unicode(str(genomeObject[x])) for x in solr_keys ]
+                        solr_strings = [ unicode(str(genomeObject[x]).replace("\t"," ")) for x in solr_keys ]
                         solr_line = "\t".join(solr_strings)
                         outBuffer.write(solr_line + "\n")
                     except Exception, e:
@@ -318,7 +318,7 @@ def export_genomes_from_ws(maxNumObjects,genome_list,wsname,csdbversion):
                         outBuffer = StringIO.StringIO()
                 
                         try:
-                            solr_strings = [ unicode(str(featureObject[x])) for x in solr_keys ]
+                            solr_strings = [ unicode(str(featureObject[x]).replace("\t"," ")) for x in solr_keys ]
                             solr_line = "\t".join(solr_strings)
                             outBuffer.write(solr_line + "\n")
                         except Exception, e:
