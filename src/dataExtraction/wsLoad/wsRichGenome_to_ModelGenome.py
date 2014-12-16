@@ -7,6 +7,7 @@ import random
 import simplejson
 import re
 import time
+import traceback
 
 # found at https://pythonadventures.wordpress.com/tag/unicodeencodeerror/
 reload(sys)
@@ -241,25 +242,57 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
 # would like a try block here
 # if the save fails because subdata is too big, try to re-save as a genome-like object that doesn't
 # have as many searchable fields
-                try:
-                    if args.skip_dna_sequences:
-                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id'],"provenance":genome_provenance}]})
-                        print >> sys.stderr,genome_info
-                    else:
+                contig_not_saved = True
+                save_wait_time = 1
+                while contig_not_saved:
+                    try:
                         contig_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1],"provenance":contig_provenance}]})
+                        contig_not_saved = False
                         fbaGenomeObject['contigset_ref'] = wsoutput + '/' + contigref[0]['info'][1]
-                        print >> sys.stderr,contig_info
+                    except biokbase.workspace.client.ServerError as err:
+                        rematch1 = re.search('504 Gateway Time-Out',str(err))
+                        rematch2 = re.search('subdata size exceeds limit', str(err))
+                        if rematch1 != None:
+                            time.sleep(save_wait_time)
+                            save_wait_time = save_wait_time * 2
+                            print >> sys.stderr,contig_info
+                            if save_wait_time > 500:
+                                print "WS TIMEOUT Unable to save contigset for : " + fbaGenomeObject['id']
+                                break
+                        elif rematch2 != None:
+                            print "Too many subobjects.  Unable to save contigset for : " + fbaGenomeObject['id']
+                            print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, skipping for now'
+                            break                        
+                        else:
+                            print "Unable to save contigset for : " + fbaGenomeObject['id']
+                            # print exception stack, any useful info
+                            print traceback.format_exc()
+                            break
+                        
+                genome_not_saved = True
+                save_wait_time = 1
+                while genome_not_saved:
+                    try:
                         genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id'],"provenance":genome_provenance}]})
-                        print >> sys.stderr,genome_info
-                except biokbase.workspace.client.ServerError as err:
-                    rematch = re.search('subdata size exceeds limit', str(err))
-                    if rematch != None:
-                        print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, skipping for now'
-                        continue
-#                        print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, trying to save as BasicGenome object'
-#                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"kkellerKBaseGenomes.BasicGenome","data":fbaGenomeObject,"name":fbaGenomeObject['id']}]})
-                    else:
-                        raise
+                        genome_not_saved = False
+                    except biokbase.workspace.client.ServerError as err:
+                        rematch1 = re.search('504 Gateway Time-Out',str(err))
+                        rematch2 = re.search('subdata size exceeds limit', str(err))
+                        if rematch1 != None:
+                            time.sleep(save_wait_time)
+                            save_wait_time = save_wait_time * 2
+                            print >> sys.stderr,genome_info
+                            if save_wait_time > 500:
+                                print "WS TIMEOUT Unable to save genome for : " + fbaGenomeObject['id']
+                                break
+                        elif rematch2 != None:
+                            print "Too many subobjects.  Unable to save genome for : " + fbaGenomeObject['id']
+                            print >> sys.stderr,fbaGenomeObject['id'] + ' is too large, skipping for now'
+                            break                        
+                        else:
+                            print "Unable to save genome for : " + fbaGenomeObject['id']
+                            # print exception stack, any useful info
+                            print traceback.format_exc()
 
                 end = time.time()
                 print >> sys.stderr, "saved KBaseGenome.Genome objects for %s %s" % ( x[1], str(end - start))
@@ -268,7 +301,6 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput):
             else:
                 print '            skipping %s, is a %s' % (x[0], x[2])
             object_counter += 1
-#    workspace_counter += 1
     
 if __name__ == "__main__":
     import argparse
@@ -278,7 +310,7 @@ if __name__ == "__main__":
     parser.add_argument('--wsoutput', nargs=1, help='workspace name to load to', required=True)
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
     parser.add_argument('--skip-dna-sequences',action='store_true',help='skip storing contigset object and feature DNA sequences')
-    parser.add_argument('genomes', action="store", nargs='*')
+    parser.add_argument('--genomes', action="store", nargs='*')
     args = parser.parse_args()
 
     maxNumObjects = sys.maxint
