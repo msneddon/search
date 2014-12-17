@@ -436,7 +436,8 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
 #Warning Log
                         print str(e) 
                         print "Failed trying to write to string buffer for model " + metagenome_object['metagenome_id'] 
-                    outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"','')) 
+#                    outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"','')) 
+                    outFile.write(outBuffer.getvalue().encode('utf8')) 
                     outBuffer.close() 
             #END METAGENOME WS OBJECT
 
@@ -525,7 +526,8 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
 #Warning Log
                                     print str(e) 
                                     print "Failed trying to write to string buffer the taxonomic_profile_info " + tax_profile_object['metagenome_id'] 
-                                outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"','')) 
+#                                outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"',''))
+                                outFile.write(outBuffer.getvalue().encode('utf8'))  
                                 outBuffer.close()                                
                         counter = counter + 1 
                         sys.stdout.write("Counter Time : "+ str(counter)+ " : TaxonomicProfile " + tax_profile['info'][1] + " : " + str(datetime.datetime.now()) + "\n") 
@@ -614,7 +616,9 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
 #Warning Log
                                     print str(e) 
                                     print "Failed trying to write to string buffer the functional_profile_info " + functional_profile_object['metagenome_id'] 
-                                outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','').replace('"','')) 
+#                                outFile.write(outBuffer.getvalue().encode('utf8').replace('\'','\\'').replace('"','')) 
+#                                outFile.write(outBuffer.getvalue().encode('utf8').replace('\'',''').replace('"','')) 
+                                outFile.write(outBuffer.getvalue().encode('utf8')) 
                                 outBuffer.close() 
                         counter = counter + 1 
                         sys.stdout.write("Counter Time : "+ str(counter)+ " : FunctionalProfile " + functional_profile['info'][1] + " : " + str(datetime.datetime.now()) + "\n") 
