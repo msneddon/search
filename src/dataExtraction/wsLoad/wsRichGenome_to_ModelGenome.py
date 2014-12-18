@@ -19,14 +19,15 @@ import biokbase.workspace.client
 #wsoutput = 'KBasePublicGenomesV3LoadJul2014'
 #wsoutput = 'kbasetest:home'
 
-def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_index,end_index):
-    #ws_prod_client = biokbase.workspace.client.Workspace('http://localhost:7058')
-    ws_prod_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
+def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_index,end_index,ws_source_client,ws_target_client):
     # gavin's dev instance
 #    ws_prod_client = biokbase.workspace.client.Workspace('http://dev04:7058')
     #ws_dev_client = biokbase.workspace.client.Workspace('https://kbase.us/services/ws/')
+
+#    print "Start_index : " + str(start_index)
+#    print "End_index : " + str(end_index)
     
-    workspace_object = ws_prod_client.get_workspace_info({'workspace':wsinput})
+    workspace_object = ws_source_client.get_workspace_info({'workspace':wsinput})
     
     workspace_id = workspace_object[0]
     workspace_name = workspace_object[1]
@@ -37,15 +38,15 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_i
         names_list = list()
         for genome in genome_list:
             names_list.append({'workspace':wsinput,'name':genome})
-        objects_list = [x['info'] for x in ws_prod_client.get_objects(names_list)]
+        objects_list = [x['info'] for x in ws_source_client.get_objects(names_list)]
     else:
         # need to loop through to make sure we get all objects; limit of 5000 items returned by ws
-#        objects_list = ws_prod_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"},limit:5000,skip:skipNum)
+#        objects_list = ws_source_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome"},limit:5000,skip:skipNum)
         object_count = 1
         skipNum = 0
         limitNum = 5000
         while object_count != 0:
-            this_list = ws_prod_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome","limit":limitNum,"skip":skipNum})
+            this_list = ws_source_client.list_objects({"ids": [workspace_id],"type":"KBaseSearch.Genome","limit":limitNum,"skip":skipNum})
             object_count=len(this_list)
             skipNum += limitNum
             objects_list.extend(this_list)
@@ -72,13 +73,16 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_i
 
         objects_list = objects_list[start_index:(end_index + 1)] 
 
+#        print "Length of object list : " + str(len(objects_list))
+#        sys.exit()
+
         for x in objects_list:
             print "\t\tChecking %s, done with %s of all objects in %s" % (x[1], str(100.0 * float(object_counter)/len(objects_list)) + " %", workspace_name)
             
             if "Genome" in x[2]:
 
                 try:
-                    ws_prod_client.get_object_info([{"workspace":wsoutput,"name":x[1]}],0)
+                    ws_source_client.get_object_info([{"workspace":wsoutput,"name":x[1]}],0)
                     object_counter += 1
                     if args.skip_existing == True:
                         print >> sys.stderr, 'object '  + x[1] + ' found in ws ' + wsoutput + ' , skipping'
@@ -93,7 +97,7 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_i
                 done = False
                 while not done:
                     try:
-                        genome = ws_prod_client.get_objects([{"wsid": str(workspace_id), "objid": x[0]}])
+                        genome = ws_source_client.get_objects([{"wsid": str(workspace_id), "objid": x[0]}])
                         done = True
                     except Exception, e:
                         print str(e)
@@ -153,11 +157,11 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_i
                 start = time.time()
 
                 if genome['data'].has_key('contigset_ref') and not args.skip_dna_sequences:
-#                    contigs = ws_prod_client.get_objects([{"wsid": str(workspace_id), "objid": genome['data']['contigset_ref']}])
+#                    contigs = ws_source_client.get_objects([{"wsid": str(workspace_id), "objid": genome['data']['contigset_ref']}])
 #                    print >> sys.stderr, genome['data']['contigset_ref']
                     wsstuff = genome['data']['contigset_ref'].split('/')
 #                    print >> sys.stderr, wsstuff
-                    contigref = ws_prod_client.get_objects([{"wsid": str(workspace_id), "objid": wsstuff[1]}])
+                    contigref = ws_source_client.get_objects([{"wsid": str(workspace_id), "objid": wsstuff[1]}])
 #                    print >> sys.stderr, contigref
 #                    print >> sys.stderr, contigref[0]['info']
                     contig = contigref[0]['data']
@@ -183,7 +187,7 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_i
 
                 fbaGenomeObject['features'] = list()
 
-                featureset_info = ws_prod_client.get_objects([{"ref": genome['data']['featureset_ref']}])
+                featureset_info = ws_source_client.get_objects([{"ref": genome['data']['featureset_ref']}])
                 end = time.time()
                 print >> sys.stderr, "retrieved featureset object for %s %s" % ( x[1], str(end - start))
                 start = time.time()
@@ -254,7 +258,7 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_i
                 save_wait_time = 1
                 while contig_not_saved:
                     try:
-                        contig_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1],"provenance":contig_provenance}]})
+                        contig_info = ws_target_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.ContigSet","data":fbaContig,"name": contigref[0]['info'][1],"provenance":contig_provenance}]})
                         contig_not_saved = False
                         fbaGenomeObject['contigset_ref'] = wsoutput + '/' + contigref[0]['info'][1]
                     except biokbase.workspace.client.ServerError as err:
@@ -281,7 +285,7 @@ def copy_richGenome_to_genome(maxNumObjects,genome_list,wsinput,wsoutput,start_i
                 save_wait_time = 1
                 while genome_not_saved:
                     try:
-                        genome_info = ws_prod_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id'],"provenance":genome_provenance}]})
+                        genome_info = ws_target_client.save_objects({"workspace":wsoutput,"objects":[ { "type":"KBaseGenomes.Genome","data":fbaGenomeObject,"name":fbaGenomeObject['id'],"provenance":genome_provenance}]})
                         genome_not_saved = False
                     except biokbase.workspace.client.ServerError as err:
                         rematch1 = re.search('504 Gateway Time-Out',str(err))
@@ -314,19 +318,24 @@ if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser(description='Create import files from workspace objects')
     parser.add_argument('--count', action="store", dest="maxNumObjects", type=int)
-    parser.add_argument('--wsinput', nargs=1, help='workspace name to load from', required=True)
-    parser.add_argument('--wsoutput', nargs=1, help='workspace name to load to', required=True)
+    parser.add_argument('--wsinput', nargs="?", help='workspace name to load from', required=True)
+    parser.add_argument('--wsoutput', nargs="?", help='workspace name to load to', required=True)
     parser.add_argument('--skip-existing',action='store_true',help='skip processing genomes which already exist in ws')
-    parser.add_argument('--startindex',action='store',type=int,nargs="?", help='Number allows user to take a slice of total genomes in the WS.  Note start must be less end. Both start and end are required if used.  Indexing starts at zero.')
-    parser.add_argument('--endindex', action="store",type=int,nargs="?",help='Number that the genome list slice goes up to (including).  If start index is not specified, this gets ignored.  If set to artificially high number it runs to the end of list.')
+    parser.add_argument('--startindex',action='store',type=int, nargs="?", help='Number allows user to take a slice of total genomes in the WS.  Note start must be less end. Both start and end are required if used.  Indexing starts at zero.')
+    parser.add_argument('--endindex', action="store",type=int, nargs="?",help='Number that the genome list slice goes up to (including).  If start index is not specified, this gets ignored.  If set to artificially high number it runs to the end of list.')
     parser.add_argument('--skip-dna-sequences',action='store_true',help='skip storing contigset object and feature DNA sequences')
+    parser.add_argument('--source-wsinstance', dest="source_wsinstance",nargs="?",help='source workspace instance to use', required=False,action="store",default='https://kbase.us/services/ws/')
+    parser.add_argument('--target-wsinstance', dest="target_wsinstance",nargs="?",help='source workspace instance to use', required=False,action="store",default='https://kbase.us/services/ws/')
     parser.add_argument('genomes', action="store", nargs='*')
+
+
 
     try:
         args = parser.parse_args()
     except Exception, e:
         print args
         raise
+    print args
 
     maxNumObjects = sys.maxint
     if args.maxNumObjects:
@@ -335,13 +344,13 @@ if __name__ == "__main__":
     start_index = None
     end_index = None
 
-    if args.startindex:
+    if args.startindex is not None:
         try:
             start_index = int(args.startindex)
         except Exception, e:
             print "Unable to convert startindex to an integer"
             sys.exit(0)
-        if args.endindex:
+        if args.endindex is not None:
             try:
                 end_index = int(args.endindex)
             except Exception, e:
@@ -355,4 +364,36 @@ if __name__ == "__main__":
             sys.exit()
     
     print args.genomes
-    copy_richGenome_to_genome(maxNumObjects,args.genomes,args.wsinput[0],args.wsoutput[0],start_index, end_index)
+#    if source_wsinstance is None:
+#        source_wsinstance = 'https://kbase.us/services/ws/'
+
+#    if target_wsinstance is None:
+#        target_wsinstance = 'https://kbase.us/services/ws/'
+
+    ws_source_client = biokbase.workspace.client.Workspace(args.source_wsinstance)
+    ws_target_client = biokbase.workspace.client.Workspace(args.target_wsinstance)
+
+    if args.source_wsinstance == args.target_wsinstance :
+        ws_source_client = ws_target_client
+
+    try: 
+        retval=ws_target_client.create_workspace({"workspace":args.wsoutput,"globalread":"n","description":"Public Genomes Workspace"})
+        print 'created workspace ' + args.wsoutput + ' at ws url ' + ws_target_client.url 
+        print retval 
+    except biokbase.workspace.client.ServerError as err:
+        rematch = re.search('Workspace name ' + args.wsoutput + ' is already in use',str(err))
+        if rematch != None:
+            #means WS already exists, now need to check on privelages.
+            print 'workspace ' + args.wsoutput + ' at ws url ' + ws_target_client.url + ' may already exist, trying to use'
+#            ws_target_client.get_permissions(
+        else:  #Means another error
+            print "E : " + str(e)
+            print "x : " + str(x[0])
+            raise
+    except Exception, e:
+        print "E : " + str(e)
+        print "x : " + str(x[0])
+        raise
+
+#    sys.exit(0)
+    copy_richGenome_to_genome(maxNumObjects,args.genomes,args.wsinput,args.wsoutput, start_index, end_index, ws_source_client,ws_target_client)
