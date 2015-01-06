@@ -485,7 +485,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                         else:
                             print "WARNING NO METAGENOME FOUND FOR TaxonomicProfile : " +  tax_profile['info'][1]
 #TEMPORARY HACK SINCE THEY NOT DONE WITH NEW METAGENOME WS OBJECTS
-#                            continue
+                            continue
 
                         #go through the results and populate the rows.
                         for tax_level in level_name_dict.keys() :
@@ -576,7 +576,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                         else:
                             print "WARNING NO METAGENOME FOUND FOR FunctionalProfile : " +  functional_profile['info'][1]
 #TEMPORARY HACK SINCE THEY NOT DONE WITH NEW METAGENOME WS OBJECTS
-#                            continue
+                            continue
  
                         #go through the results and populate the rows.
                         for functional_level in level_name_dict.keys() :
