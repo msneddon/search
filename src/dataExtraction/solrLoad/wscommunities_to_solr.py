@@ -77,7 +77,9 @@ def get_profile_grouping_info(profile, row_metadata_key):
             print "ERROR :Either Zero or More than one metagenome for object : "+  str(x[0]) 
             sys.exit(0) 
         for metagenome in metagenomes.keys():
-            metagenome_ref = metagenomes["data"][metagenome]["ref"]
+            if metagenomes[metagenome].has_key("ref"):
+                metagenome_ref = metagenomes[metagenome]["ref"]
+                
 #    else:
 #        pp.pprint(profile)
  
