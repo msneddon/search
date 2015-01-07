@@ -79,6 +79,8 @@ def get_profile_grouping_info(profile, row_metadata_key):
         for metagenome in metagenomes.keys():
             if metagenomes[metagenome].has_key("ref"):
                 metagenome_ref = metagenomes[metagenome]["ref"]
+            else:
+                print "Warning: The profile "+  str(x[0]) + " had a metagenomes portion but no reference to a metagenome."
                 
 #    else:
 #        pp.pprint(profile)
@@ -453,7 +455,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
             limitNum = 5000 
             tax_profile_objects_list = list() 
             while tax_profile_object_count != 0:
-                tax_profile_list = ws_client.list_objects({"ids": [workspace_id],"type":"Communities.TaxonomicProfile","limit":limitNum,"skip":skipNum})
+                tax_profile_list = ws_client.list_objects({"ids": [workspace_id],"type":"Communities.TaxonomicProfile-2.0","limit":limitNum,"skip":skipNum})
                 tax_profile_object_count=len(tax_profile_list)
                 skipNum += limitNum 
                 tax_profile_objects_list.extend(tax_profile_list) 
@@ -545,7 +547,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
             limitNum = 5000 
             functional_profile_objects_list = list() 
             while functional_profile_object_count != 0:
-                functional_profile_list = ws_client.list_objects({"ids": [workspace_id],"type":"Communities.FunctionalProfile","limit":limitNum,"skip":skipNum})
+                functional_profile_list = ws_client.list_objects({"ids": [workspace_id],"type":"Communities.FunctionalProfile-2.0","limit":limitNum,"skip":skipNum})
                 functional_profile_object_count=len(functional_profile_list)
                 skipNum += limitNum
                 functional_profile_objects_list.extend(functional_profile_list)
