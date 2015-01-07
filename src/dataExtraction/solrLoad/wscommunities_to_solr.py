@@ -71,13 +71,15 @@ def get_profile_grouping_info(profile, row_metadata_key):
         sys.exit(0) 
 
     metagenome_ref = ""
-    if (profile.has_key("metagenomes") and profile["metagenomes"].has_key("elements")): 
-        metagenomes = profile["metagenomes"]["elements"]
+    if (profile["data"].has_key("metagenomes") and profile["data"]["metagenomes"].has_key("elements")):
+        metagenomes = profile["data"]["metagenomes"]["elements"]
         if len(metagenomes) != 1: 
             print "ERROR :Either Zero or More than one metagenome for object : "+  str(x[0]) 
             sys.exit(0) 
         for metagenome in metagenomes.keys():
             metagenome_ref = metagenomes[metagenome]["ref"]
+#    else:
+#        pp.pprint(profile)
  
     total_abundance = 0 
  
@@ -239,6 +241,8 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
                     ws_id = str(metagenome['info'][6])
                     ws_object_version = str(metagenome['info'][4])
                     metagenome_object_ref_key = ws_id + "/" + ws_object_id + "/" + ws_object_version
+
+#                    print "METAGENOME_OBJECT_REF : "+ metagenome_object_ref_key 
 
                     metagenome_object["metagenome_id"] = metagenome['data']['id']
                     metagenome_object["metagenome_name"] = metagenome['data']['name']
