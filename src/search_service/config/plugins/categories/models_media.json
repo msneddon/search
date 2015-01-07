@@ -1,0 +1,11 @@
+{
+    "category": "models_media",
+    "solr": {
+        "core": "media",
+        "visible_fields": ["object_id","object_name","object_type","workspace_name"],
+        "sort_fields": ["media_id"],
+        "mapped_sort_fields": {},
+        "facet_fields": [],
+        "query_string": "&fq=object_type:*.Media-*"
+    }
+}
