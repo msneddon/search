@@ -3,10 +3,10 @@
     "display": "Metagenomes",
     "solr": {
         "core": "metagenomes",
-        "visible_fields": ["object_id","object_type","object_name","workspace_name","metagenome_id","metagenome_name","metagenome_metadata","sequence_type","seq_method","project_name","project_id","sample_id","sample_name","env_package_type","feature","mix_biome","mix_material","mix_location","mix_latitude","mix_longitude"],
-        "sort_fields": ["metagenome_id", "metagenome_name", "sample_name", "project_name"],
-        "mapped_sort_fields": {"metagenome_name": "metagenome_name_sort","sample_name": "sample_name_sort", "project_name": "project_name_sort"},
-        "facet_fields": ["biome", "sequence_type", "env_package_type", "seq_method"],
-        "query_string": "&fq=object_type:Communities.Metagenome-*&q={!type=edismax !boost b=product(tax_abundance,tax_level) qf='tax_level_description' v=$qq}{!type=edismax !boost b=product(func_abundance,func_level) qf='func_level_description' v=$qq}{!join from=metagenome_id to=metagenome_id qf='tax_level_description func_level_description' v=$qq}"
+        "visible_fields": ["object_id","object_type","object_name","object_workspace","metagenome_id","metagenome_name","sequence_type","metagenome_created","mix_PI_full_name","mix_location","mix_latitude", "mix_longitude","mix_biome","tax_object_id","tax_object_type","tax_object_name","tax_object_workspace","tax_details","func_object_id","func_object_type","func_object_name","func_object_workspace","func_details"],
+        "sort_fields": ["metagenome_id", "metagenome_name", "sequence_type", "mix_biome", "mix_location"],
+        "mapped_sort_fields": {},
+        "facet_fields": ["mix_biome", "sequence_type"],
+        "query_string": ""
     }
 }
