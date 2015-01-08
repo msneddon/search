@@ -64,23 +64,23 @@ def get_profile_grouping_info(profile, row_metadata_key):
                 alignment_length_index = column_counter
 
     if len(metagenome_set) != 1: 
-        print "ERROR :Either Zero or More than one metagenome for object : "+  str(x[0])
+        print "ERROR :Either Zero or More than one metagenome for object : kb|ws." + str(profile['info'][6]) + '.obj.' + str(profile['info'][0])
         sys.exit(0)
     if abundance_index == -1:
-        print "ERROR :Profile has no abundance : "+  str(x[0])
+        print "ERROR :Profile has no abundance : kb|ws." + str(profile['info'][6]) + '.obj.' + str(profile['info'][0])
         sys.exit(0) 
 
     metagenome_ref = ""
     if (profile["data"].has_key("metagenomes") and profile["data"]["metagenomes"].has_key("elements")):
         metagenomes = profile["data"]["metagenomes"]["elements"]
         if len(metagenomes) != 1: 
-            print "ERROR :Either Zero or More than one metagenome for object : "+  str(x[0]) 
+            print "ERROR :Either Zero or More than one metagenome for object : kb|ws." + str(profile['info'][6]) + '.obj.' + str(profile['info'][0])
             sys.exit(0) 
         for metagenome in metagenomes.keys():
             if metagenomes[metagenome].has_key("ref"):
                 metagenome_ref = metagenomes[metagenome]["ref"]
             else:
-                print "Warning: The profile "+  str(x[0]) + " had a metagenomes portion but no reference to a metagenome."
+                print "Warning: The profile kb|ws." + str(profile['info'][6]) + '.obj.' + str(profile['info'][0]) + " had a metagenomes portion but no reference to a metagenome."
                 
 #    else:
 #        pp.pprint(profile)
