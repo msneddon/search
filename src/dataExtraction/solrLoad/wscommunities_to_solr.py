@@ -209,7 +209,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
 
         if len(objects_list) > 0:
 #Info Log
-            print "\tWorkspace %s has %d matching objects" % (workspace_name, len(objects_list))
+            print "\tWorkspace %s has %d matching metagenome objects" % (workspace_name, len(objects_list))
             object_counter = 0
  
             if maxNumObjects < 1000: 
@@ -463,7 +463,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
             tax_profile_objects_list.sort() 
  
             if len(tax_profile_objects_list) > 0:
-                print "\tWorkspace %s has %d matching objects" % (workspace_name, len(tax_profile_objects_list))
+                print "\tWorkspace %s has %d matching tax profile objects" % (workspace_name, len(tax_profile_objects_list))
                 counter = 0 
                 for x in tax_profile_objects_list: 
 #Info log   
@@ -555,6 +555,7 @@ def export_communities_from_ws(maxNumObjects, metagenome_list, wsname):
             functional_profile_objects_list.sort() 
  
             if len(functional_profile_objects_list) > 0:
+                print "\tWorkspace %s has %d matching functional profile objects" % (workspace_name, len(functional_profile_objects_list))
                 counter = 0
                 for x in functional_profile_objects_list:
 #Info log 
