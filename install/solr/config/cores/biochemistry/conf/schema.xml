@@ -74,36 +74,45 @@ these fields are for any workspace object
    <field name="object_workspace" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" />
 
-
-
 <!--
-these are for the top level media object
+these are for the top level biochem object
 -->
 
-   <field name="media_id" type="string" indexed="true" stored="true" multiValued="false"  />
-   <field name="media_name" type="string" indexed="true" stored="true" multiValued="false" />
-   <field name="media_source_id" type="string" indexed="true" stored="true" multiValued="false" />
-   <field name="media_source" type="string" indexed="true" stored="true" multiValued="false" />
-   <field name="protocol_link" type="string" indexed="true" stored="true" multiValued="false" />
-   <field name="is_defined" type="boolean" indexed="true" stored="true" multiValued="false" />
-   <field name="is_minimal" type="boolean" indexed="true" stored="true" multiValued="false" />
-   <field name="is_aerobic" type="boolean" indexed="true" stored="true" multiValued="false" />
-   <field name="media_type" type="string" indexed="true" stored="true" multiValued="false" />
-   <field name="pH_data" type="string" indexed="true" stored="true" multiValued="false" />
-   <field name="temperature" type="float" indexed="true" stored="true" multiValued="false" />
-   <field name="atmosphere" type="string" indexed="true" stored="true" multiValued="false" />
-
-
+   <field name="biochem_id" type="string" indexed="true" stored="true" multiValued="false"  />
+   <field name="biochem_name" type="string" indexed="true" stored="true" multiValued="false" />
+   <field name="biochem_description" type="string" indexed="true" stored="true" multiValued="false" />
 
 <!--
-these fields are for media compounds
+these are for the biochem compartments
+-->
+   <field name="number_of_compartments" type="int" indexed="true" stored="true" multiValued="false" />
+   <field name="compartment_names" type="string" indexed="true" stored="true" multiValued="true" />
+
+<!--
+these are for the biochem compounds
 -->
    <field name="number_of_compounds" type="int" indexed="true" stored="true" multiValued="false" />
    <field name="compound_ids" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="compound_names" type="string" indexed="true" stored="true" multiValued="true" />
    <field name="compound_abbreviations" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="compound_aliases" type="string" indexed="true" stored="true" multiValued="true" />
 
+<!--
+these are for the biochem reactions
+-->
+   <field name="number_of_reactions" type="int" indexed="true" stored="true" multiValued="false" />
+   <field name="reaction_ids" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="reaction_names" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="reaction_abbreviations" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="reaction_aliases" type="string" indexed="true" stored="true" multiValued="true" />
 
+<!--
+these are for the biochem cues
+-->
+   <field name="number_of_cues" type="int" indexed="true" stored="true" multiValued="false" />
+   <field name="cue_ids" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="cue_names" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="cue_abbreviations" type="string" indexed="true" stored="true" multiValued="true" />
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
@@ -124,19 +133,21 @@ these fields are for media compounds
    <copyField source="object_id" dest="text"/>
    <copyField source="object_id" dest="text_boost"/>
    <copyField source="object_type" dest="text"/>
-   <copyField source="media_id" dest="text"/>
-   <copyField source="media_id" dest="text_boost"/>
-   <copyField source="media_name" dest="text"/>
-   <copyField source="media_source_id" dest="text_boost"/>
-   <copyField source="media_source" dest="text"/>
-   <copyField source="protocol_link" dest="text"/>
-   <copyField source="media_type" dest="text"/>
-   <copyField source="pH_data" dest="text"/>
-   <copyField source="temperature" dest="text"/>
-   <copyField source="atmosphere" dest="text"/>
+   <copyField source="biochem_id" dest="text_boost"/>
+   <copyField source="biochem_name" dest="text"/>
+   <copyField source="biochem_description" dest="text"/>
+   <copyField source="compartment_names" dest="text"/>
    <copyField source="compound_ids" dest="text_boost"/>
    <copyField source="compound_names" dest="text"/>
    <copyField source="compound_abbreviations" dest="text"/>
+   <copyField source="compound_aliases" dest="text"/>
+   <copyField source="reaction_ids" dest="text_boost"/>
+   <copyField source="reaction_names" dest="text"/>
+   <copyField source="reaction_abbreviations" dest="text"/>
+   <copyField source="reaction_aliases" dest="text"/>
+   <copyField source="cue_ids" dest="text_boost"/>
+   <copyField source="cue_names" dest="text"/>
+   <copyField source="cue_abbreviations" dest="text"/>
  
   <types>
     <!-- field type definitions. The "name" attribute is

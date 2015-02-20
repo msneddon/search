@@ -68,9 +68,7 @@
 <!--
 these fields are for any workspace object
 -->
-
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
-   <field name="object_version" type="int" indexed="false" stored="true" multiValued="false" required="false" />
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="object_workspace" type="string" indexed="true" stored="true" multiValued="false" />
    <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" />
@@ -78,45 +76,58 @@ these fields are for any workspace object
 <!--
 these are for any model object
 -->
+   <field name="fba_model_id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
+   <field name="fba_model_name" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+   <field name="fba_model_type" type="string" indexed="true" stored="true" required="true" multiValued="false" />
 
-   <field name="model_id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
-   <field name="model_source" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-   <field name="model_source_id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-   <field name="model_name" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-   <field name="model_type" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-   <field name="model_genome_ref" type="string" indexed="true" stored="true" required="true" multiValued="false" />
-   <field name="biomasses" type="text_general" indexed="true" stored="true"/>
-   <field name="compartments" type="text_general" indexed="true" stored="true"/>
+<!--
+genome level fields
+-->
+   <field name="genome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" />
+   <field name="scientific_name" type="text_general" indexed="true" stored="true" required="true" multiValued="false" />
+   <field name="taxonomy" type="string" indexed="true" stored="true" required="true" multiValued="true" />
+   <field name="domain" type="string" indexed="true" stored="true" required="false" multiValued="false" />
+
+<!--
+top level reference counts to gapfillings, gapgens, biomasses, templates, compartments
+-->
+   <field name="number_of_gapfillings" type="int" indexed="true" stored="true"/>
+   <field name="number_of_gapgens" type="int" indexed="true" stored="true"/>
+   <field name="number_of_biomasses" type="int" indexed="true" stored="true"/>
+   <field name="number_of_templates" type="int" indexed="true" stored="true"/>
+   <field name="number_of_compartments" type="int" indexed="true" stored="true"/>
+
+<!--
+these fields are for compounds 
+-->                                                                                                                                    
+   <field name="number_of_compounds" type="int" indexed="true" stored="true"/>
+   <field name="compound_names" type="text_ws_general" indexed="true" stored="true" required="false" multiValued="true" />
+   <field name="compound_aliases" type="text_ws_general" indexed="true" stored="true" required="false" multiValued="true" />
+   <field name="compound_ids" type="text_ws_general" indexed="true" stored="true" required="false" multiValued="true" />
 
 <!--
 these fields are for reactions
 -->
-
-   <field name="reaction_id" type="string" indexed="true" stored="true"/>
-   <field name="reaction_ref" type="string" indexed="true" stored="true"/>
-   <field name="reaction_name" type="text_general" indexed="true" stored="true"/>
-   <field name="reaction_pathway" type="text_general" indexed="true" stored="true"/>
-   <field name="reaction_direction" type="string" indexed="true" stored="true"/>
-   <field name="reaction_features" type="string" indexed="true" stored="true" multiValued="true" />
+   <field name="number_of_reactions" type="int" indexed="true" stored="true"/>
+   <field name="reaction_names" type="text_ws_general" indexed="true" stored="true" required="false" multiValued="true" />
+   <field name="reaction_aliases" type="text_ws_general" indexed="true" stored="true" required="false" multiValued="true" />
+   <field name="reaction_pathways" type="text_ws_general" indexed="true" stored="true" required="false" multiValued="true" />
 
 <!--
-these fields are for compounds
--->
-   <field name="compound_ref" type="string" indexed="true" stored="true"/>
-   <field name="compound_id" type="string" indexed="true" stored="true"/>
-   <field name="compound_formula" type="string" indexed="true" stored="true"/>
-   <field name="compound_name" type="text_general" indexed="true" stored="true"/>
-
-<!--
-these fields are for both reactions and compounds
--->
-   <field name="modelcompartment_ref" type="string" indexed="true" stored="true"/>
+these fields are for features
+--> 
+   <field name="number_of_features" type="int" indexed="true" stored="true"/>
+   <field name="feature_ids" type="text_ws_general" indexed="true" stored="true" required="false" multiValued="true" />
+   <field name="feature_aliases" type="text_ws_general" indexed="true" stored="true" required="false" multiValued="true" />
+   <field name="feature_functions" type="text_ws_general" indexed="true" stored="true" required="false" multiValued="true" />
 
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
 
+<!--   
    <field name="timestamp" type="date" indexed="true" stored="true" default="NOW" multiValued="false"/>
+-->
    <field name="_version_" type="long" indexed="true" stored="true"/>
 
 
@@ -131,23 +142,39 @@ these fields are for both reactions and compounds
    <copyField source="object_id" dest="text"/>
    <copyField source="object_id" dest="text_boost"/>
    <copyField source="object_type" dest="text"/>
-   <copyField source="model_name" dest="text"/>
-   <copyField source="model_type" dest="text"/>
-   <copyField source="biomasses" dest="text"/>
-   <copyField source="compartments" dest="text"/>
 
-   <copyField source="reaction_id" dest="text"/>
-   <copyField source="reaction_ref" dest="text"/>
-   <copyField source="reaction_name" dest="text"/>
-   <copyField source="reaction_pathway" dest="text"/>
-   <copyField source="reaction_features" dest="text"/>
+   <copyField source="fba_model_id" dest="text_boost"/>
+   <copyField source="fba_model_name" dest="text"/>
+   <copyField source="fba_model_type" dest="text"/>
 
-   <copyField source="compound_ref" dest="text"/>
-   <copyField source="compound_id" dest="text"/>
-   <copyField source="compound_name" dest="text"/>
-   <copyField source="compound_formula" dest="text"/>
+<!--
+genome level fields
+-->
+   <copyField source="genome_id" dest="text_boost"/>
+   <copyField source="scientific_name" dest="text"/>
+   <copyField source="taxonomy" dest="text"/>
+   <copyField source="domain" dest="text"/>
 
-   <copyField source="modelcompartment_ref" dest="text"/>
+<!--
+these fields are for compounds 
+-->                                                                                                                                    
+   <copyField source="compound_names" dest="text"/>
+   <copyField source="compound_aliases" dest="text"/>
+   <copyField source="compound_ids" dest="text_boost"/>
+
+<!--
+these fields are for reactions
+-->
+   <copyField source="reaction_names" dest="text"/>
+   <copyField source="reaction_aliases" dest="text"/>
+   <copyField source="reaction_pathways" dest="text"/>
+
+<!--
+these fields are for features
+--> 
+   <copyField source="feature_ids" dest="text_boost"/>
+   <copyField source="feature_aliases" dest="text"/>
+   <copyField source="feature_functions" dest="text"/>
 
  
   <types>

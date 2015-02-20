@@ -112,6 +112,7 @@
    <field name="atomic_regulons" type="text_ws_general" indexed="false" stored="false"/>
    <field name="coexpressed_fids" type="text_ws_general" indexed="false" stored="false"/>
    <field name="co_occurring_fids" type="text_ws_general" indexed="false" stored="false"/>
+   <field name="cs_db_version" type="text_ws_general" indexed="false" stored="false"/>
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
@@ -160,6 +161,7 @@
    <copyField source="atomic_regulons" dest="text"/>
    <copyField source="coexpressed_fids" dest="text"/>
    <copyField source="co_occurring_fids" dest="text"/>
+   <copyField source="cs_db_version" dest="text"/>
 
  
   <types>

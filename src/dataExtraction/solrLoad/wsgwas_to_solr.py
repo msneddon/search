@@ -141,7 +141,7 @@ def export_gwas_from_ws(maxNumObjects,wsname):
     
                     try:
                         solr_strings = [object_id,workspace_name,object_type,object_name]
-                        solr_strings += [ unicode(str(search_values[x])) for x in solr_keys ]
+                        solr_strings += [ unicode(str(search_values[x]).replace("\t"," ")) for x in solr_keys ]
                         solr_line = "\t".join(solr_strings)
                         outBuffer.write(solr_line + "\n")
                     except Exception, e:

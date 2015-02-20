@@ -27,7 +27,7 @@ def get_results():
         response.content_type = "application/json"
         response.status_code = 200                
         
-        search_wsgi.logger.info(response.headers)
+        #search_wsgi.logger.info(response.headers)
                           
         return response
     else:
@@ -57,19 +57,21 @@ def invalid_request(error = None):
     return response
 
 
-
-def initialize_logging():
+def initLogger():
     import logging.handlers
 
-    controllers.logger = search_wsgi.logger
+    formatter = logging.Formatter("%(asctime)s - %(filename)s - %(lineno)d - %(levelname)s - %(message)s")
+    formatter.converter = time.gmtime
 
     if serviceConfig['search'].has_key('log_syslog') and serviceConfig['search']['log_syslog'] == 'True':
         syslog_handler = logging.handlers.SysLogHandler(facility = logging.handlers.SysLogHandler.LOG_DAEMON, 
                                                         address = "/dev/log")
+        syslog_handler.setFormatter(formatter)
         search_wsgi.logger.addHandler(syslog_handler)
     
     if serviceConfig['search'].has_key('log_file'):
         file_handler = logging.FileHandler(serviceConfig['search']['log_file'])
+        file_handler.setFormatter(formatter)
         search_wsgi.logger.addHandler(file_handler)
     
     configLevel = serviceConfig['search']['log_level']
@@ -80,6 +82,10 @@ def initialize_logging():
         level = logging.INFO
 
     search_wsgi.logger.setLevel(level)
+
+
+def getLogger():
+    return search_wsgi.logger
 
 
 #create a categories.json file that can be loaded and sent to the client
@@ -134,13 +140,11 @@ def load_service_config():
         settings["categories"]["categories"][p]["sortable"] = settings["plugins"][p]["solr"]["sort_fields"][:]
         settings["categories"]["categories"][p]["facets"] = settings["plugins"][p]["solr"]["facet_fields"][:]
         
-    search_wsgi.logger.info(settings)    
+    #search_wsgi.logger.info(settings)    
         
     return settings
 
 
 # get the service configuration settings
 serviceConfig = load_service_config()
-initialize_logging()
-
-
+initLogger()
