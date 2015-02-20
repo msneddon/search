@@ -1,10 +1,13 @@
 import flask
 import requests
 import logging
+import search
 
 #import biokbase.workspace.client
 
 from exceptions import InvalidSearchRequestError
+
+logger = search.getLogger()
 
 def get_results(request, config):
     capture_metrics(request)
@@ -17,6 +20,7 @@ def get_results(request, config):
     computed_solr_url = compute_solr_query(validated, config)
     
     logger.info(computed_solr_url)
+    logger.info("CHECK")
 
     solr_results = dict()
     # call solr and retrieve result set
@@ -37,6 +41,7 @@ def get_results(request, config):
         results = transform_solr_json(solr_results, validated)
     except Exception, e:
          logger.exception(e)
+         logger.info(solr_results)
          raise
 
     if validated.has_key("callback"):
@@ -103,8 +108,6 @@ def transform_solr_json(results, params):
 
     # handle faceting
     if results.has_key("facet_counts"):
-        logger.info(results["facet_counts"])
-        
         transform["facets"] = results["facet_counts"]["facet_fields"]
 
     return transform
@@ -192,11 +195,13 @@ def validate_inputs(query, config):
 
     # check for the presence of a query string
     if query.has_key('q') and query['q'] is not None:
+        validatedParams['userText'] = "&qq=" + query['q']
         if query['q'] == '*':
             validatedParams['queryString'] = "&q=*:*"
         else:
             validatedParams['queryString'] = "&q=text:" + query['q'] + "&q=text_boost:" + query['q']
     else:
+        validatedParams['userText'] = "&qq=" + query['q']
         validatedParams['queryString'] = "&q=''"
 
     return validatedParams
@@ -233,9 +238,9 @@ def compute_solr_query(options, config):
     solr_url += "&fl=" + ','.join(config['plugins'][options['category']]['solr']['visible_fields'])
 
     if options.has_key('sort') and options['sort'] is not None:
-        paramString += "&sort=" + options['sort'] + ", score desc"
-    else:
-        paramString += "&sort=score desc"
+        paramString += "&sort=" + options['sort']
+    #else:
+    #    paramString += "&sort=score desc"
 
     # add faceting options, if present
     if len(config['plugins'][options['category']]['solr']['facet_fields']) > 0:
@@ -253,12 +258,12 @@ def compute_solr_query(options, config):
                 else:
                     facetDict[facetKey] += " OR " + facetValue.replace("*",",").replace("^",":")
         
-            if facetDict[facetKey].find(" OR ") > -1:
-                facetDict[facetKey] = "(" + facetDict[facetKey] + ")"
+            #facetDict[facetKey] = "(" + facetDict[facetKey] + ")"
 
             for k in xrange(len(facetOrder)):    
+                logger.info(facetDict[facetOrder[k])
                 facet_fields += "&facet.field={!ex=" + facetOrder[k] + "}" + facetOrder[k]
-                paramString += "&fq={!tag=" + facetOrder[k] + "}" + facetOrder[k] + ":" + facetDict[facetOrder[k]]
+                paramString += "&fq={!tag=" + facetOrder[k] + "}" + facetOrder[k] + ":" + "(" + facetDict[facetOrder[k]] + ")"
 
             for x in config['plugins'][options['category']]['solr']['facet_fields']:
                 if not facetDict.has_key(x):
@@ -267,8 +272,7 @@ def compute_solr_query(options, config):
             for x in config['plugins'][options['category']]['solr']['facet_fields']:
                 facet_fields += "&facet.field=" + x
 
-    solr_url += facet_fields + options['queryString'] + paramString
-            
+    solr_url += facet_fields + options['userText'] + options['queryString'] + paramString
 
     if config['plugins'][options['category']]['solr'].has_key('secure') and config['plugins'][options['category']]['solr']['secure'] == True:
         if not options.has_key('username') or options['username'] is None:

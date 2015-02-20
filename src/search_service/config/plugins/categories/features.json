@@ -2,10 +2,10 @@
     "category": "features",
     "solr": {
         "core": "genomes",
-        "visible_fields": ["object_id","object_type","workspace_name","genome_id","feature_id","genome_source_id","feature_source_id","dna_sequence_length","protein_translation_length","feature_type","function","aliases","scientific_name","domain","taxonomy","feature_publications","roles","subsystems","subsystem_data","protein_families","annotations","regulon_data","coexpressed_fids","co_occurring_fids","gene_name"],
+        "visible_fields": ["object_id","object_type","workspace_name","genome_id","feature_id","genome_source_id","feature_source_id","dna_sequence_length","protein_translation_length","feature_type","function","aliases","scientific_name","domain","taxonomy","feature_publications","roles","subsystems","subsystem_data","protein_families","annotations","regulon_data","coexpressed_fids","co_occurring_fids","gene_name","cs_db_version"],
         "sort_fields": ["feature_id", "feature_source_id", "scientific_name", "feature_type", "function", "protein_translation_length", "dna_sequence_length"],
         "mapped_sort_fields": {"scientific_name": "scientific_name_sort"},
         "facet_fields": ["feature_type", "taxonomy","has_publications"],
-        "query_string": "&fq=object_type:KBase*.Feature-*"
+        "query_string": "&fq=object_type:KBase*.Feature*&facet.limit=10&facet.mincount=2"
     }
 }
