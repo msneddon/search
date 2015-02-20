@@ -123,10 +123,7 @@ deploy-all: deploy-config deploy-client deploy-service
 deploy-client: deploy-libs deploy-scripts deploy-docs
 	echo "nothing to do for deploy-client"
 
-deploy-config: deploy-config-tomcat deploy-config-solr
-
-deploy-config-tomcat:
-	./deploy.py --install-tomcat-config
+deploy-config: deploy-config-solr
 
 deploy-config-solr:
 	./deploy.py --install-solr-config
