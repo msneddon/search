@@ -61,6 +61,7 @@
             to off for version >= 1.4
        1.5: omitNorms defaults to true for primitive field types 
             (int, float, boolean, string...)
+       1.6: added indexing to cs_db_version.  It is also stored
      -->
 
  <fields>
@@ -112,7 +113,7 @@
    <field name="atomic_regulons" type="text_ws_general" indexed="false" stored="false"/>
    <field name="coexpressed_fids" type="text_ws_general" indexed="false" stored="false"/>
    <field name="co_occurring_fids" type="text_ws_general" indexed="false" stored="false"/>
-   <field name="cs_db_version" type="text_ws_general" indexed="false" stored="false"/>
+   <field name="cs_db_version" type="text_ws_general" indexed="true" stored="true"/>
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
