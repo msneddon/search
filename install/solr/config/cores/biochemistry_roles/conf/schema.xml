@@ -69,12 +69,12 @@
    <field name="id" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="source" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="searchnames" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="features" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="complexes" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="reactions" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="subsystems" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="aliases" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="searchnames" type="string" indexed="true" stored="true" multiValued="true" /> 
+   <field name="features" type="string" indexed="true" stored="true" multiValued="true" /> 
+   <field name="complexes" type="string" indexed="true" stored="true" multiValued="true" /> 
+   <field name="reactions" type="string" indexed="true" stored="true" multiValued="true" /> 
+   <field name="subsystems" type="string" indexed="true" stored="true" multiValued="true" /> 
+   <field name="aliases" type="string" indexed="true" stored="true" multiValued="true" /> 
    
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
 
