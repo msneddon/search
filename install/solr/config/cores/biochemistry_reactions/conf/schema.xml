@@ -79,7 +79,7 @@
    <field name="code" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="equation" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="direction" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="reversability" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="reversibility" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="stoichiometry" type="string" indexed="true" stored="true" multiValued="true" /> 
    <field name="deltag" type="float" indexed="true" stored="true" multiValued="false" /> 
    <field name="deltagerr" type="float" indexed="true" stored="true" multiValued="false" /> 
@@ -128,7 +128,7 @@
    <copyField source="compound_ids" dest="text"/>
    <copyField source="roles" dest="text"/>
    <copyField source="subsystems" dest="text"/>
-   <copyField source="kegg_pathays" dest="text"/>
+   <copyField source="kegg_pathways" dest="text"/>
    <copyField source="metacyc_pathways" dest="text"/>
    <copyField source="ecocyc_pathways" dest="text"/>
    <copyField source="aracyc_pathways" dest="text"/>

@@ -74,7 +74,7 @@
    <field name="names" type="string" indexed="true" stored="true" multiValued="true" /> 
    <field name="searchnames" type="string" indexed="true" stored="true" multiValued="true" /> 
 
-   <field name="search_in_chi" type="string" indexed="true" stored="true" multiValued="false" /> 
+   <field name="search_inchi" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="formula" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="structure" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="groups" type="string" indexed="true" stored="true" multiValued="true" />
@@ -108,7 +108,7 @@
         or to add multiple fields to the same field for easier/faster searching.  -->
 
    <copyField source="id" dest="text"/>
-   <copyField source="abbreviations" dest="text"/>
+   <copyField source="abbreviation" dest="text"/>
    <copyField source="name" dest="text"/>
    <copyField source="source" dest="text"/>
    <copyField source="names" dest="text"/>
