@@ -7,7 +7,7 @@ import search
 
 from exceptions import InvalidSearchRequestError
 
-logger = search.getLogger()
+#logger = search.getLogger()
 
 def get_results(request, config):
     capture_metrics(request)
@@ -19,8 +19,8 @@ def get_results(request, config):
      # compute the solr url based on the user query
     computed_solr_url = compute_solr_query(validated, config)
     
-    logger.info(computed_solr_url)
-    logger.info("CHECK")
+#    logger.info(computed_solr_url)
+#    logger.info("CHECK")
 
     solr_results = dict()
     # call solr and retrieve result set
@@ -32,16 +32,16 @@ def get_results(request, config):
 
         solr_results = response.json()
     except Exception, e:
-        logger.error(computed_solr_url)
-        logger.exception(e)
+#        logger.error(computed_solr_url)
+#        logger.exception(e)
         raise
 
     try:
         # transform the json into the output format    
         results = transform_solr_json(solr_results, validated)
     except Exception, e:
-         logger.exception(e)
-         logger.info(solr_results)
+#         logger.exception(e)
+#         logger.info(solr_results)
          raise
 
     if validated.has_key("callback"):
@@ -210,7 +210,7 @@ def validate_inputs(query, config):
 def capture_metrics(request):
     headersString = ",".join([str(k) + " = " + str(request.headers[k]) for k in request.headers.keys()])
     
-    logger.info("METRICS -- " + " URL : " + request.url + " HEADERS : " + headersString)
+#    logger.info("METRICS -- " + " URL : " + request.url + " HEADERS : " + headersString)
 
 
 def compute_solr_query(options, config):
@@ -261,7 +261,7 @@ def compute_solr_query(options, config):
             #facetDict[facetKey] = "(" + facetDict[facetKey] + ")"
 
             for k in xrange(len(facetOrder)):    
-                logger.info(facetDict[facetOrder[k]])
+#                logger.info(facetDict[facetOrder[k]])
                 facet_fields += "&facet.field={!ex=" + facetOrder[k] + "}" + facetOrder[k]
                 paramString += "&fq={!tag=" + facetOrder[k] + "}" + facetOrder[k] + ":" + "(" + facetDict[facetOrder[k]] + ")"
 
