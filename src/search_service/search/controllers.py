@@ -261,7 +261,7 @@ def compute_solr_query(options, config):
             #facetDict[facetKey] = "(" + facetDict[facetKey] + ")"
 
             for k in xrange(len(facetOrder)):    
-                logger.info(facetDict[facetOrder[k])
+                logger.info(facetDict[facetOrder[k]])
                 facet_fields += "&facet.field={!ex=" + facetOrder[k] + "}" + facetOrder[k]
                 paramString += "&fq={!tag=" + facetOrder[k] + "}" + facetOrder[k] + ":" + "(" + facetDict[facetOrder[k]] + ")"
 
