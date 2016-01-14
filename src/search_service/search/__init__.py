@@ -3,6 +3,7 @@ import os
 import os.path
 import logging
 import ConfigParser
+import time
 
 # local modules
 import exceptions
