@@ -57,7 +57,7 @@ case "$1" in
     ;;
     *)
         stop_service
-        stop_tomcat
+#        stop_tomcat
     ;;
 esac
 
