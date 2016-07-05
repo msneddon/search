@@ -70,13 +70,13 @@
    <field name="cs_id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
  -->
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="workspace_name" type="string" indexed="false" stored="true" multiValued="false" /> 
+   <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="object_name" type="string" indexed="false" stored="true" multiValued="false" /> 
+   <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="genome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="feature_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="genome_source" type="text_general" indexed="false" stored="true"/>
-   <field name="genome_source_id" type="string" indexed="false" stored="true"/>
+   <field name="genome_source" type="text_general" indexed="true" stored="true"/>
+   <field name="genome_source_id" type="string" indexed="true" stored="true"/>
    <field name="feature_source_id" type="string" indexed="false" stored="true"/>
    <field name="protein_translation_length" type="int" indexed="true" stored="true"/>
    <field name="dna_sequence_length" type="int" indexed="true" stored="true"/>
