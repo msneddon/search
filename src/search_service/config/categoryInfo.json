@@ -22,6 +22,18 @@
                              "category": "features"
                          },
                          {
+                             "label": "Taxonomy",
+                             "category": "taxonomy"
+                         },
+                         {
+                             "label": "Genome Features-QZ",
+                             "category": "GenomeFeatures-QZ"
+                         },
+                         {
+                             "label": "Genomes-QZ",
+                             "category": "Genomes-QZ"
+                         },
+                         {
                              "label": "Genomes",
                              "category": "genomes"                             
                          },

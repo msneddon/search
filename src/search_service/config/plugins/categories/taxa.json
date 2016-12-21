@@ -1,0 +1,11 @@
+{
+    "category": "taxonomy",
+    "solr": {
+        "core": "taxonomy_ci",
+        "visible_fields":["taxonomy_id","scientific_name","scientific_lineage","rank","kingdom","domain","aliases","parent_taxon_ref","genetic_code","division_id","ws_ref"], 
+        "sort_fields": ["taxonomy_id", "scientific_name", "domain", "rank", "kingdom"],
+        "mapped_sort_fields": {"scientific_name": "scientific_name_sort"},
+        "facet_fields": ["parent_taxon_ref","domain"],
+        "query_string": "&fq=facet.limit=10&facet.mincount=1"
+    }
+}

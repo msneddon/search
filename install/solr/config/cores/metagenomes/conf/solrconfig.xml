@@ -30,7 +30,6 @@
   <dataDir>${solr.core1.data.dir:}</dataDir>
 
   <!-- To enable dynamic schema REST APIs, use the following for <schemaFactory>:
-  
        <schemaFactory class="ManagedIndexSchemaFactory">
          <bool name="mutable">true</bool>
          <str name="managedSchemaResourceName">managed-schema</str>

@@ -20,9 +20,6 @@ import os
 import Bio.SeqIO
 import Bio.SeqFeature
 import urllib2
-import logging
-import warnings
-import re
 
 import biokbase.workspace.client
 import biokbase.cdmi.client
