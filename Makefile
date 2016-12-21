@@ -109,7 +109,8 @@ test-service:
 # even if there is no server side code to deploy.
 #
 
-deploy: deploy-config deploy-client deploy-service
+# by default deploy only the service code
+deploy: deploy-service
 
 # deploy-all deploys client *and* server is depricated and should
 # be replaced by the deploy target.

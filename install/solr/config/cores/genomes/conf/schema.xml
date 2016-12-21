@@ -61,6 +61,7 @@
             to off for version >= 1.4
        1.5: omitNorms defaults to true for primitive field types 
             (int, float, boolean, string...)
+       1.6: added indexing to cs_db_version.  It is also stored
      -->
 
  <fields>
@@ -69,13 +70,13 @@
    <field name="cs_id" type="string" indexed="true" stored="true" multiValued="false" required="true" />
  -->
    <field name="object_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="workspace_name" type="string" indexed="false" stored="true" multiValued="false" /> 
+   <field name="workspace_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="object_type" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="object_name" type="string" indexed="false" stored="true" multiValued="false" /> 
+   <field name="object_name" type="string" indexed="true" stored="true" multiValued="false" /> 
    <field name="genome_id" type="string" indexed="true" stored="true" required="true" multiValued="false" /> 
    <field name="feature_id" type="string" indexed="true" stored="true" multiValued="false" /> 
-   <field name="genome_source" type="text_general" indexed="false" stored="true"/>
-   <field name="genome_source_id" type="string" indexed="false" stored="true"/>
+   <field name="genome_source" type="string" indexed="true" stored="true"/>
+   <field name="genome_source_id" type="string" indexed="true" stored="true"/>
    <field name="feature_source_id" type="string" indexed="false" stored="true"/>
    <field name="protein_translation_length" type="int" indexed="true" stored="true"/>
    <field name="dna_sequence_length" type="int" indexed="true" stored="true"/>
@@ -112,7 +113,7 @@
    <field name="atomic_regulons" type="text_ws_general" indexed="false" stored="false"/>
    <field name="coexpressed_fids" type="text_ws_general" indexed="false" stored="false"/>
    <field name="co_occurring_fids" type="text_ws_general" indexed="false" stored="false"/>
-   <field name="cs_db_version" type="text_ws_general" indexed="false" stored="false"/>
+   <field name="cs_db_version" type="text_ws_general" indexed="true" stored="true"/>
 
    <field name="text_boost" type="text_ws_general" indexed="true" stored="false" multiValued="true"/>
    <field name="text" type="text_ws_general" indexed="true" stored="false" multiValued="true" />
