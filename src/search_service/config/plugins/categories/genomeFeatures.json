@@ -1,5 +1,5 @@
 {
-    "category": "GenomeFeatures-QZ",
+    "category": "genomeFeatures",
     "solr": {
         "core": "GenomeFeatures_prod",
         "visible_fields": ["genome_feature_id","feature_type","workspace_name","feature_id","genetic_code","taxonomy","refseq_category","protein_translation_length","dna_sequence_length","function","aliases","scientific_name","domain","taxonomy","roles","gene_name","num_cds","num_contigs"],
