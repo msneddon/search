@@ -1,5 +1,5 @@
 {
-    "category": "Genomes",
+    "category": "refseq_genomes",
     "solr": {
         "core": "GenomeFeatures_prod",
         "visible_fields":["genome_id","scientific_name","genome_source","domain","gc_content","functions","aliases","assembly_ref"], 
