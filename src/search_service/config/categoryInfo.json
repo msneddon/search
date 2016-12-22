@@ -18,8 +18,8 @@
                              ]
                          },
                          {
-                             "label": "Features",
-                             "category": "features"
+                             "label": "Old features",
+                             "category": "old_features"
                          },
                          {
                              "label": "Taxonomy",
@@ -30,8 +30,8 @@
                              "category": "genomeFeatures"
                          },
                          {
-                             "label": "Genomes",
-                             "category": "genomes"
+                             "label": "Refseq Genomes",
+                             "category": "refseq_genomes"
                          },
                          {
                              "label": "Old genomes",
