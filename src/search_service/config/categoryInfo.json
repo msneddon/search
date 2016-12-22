@@ -18,7 +18,7 @@
                              ]
                          },
                          {
-                             "label": "Genome Features",
+                             "label": "Features",
                              "category": "features"
                          },
                          {
@@ -26,16 +26,16 @@
                              "category": "taxonomy"
                          },
                          {
-                             "label": "Genome Features-QZ",
-                             "category": "GenomeFeatures-QZ"
-                         },
-                         {
-                             "label": "Genomes-QZ",
-                             "category": "Genomes-QZ"
+                             "label": "Genome Features",
+                             "category": "genomeFeatures"
                          },
                          {
                              "label": "Genomes",
-                             "category": "genomes"                             
+                             "category": "genomes"
+                         },
+                         {
+                             "label": "Old genomes",
+                             "category": "old_genomes"                             
                          },
                          {
                              "label": "Genome-Wide Association Analysis",
