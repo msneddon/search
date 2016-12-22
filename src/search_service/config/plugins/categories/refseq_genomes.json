@@ -5,7 +5,7 @@
         "visible_fields":["genome_id","scientific_name","genome_source","domain","gc_content","functions","aliases","assembly_ref"], 
         "sort_fields": ["genome_id", "genome_source", "scientific_name"],
         "mapped_sort_fields": {"scientific_name": "scientific_name_sort"},
-        "facet_fields": ["genome_source", "domain"],
+        "facet_fields": ["domain","taxonomy"],
         "query_string": "&fq=facet.limit=10&facet.mincount=1"
     }
 }
