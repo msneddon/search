@@ -6,6 +6,6 @@
         "sort_fields": ["taxonomy_id", "scientific_name", "domain", "rank", "kingdom"],
         "mapped_sort_fields": {"scientific_name": "scientific_name_sort"},
         "facet_fields": [],
-        "query_string": "&fq=facet.limit=10&facet.mincount=1"
+        "query_string": ""
     }
 }
