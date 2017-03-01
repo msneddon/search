@@ -18,8 +18,8 @@
                              ]
                          },
                          {
-                             "label": "Old features",
-                             "category": "old_features"
+                             "label": "Legacy features",
+                             "category": "legacy_features"
                          },
                          {
                              "label": "Taxonomy",
@@ -30,12 +30,12 @@
                              "category": "genomeFeatures"
                          },
                          {
-                             "label": "Refseq Genomes",
-                             "category": "refseq_genomes"
+                             "label": "Reference Genomes",
+                             "category": "reference_genomes"
                          },
                          {
-                             "label": "Old genomes",
-                             "category": "old_genomes"                             
+                             "label": "Legacy genomes",
+                             "category": "legacy_genomes"                             
                          },
                          {
                              "label": "Genome-Wide Association Analysis",
