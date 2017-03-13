@@ -3,14 +3,15 @@ MAINTAINER Michael Sneddon (mwsneddon@lbl.gov)
 
 
 RUN mkdir -p /kb/module/search
-RUN mkdir -p /kb/module/search/
+RUN mkdir -p /kb/module/search/config
 RUN chmod -R a+rw /kb/module
 WORKDIR /kb/module/search
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
 
-COPY ./ .
+COPY ./scripts ./scripts
+COPY ./search ./search
 
 ENTRYPOINT [ "./scripts/entrypoint.sh" ]
 CMD [ ]

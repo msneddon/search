@@ -1,6 +1,6 @@
 #!/bin/bash
 if [ $# -eq 0 ] ; then
-  bash
+  sh ./scripts/start_service.sh
 elif [ "${1}" = "start" ] ; then
   sh ./scripts/start_service.sh
 elif [ "${1}" = "bash" ] ; then
