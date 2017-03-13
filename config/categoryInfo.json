@@ -5,19 +5,6 @@
                      "label": "Public Data",
                      "children": [
                          {
-                             "label": "Metagenomes",
-                             "category": "metagenomes"
-                         },
-                         {
-                             "label": "Expression",
-                             "category": "expression",
-                             "children": [
-                                 {"label": "Series", "category": "expression_series"},
-                                 {"label": "Samples", "category": "expression_samples"},
-                                 {"label": "Platforms", "category": "expression_platforms"}
-                             ]
-                         },
-                         {
                              "label": "Genome Features",
                              "category": "features"
                          },
@@ -26,51 +13,11 @@
                              "category": "genomes"                             
                          },
                          {
-                             "label": "Genome-Wide Association Analysis",
-                             "category": "gwas",
-                             "children": [
-                                 {"label": "GWAS Populations", "category": "gwas_populations"},
-                                 {"label": "GWAS Population Kinships", "category": "gwas_population_kinships"},
-                                 {"label": "GWAS Population Variations", "category": "gwas_population_variations"},
-                                 {"label": "GWAS Top Variations", "category": "gwas_top_variations"},
-                                 {"label": "GWAS Population Traits", "category": "gwas_population_traits"},
-                                 {"label": "GWAS Gene Lists", "category": "gwas_gene_lists"}                             
-                             ]
-                         },
-                         {
                              "label": "Metabolic Models",
                              "category": "models",
                              "children": [
                                  {"label": "Flux Balance Analysis Models", "category": "models_fba"},
                                  {"label": "Media", "category": "models_media"}
-                             ]
-                         },
-                         {
-                             "label": "Narratives",
-                             "category": "narratives"                             
-                         },
-                         {
-                             "label": "Networks",
-                             "category": "networks",
-                             "children": [
-                                 {"label": "Co-Expression Networks", "category": "networks_coexpression"},
-                                 {"label": "Regulon Networks", "category": "networks_regulons"},
-                                 {"label": "PPI Interaction Networks", "category": "networks_ppi"},
-                                 {
-                                     "label": "Clusters",
-                                     "category": "networks_clusters",
-                                     "children": [
-                                         {
-                                             "label": "BiClusters",
-                                             "category": "networks_clusters_bi",
-                                             "children": [
-                                                 {"label": "cMonkey BiClusters", "category": "networks_clusters_bi_cmonkey"},
-                                                 {"label": "Mak BiClusters", "category": "networks_clusters_bi_mak"}
-                                             ]
-                                         },
-                                         {"label": "PPI Interactions", "category": "networks_clusters_ppi"}
-                                     ]
-                                 }
                              ]
                          }
                      ]
