@@ -10,3 +10,10 @@ basic Flask app wrapper around solr.
     docker run -p 7078:7078 -v $PWD/config:/kb/module/search/config --name mykbsearch -d kbsearch
 
     curl localhost:7078
+    {
+      "message": "KBase Search Service"
+    }
+
+    curl localhost:7078/categories
+
+    curl "localhost:7078/getResults?itemsPerPage=20&page=1&q=*&category=genomes"

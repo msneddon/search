@@ -22,7 +22,7 @@ def index():
 
 @search_wsgi.route('/getResults', methods = ['GET'])
 def get_results():
-    result = controllers.get_results(flask.request, serviceConfig)
+    result = search.controllers.get_results(flask.request, serviceConfig)
     
     if type(result) != type(flask.Response):
         response = flask.make_response(result)
