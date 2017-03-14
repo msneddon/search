@@ -3,6 +3,8 @@ import requests
 import logging
 import search.service
 
+import search.exceptions
+
 #import biokbase.workspace.client
 
 from exceptions import InvalidSearchRequestError
@@ -33,8 +35,8 @@ def get_results(request, config):
         if response.status_code == requests.codes.ok:
             solr_results = response.json()
         else:
-            raise SolrError('Error connecting to solr: response code:' + str(response.status_code) +
-                ' message='+str(response.text))
+            raise search.exceptions.SolrError('Error connecting to solr: response code:' + str(response.status_code) +
+                                              ' message=' + str(response.text))
     except Exception, e:
         logger.error(computed_solr_url)
         logger.exception(e)
