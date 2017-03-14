@@ -33,7 +33,7 @@ def get_results(request, config):
         if response.status_code == requests.codes.ok:
             solr_results = response.json()
         else:
-            raise ValueError('Cannot connect to solr: response code:' + str(response.status_code) +
+            raise SolrError('Error connecting to solr: response code:' + str(response.status_code) +
                 ' message='+str(response.text))
     except Exception, e:
         logger.error(computed_solr_url)
