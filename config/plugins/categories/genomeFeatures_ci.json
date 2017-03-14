@@ -1,7 +1,7 @@
 {
-    "category": "genomeFeatures",
+    "category": "genomeFeatures_ci",
     "solr": {
-        "core": "GenomeFeatures_prod",
+        "core": "GenomeFeatures_ci",
         "visible_fields": ["genome_feature_id","feature_type","workspace_name","feature_id","genetic_code","taxonomy","refseq_category","protein_translation_length","dna_sequence_length","function","aliases","scientific_name","domain","taxonomy","roles","gene_name","num_cds","num_contigs"],
         "sort_fields": ["feature_id","scientific_name","feature_type", "function", "protein_translation_length", "dna_sequence_length"],
         "mapped_sort_fields": {"scientific_name": "scientific_name_sort"},
