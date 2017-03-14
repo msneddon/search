@@ -1,8 +1,0 @@
-{
-    "category": "CSGenomes",
-    "display": "Genomes",
-    "solr": {
-        "core": "wsGenomeFeatures",
-        "query_string": "&fq=object_type:*Genome*"
-    }
-}
