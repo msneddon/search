@@ -1,6 +1,6 @@
 
 
-IMG_NAME = kbsearch
+IMG_NAME = kbase/search
 CONTAINER_NAME = mykbsearch
 
 build:

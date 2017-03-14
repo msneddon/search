@@ -7,7 +7,7 @@ import search.service
 
 from exceptions import InvalidSearchRequestError
 
-logger = search.search_wsgi.getLogger()
+logger = search.service.getLogger()
 
 def get_results(request, config):
     capture_metrics(request)

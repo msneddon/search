@@ -1,29 +1,18 @@
-# KBase Search
+# KBase Search Service
 
-The KBase Search module is responsible for providing a search capability that guides users to KBase data of interest.
-A public facing web service provides core search capabilities on KBase data types, 
-and a search web UI found in https://github.com/kbase/ui-common and seen from https://narrative.kbase.us provides a
-rich client interface to guide users toward KBase data that best meet their criteria.
+This is a stripped down fork of the kbase search service that removes much of the legacy configurations and install/deployment files.  It is designed to be run as a docker container.  Here's a a quickstart:
 
-KBase Search layers on top of [Apache Solr](http://lucene.apache.org/solr/) to provide full-text search of KBase public data.
+    # build the container
+    docker build . -t kbase/search
 
-## KBase Search Deployment
+    # start the service (mounts config into container to set configuration)
+    docker run -p 7078:7078 -v $PWD/config:/kb/module/search/config --name mykbsearch -d kbase/search
 
-### Dependencies
+    curl localhost:7078
+    {
+      "message": "KBase Search Service"
+    }
 
-- [Apache Tomcat](http://tomcat.apache.org)
+    curl localhost:7078/categories
 
-### Installation
-
-    cd /kb/dev_container/modules
-    git clone https://git.kbase.us/search.git
-    cd search
-    make deploy
-
-    # service must be running for testing    
-    /kb/deployment/services/search/start_service
-    
-    # make test loads real (or for some data types example) data
-    make test
-
-
+    curl "localhost:7078/getResults?itemsPerPage=20&page=1&q=*&category=genomes"

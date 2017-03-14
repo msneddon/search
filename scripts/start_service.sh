@@ -18,7 +18,7 @@ error() {
 
 start_service() {
     log starting "search service"
-    export PYTHONPATH=$PYTHONPATH:$(pwd)
+    export PYTHONPATH=$PYTHONPATH:$(pwd)/lib
     export SEARCH_CONFIG_DIRECTORY=$(pwd)/config
     uwsgi --ini $SEARCH_CONFIG_DIRECTORY/uwsgi_search.ini
     if [ "$?" = "0" ]; then
