@@ -1,7 +1,7 @@
 import flask
 import requests
 import logging
-import search.search_wsgi
+import search.service
 
 #import biokbase.workspace.client
 
