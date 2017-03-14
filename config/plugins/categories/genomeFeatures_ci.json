@@ -6,6 +6,6 @@
         "sort_fields": ["feature_id","scientific_name","feature_type", "function", "protein_translation_length", "dna_sequence_length"],
         "mapped_sort_fields": {"scientific_name": "scientific_name_sort"},
         "facet_fields": ["feature_type", "taxonomy","genome_id"],
-        "query_string": "&fq=facet.limit=10&facet.mincount=2"
+        "query_string": "&fq=object_type:*.Feature&fq=facet.limit=10&facet.mincount=2"
     }
 }
