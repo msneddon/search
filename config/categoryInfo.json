@@ -6,23 +6,40 @@
                      "children": [
                          {
                              "label": "Legacy features",
-                             "category": "legacy_features"
+                             "category": "features"
                          },
+                         {
+                             "label": "Legacy genomes",
+                             "category": "genomes"
+                         }
+
+
+
                          {
                              "label": "Taxonomy",
                              "category": "taxonomy"
                          },
+
+
+
                          {
                              "label": "Genome Features",
-                             "category": "genomeFeatures"
+                             "category": "genomeFeatures_prod"
                          },
                          {
                              "label": "Reference Genomes",
-                             "category": "reference_genomes"
+                             "category": "reference_genomes_prod"
+                         },
+
+
+
+                         {
+                             "label": "Genome Features CI",
+                             "category": "genomeFeatures_ci"
                          },
                          {
-                             "label": "Legacy genomes",
-                             "category": "legacy_genomes"                             
+                             "label": "Reference Genomes CI",
+                             "category": "reference_genomes_ci"
                          }
                      ]
                  }

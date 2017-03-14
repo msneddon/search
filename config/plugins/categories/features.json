@@ -1,5 +1,5 @@
 {
-    "category": "legacy_features",
+    "category": "features",
     "solr": {
         "core": "genomes",
         "visible_fields": ["object_id","object_type","workspace_name","genome_id","feature_id","genome_source_id","feature_source_id","dna_sequence_length","protein_translation_length","feature_type","function","aliases","scientific_name","domain","taxonomy","feature_publications","roles","subsystems","subsystem_data","protein_families","annotations","regulon_data","coexpressed_fids","co_occurring_fids","gene_name","cs_db_version"],
