@@ -11,33 +11,35 @@ import exceptions
 import search.exceptions
 import search.controllers
 
+VERSION = '2.0.0'
+
 # create the flask object for handling all requests
 search_wsgi = flask.Flask(__name__)
 
 @search_wsgi.route('/', methods = ['GET'])
 def index():
-    response = flask.jsonify({'message': "KBase Search Service"})
+    response = flask.jsonify({'message': "KBase Search Service v" + str(VERSION)})
     response.status_code = 200
     return response
 
 
-@search_wsgi.route('/getResults', methods = ['GET'])
+@search_wsgi.route('/getResults', methods=['GET'])
 def get_results():
     result = search.controllers.get_results(flask.request, serviceConfig)
-    
+
     if type(result) != type(flask.Response):
         response = flask.make_response(result)
         response.content_type = "application/json"
-        response.status_code = 200                
-        
-        #search_wsgi.logger.info(response.headers)
-                          
+        response.status_code = 200
+
+        # search_wsgi.logger.info(response.headers)
+
         return response
     else:
         return result
 
 
-@search_wsgi.route('/categories', methods = ['GET'])
+@search_wsgi.route('/categories', methods=['GET'])
 def get_categories():
     response = flask.jsonify(serviceConfig["categories"])
     response.status_code = 200
@@ -45,7 +47,7 @@ def get_categories():
 
 
 @search_wsgi.errorhandler(search.exceptions.InvalidSearchRequestError)
-def invalid_request(error = None):
+def invalid_request(error=None):
     search_wsgi.logger.error(error.message)
     response = flask.jsonify({'error': error.message})
     response.content_type = "application/json"
@@ -54,7 +56,7 @@ def invalid_request(error = None):
 
 
 @search_wsgi.errorhandler(Exception)
-def invalid_request(error = None):
+def invalid_request(error=None):
     search_wsgi.logger.exception(error)
     response = flask.jsonify({'error': str(error)})
     response.content_type = "application/json"
