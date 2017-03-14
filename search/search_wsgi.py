@@ -7,7 +7,8 @@ import time
 
 # local modules
 import exceptions
-import controllers
+import search.exceptions
+import search.controllers
 
 # create the flask object for handling all requests
 search_wsgi = flask.Flask(__name__)
@@ -21,7 +22,7 @@ def index():
 
 @search_wsgi.route('/getResults', methods = ['GET'])
 def get_results():
-    result = controllers.get_results(flask.request, serviceConfig)
+    result = search.controllers.get_results(flask.request, serviceConfig)
     
     if type(result) != type(flask.Response):
         response = flask.make_response(result)
@@ -42,7 +43,7 @@ def get_categories():
     return response
 
 
-@search_wsgi.errorhandler(exceptions.InvalidSearchRequestError)
+@search_wsgi.errorhandler(search.exceptions.InvalidSearchRequestError)
 def invalid_request(error = None):
     search_wsgi.logger.error(error.message)
     response = flask.jsonify({'message': error.message})
@@ -124,14 +125,20 @@ def load_plugins(config):
 def load_service_config():
     settings = dict()
 
+    search_config_directory = os.environ['SEARCH_CONFIG_DIRECTORY']
+    cfg_file_path = os.path.join(search_config_directory, 'search_config.ini')
+    if not os.path.isfile(cfg_file_path):
+        raise EnvironmentError('Search config file ('+str(cfg_file_path)+') does not exist.  Is SEARCH_CONFIG_DIRECTORY env var set?')
+
     config = ConfigParser.ConfigParser()
-    config.read("/kb/deployment/services/search/config/search_config.ini")
+    config.read(cfg_file_path)
 
     for section in config.sections():
         settings[section] = dict()
         for option in config.options(section):
             settings[section][option] = config.get(section, option)
         
+    settings['search']['config_path'] = search_config_directory
     settings["categories"] = load_categories(settings)
     settings["plugins"] = load_plugins(settings)
     

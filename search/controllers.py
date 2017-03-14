@@ -1,17 +1,15 @@
 import flask
 import requests
 import logging
-import search
+import search.search_wsgi
 
 #import biokbase.workspace.client
 
 from exceptions import InvalidSearchRequestError
 
+logger = search.search_wsgi.getLogger()
 
 def get_results(request, config):
-
-    logger = search.getLogger()
-
     capture_metrics(request)
 
     # validate all of the required inputs
@@ -56,10 +54,7 @@ def get_results(request, config):
 
 
 def transform_solr_json(results, params):
-
-    logger = search.getLogger()
-
-    logger.info(results)
+    #logger.info(results)
 
     transform = dict()
     transform["items"] = list()
@@ -119,9 +114,6 @@ def transform_solr_json(results, params):
 
 
 def validate_inputs(query, config):
-
-    logger = search.getLogger()
-
     validatedParams = dict()
 
     # check for a jsonp callback
@@ -216,18 +208,12 @@ def validate_inputs(query, config):
             
 
 def capture_metrics(request):
-
-    logger = search.getLogger()
-
     headersString = ",".join([str(k) + " = " + str(request.headers[k]) for k in request.headers.keys()])
     
     logger.info("METRICS -- " + " URL : " + request.url + " HEADERS : " + headersString)
 
 
 def compute_solr_query(options, config):
-
-    logger = search.getLogger()
-
     mapping = "search"
     paramString = ""
     facet_fields = ""

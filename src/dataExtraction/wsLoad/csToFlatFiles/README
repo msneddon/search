@@ -1,3 +1,0 @@
-This directory contains the scripts used to generate the flat
-files used to create CS objects in a workspace.  Using flat files
-instead of the CDMI makes the export process much faster.
