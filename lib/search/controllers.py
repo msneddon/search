@@ -30,11 +30,15 @@ def get_results(request, config):
         else:
             response = requests.get(computed_solr_url)
 
-        solr_results = response.json()
+        if response.status_code == requests.codes.ok:
+            solr_results = response.json()
+        else:
+            raise ValueError('Cannot connect to solr: response code:' + str(response.status_code) +
+                ' message='+str(response.text))
     except Exception, e:
         logger.error(computed_solr_url)
         logger.exception(e)
-        raise
+        raise 
 
     try:
         # transform the json into the output format    
@@ -214,7 +218,6 @@ def capture_metrics(request):
 
 
 def compute_solr_query(options, config):
-    mapping = "search"
     paramString = ""
     facet_fields = ""
 
@@ -223,7 +226,7 @@ def compute_solr_query(options, config):
     if config['plugins'].has_key(options['category']):
         core = config['plugins'][options['category']]['solr']['core']
 
-        solr_url += mapping + '/' + core
+        solr_url += '/' + core
         
         paramString = config['plugins'][options['category']]['solr']['query_string']
     else:
@@ -249,16 +252,14 @@ def compute_solr_query(options, config):
         if options.has_key('facets') and options['facets'] is not None:
             facetDict = dict()
             facetOrder = list()
-    
+
             for x in options['facets'].split(','):
                 facetKey, facetValue = x.split(":")
                 if not facetDict.has_key(facetKey):
                     facetDict[facetKey] = facetValue.replace("*",",").replace("^",":")
                     facetOrder.append(facetKey)
                 else:
-                    facetDict[facetKey] += " OR " + facetValue.replace("*",",").replace("^",":")
-        
-            #facetDict[facetKey] = "(" + facetDict[facetKey] + ")"
+                    facetDict[facetKey] += " OR " + facetValue.replace("*",",").replace("^", ":")
 
             for k in xrange(len(facetOrder)):    
                 logger.info(facetDict[facetOrder[k]])
@@ -277,11 +278,6 @@ def compute_solr_query(options, config):
     if config['plugins'][options['category']]['solr'].has_key('secure') and config['plugins'][options['category']]['solr']['secure'] == True:
         if not options.has_key('username') or options['username'] is None:
             raise InvalidSearchRequestError("Missing or invalid authentication token!")
-
-        #workspace_url = "https://kbase.us/services/ws/"
-
-        #workspace_service = workspaceClient.workspaceService(workspace_url)
-        #workpace_service.list_workspaces({"auth_token": options['auth_token']})
 
     return solr_url
 

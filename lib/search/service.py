@@ -4,6 +4,7 @@ import os.path
 import logging
 import ConfigParser
 import time
+import traceback
 
 # local modules
 import exceptions
@@ -46,7 +47,8 @@ def get_categories():
 @search_wsgi.errorhandler(search.exceptions.InvalidSearchRequestError)
 def invalid_request(error = None):
     search_wsgi.logger.error(error.message)
-    response = flask.jsonify({'message': error.message})
+    response = flask.jsonify({'error': error.message})
+    response.content_type = "application/json"
     response.status_code = 400
     return response
 
@@ -54,7 +56,8 @@ def invalid_request(error = None):
 @search_wsgi.errorhandler(Exception)
 def invalid_request(error = None):
     search_wsgi.logger.exception(error)
-    response = flask.jsonify({'message': error.message})
+    response = flask.jsonify({'error': str(error)})
+    response.content_type = "application/json"
     response.status_code = 500
     return response
 
