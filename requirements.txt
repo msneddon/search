@@ -2,3 +2,4 @@ uwsgi
 flask
 requests
 httplib2
+flask-cors

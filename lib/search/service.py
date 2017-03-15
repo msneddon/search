@@ -4,7 +4,7 @@ import os.path
 import logging
 import ConfigParser
 import time
-import traceback
+from flask_cors import CORS
 
 # local modules
 import exceptions
@@ -15,6 +15,7 @@ VERSION = '2.0.0'
 
 # create the flask object for handling all requests
 search_wsgi = flask.Flask(__name__)
+CORS(search_wsgi)
 
 @search_wsgi.route('/', methods = ['GET'])
 def index():
