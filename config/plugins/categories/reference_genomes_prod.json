@@ -7,6 +7,6 @@
         "mapped_sort_fields": {"scientific_name": "scientific_name_sort"},
         "facet_fields": ["domain","taxonomy"],
         "default_query_field": "text_ws_go",
-        "query_string": "&fq=object_type:KBaseGenomes.Genome-8.2&facet.limit=10&facet.mincount=2"
+        "query_string": "&fq=-object_type:*Feature&facet.limit=10&facet.mincount=2"
     }
 }
