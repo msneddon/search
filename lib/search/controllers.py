@@ -1,8 +1,7 @@
 import flask
 import requests
-import logging
 import search.service
-
+import logging
 import search.exceptions
 
 #import biokbase.workspace.client
@@ -38,7 +37,7 @@ def get_results(request, config):
             raise search.exceptions.SolrError('Error connecting to solr: response code:' + str(response.status_code) +
                                               ' message=' + str(response.text))
     except Exception, e:
-        logger.error(computed_solr_url)
+        logger.error(str(computed_solr_url))
         logger.exception(e)
         raise 
 
@@ -137,7 +136,7 @@ def validate_inputs(query, config):
         if query['category'] not in config['plugins'].keys():
             raise InvalidSearchRequestError(query['category'] + " is not a valid search category.")
         
-        validatedParams['category'] = query['category'][:]                
+        validatedParams['category'] = query['category'][:]
 
     # check for and set the number of items per page
     if query.has_key('itemsPerPage') and query['itemsPerPage'] is not None:
@@ -201,14 +200,16 @@ def validate_inputs(query, config):
 
     # check for the presence of a query string
     if query.has_key('q') and query['q'] is not None:
-        validatedParams['userText'] = "&qq=" + query['q']
-        if query['q'] == '*':
-            validatedParams['queryString'] = "&q=*:*"
+        default_query_field = None
+        if 'default_query_field' in config['plugins'][query['category']]['solr']:
+            default_query_field = config['plugins'][query['category']]['solr']['default_query_field']
+
+        if default_query_field:
+            validatedParams['userText'] = "&q=" + default_query_field + ':' + query['q']
         else:
-            validatedParams['queryString'] = "&q=text:" + query['q'] + "&q=text_boost:" + query['q']
+            validatedParams['userText'] = "&q=" + query['q']
     else:
-        validatedParams['userText'] = "&qq=" + query['q']
-        validatedParams['queryString'] = "&q=''"
+        validatedParams['userText'] = "&q=*"
 
     return validatedParams
             
@@ -231,6 +232,7 @@ def compute_solr_query(options, config):
         solr_url += '/' + core
         
         paramString = config['plugins'][options['category']]['solr']['query_string']
+
     else:
         raise InvalidSearchRequestError("No such category \"" + options['category'] + "\" !")
 
@@ -275,12 +277,13 @@ def compute_solr_query(options, config):
             for x in config['plugins'][options['category']]['solr']['facet_fields']:
                 facet_fields += "&facet.field=" + x
 
-    solr_url += facet_fields + options['userText'] + options['queryString'] + paramString
+    solr_url += facet_fields + options['userText'] + paramString
 
     if config['plugins'][options['category']]['solr'].has_key('secure') and config['plugins'][options['category']]['solr']['secure'] == True:
         if not options.has_key('username') or options['username'] is None:
             raise InvalidSearchRequestError("Missing or invalid authentication token!")
 
+    print('SOLR REQUEST:' + str(solr_url))
     return solr_url
 
 

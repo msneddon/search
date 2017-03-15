@@ -21,6 +21,18 @@
                          },
 
 
+                         {
+                             "label": "Genome Features",
+                             "category": "genomeFeatures"
+                         },
+                         {
+                             "label": "Reference Genomes",
+                             "category": "reference_genomes"
+                         },
+
+
+
+
 
                          {
                              "label": "Genome Features",
@@ -30,9 +42,6 @@
                              "label": "Reference Genomes",
                              "category": "reference_genomes_prod"
                          },
-
-
-
                          {
                              "label": "Genome Features CI",
                              "category": "genomeFeatures_ci"
