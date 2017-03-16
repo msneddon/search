@@ -6,7 +6,6 @@
         "sort_fields": ["scientific_name","genome_id","domain","genome_dna_size","num_contigs","num_cds","gc_content"],
         "mapped_sort_fields": {"scientific_name": "scientific_name_sort"},
         "facet_fields": ["domain","taxonomy"],
-        "default_query_field": "text_ws_go",
         "query_string": "&fq=-object_type:*Feature&facet.limit=10&facet.mincount=2"
     }
 }
