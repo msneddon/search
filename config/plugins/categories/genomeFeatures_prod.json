@@ -4,7 +4,7 @@
         "core": "GenomeFeatures_prod",
         "visible_fields":["genome_feature_id","feature_type","workspace_name","feature_id","genome_id","functions","genetic_code","taxonomy","protein_translation_length","dna_sequence_length","aliases","scientific_name","domain","taxonomy","ws_ref"],
         "sort_fields": ["feature_id","scientific_name","feature_type", "functions", "protein_translation_length", "dna_sequence_length"],
-        "mapped_sort_fields": {"scientific_name": "scientific_name_sort"},
+        "mapped_sort_fields": {},
         "facet_fields": ["feature_type", "taxonomy", "genome_id"],
         "query_string": "&fq=object_type:*.Feature&facet.limit=10&facet.mincount=2"
     }

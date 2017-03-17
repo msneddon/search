@@ -11,6 +11,7 @@ RUN pip install -r requirements.txt
 
 COPY ./scripts ./scripts
 COPY ./lib ./lib
+COPY ./config ./config
 
 ENTRYPOINT [ "./scripts/entrypoint.sh" ]
 CMD [ ]

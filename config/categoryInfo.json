@@ -5,19 +5,11 @@
                      "label": "Public Data",
                      "children": [
                          {
-                             "label": "Reference Genomes",
-                             "category": "reference_genomes"
-                         },
-                         {
-                             "label": "Reference Genome Features",
-                             "category": "genomeFeatures"
-                         },
-                         {
-                             "label": "Legacy Genomes",
+                             "label": "Genomes",
                              "category": "genomes"
                          },
                          {
-                             "label": "Legacy Genome Features",
+                             "label": "Genome Features",
                              "category": "features"
                          }
                      ]
