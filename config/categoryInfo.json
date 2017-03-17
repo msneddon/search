@@ -5,50 +5,20 @@
                      "label": "Public Data",
                      "children": [
                          {
-                             "label": "Legacy features",
-                             "category": "features"
-                         },
-                         {
-                             "label": "Legacy genomes",
-                             "category": "genomes"
-                         },
-
-
-
-                         {
-                             "label": "Taxonomy",
-                             "category": "taxonomy"
-                         },
-
-
-                         {
-                             "label": "Genome Features",
-                             "category": "genomeFeatures"
-                         },
-                         {
                              "label": "Reference Genomes",
                              "category": "reference_genomes"
                          },
-
-
-
-
-
                          {
-                             "label": "Genome Features",
-                             "category": "genomeFeatures_prod"
+                             "label": "Reference Genome Features",
+                             "category": "genomeFeatures"
                          },
                          {
-                             "label": "Reference Genomes",
-                             "category": "reference_genomes_prod"
+                             "label": "Legacy Genomes",
+                             "category": "genomes"
                          },
                          {
-                             "label": "Genome Features CI",
-                             "category": "genomeFeatures_ci"
-                         },
-                         {
-                             "label": "Reference Genomes CI",
-                             "category": "reference_genomes_ci"
+                             "label": "Legacy Genome Features",
+                             "category": "features"
                          }
                      ]
                  }
